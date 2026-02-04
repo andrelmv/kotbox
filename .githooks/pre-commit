@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Running ktlint..."
+
+./gradlew ktlintCheck --daemon -q
+
+if [ $? -ne 0 ]; then
+    echo "ktlint check failed. Please fix the issues before committing."
+    echo "You can auto-fix most issues with: ./gradlew ktlintFormat"
+    exit 1
+fi
+
+echo "ktlint passed."

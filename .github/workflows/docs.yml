@@ -1,0 +1,62 @@
+name: Documentation
+
+on:
+  release:
+    types: [prereleased, released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (leave empty to use gradle.properties)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          key: ${{ github.ref }}
+          path: .cache
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Extract Version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+          else
+            VERSION=$(grep "pluginVersion" gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying documentation for version: $VERSION"
+
+      - name: Deploy with mike
+        run: |
+          mike deploy ${{ steps.version.outputs.version }} latest --push --update-aliases
+          mike set-default latest --push

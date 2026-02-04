@@ -1,0 +1,99 @@
+site_name: Kotlin Toolbox
+site_url: https://andrelmv.github.io/kotbox
+site_description: Developer tools for Kotlin and IntelliJ IDEA
+site_author: André Monteiro
+repo_name: andrelmv/kotbox
+repo_url: https://github.com/andrelmv/kotbox
+copyright: Copyright &copy; 2025 André Monteiro
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/icons/pluginIcon.svg
+  favicon: assets/icons/pluginIcon.svg
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/andrelmv/kotbox
+
+plugins:
+  - search:
+      lang:
+        - en
+  - mike:
+      version_selector: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      locale: en
+  - glightbox:
+      touchNavigation: true
+      loop: false
+      effect: zoom
+      width: 100%
+      height: auto
+      zoomable: true
+      draggable: true
+      skip_classes:
+        - skip-lightbox
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ["."]
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Features:
+    - JWT Encoder/Decoder: features/jwt-encoder-decoder.md
+    - Kotlin Inlay Hints: features/kotlin-inlay-hints.md
+  - Changelog: changelog.md
