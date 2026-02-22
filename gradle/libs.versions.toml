@@ -8,6 +8,8 @@ changelog = "2.5.0"
 intelliJPlatform = "2.11.0"
 
 kotlin = "2.3.10"
+ktlint = "12.1.2"
+sonar = "7.1.0.6387"
 
 kover = "0.9.7"
 qodana = "2025.3.1"
@@ -20,5 +22,7 @@ opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "ope
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+sonar = { id = "org.sonarqube", version.ref = "sonar" }
 qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }

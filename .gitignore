@@ -5,3 +5,7 @@
 .kotlin
 .qodana
 build
+
+# MkDocs
+site/
+.mkdocs_cache/

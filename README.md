@@ -1,35 +1,30 @@
-# kotlin-dev-tools
+# <img src="src/main/resources/icons/pluginIcon.svg" width="80" height="80" />      **kotlin-toolbox** 
+
 
 ![Build](https://github.com/andrelmv/kotlin-dev-tools/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/30324-kotbox.svg)](https://plugins.jetbrains.com/plugin/30324-kotbox)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/30324-kotbox.svg)](https://plugins.jetbrains.com/plugin/30324-kotbox)
+[![CodeFactor](https://www.codefactor.io/repository/github/andrelmv/kotbox/badge)](https://www.codefactor.io/repository/github/andrelmv/kotbox)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=andrelmv_kotbox&metric=coverage)](https://sonarcloud.io/summary/new_code?id=andrelmv_kotbox)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=andrelmv_kotlin-const-string-interpolation-plugin&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=andrelmv_kotlin-const-string-interpolation-plugin)
+[![License: MIT](https://img.shields.io/github/license/andrelmv/kotbox)](https://github.com/andrelmv/kotbox/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/andrelmv/kotbox?style=social)](https://github.com/andrelmv/kotbox)
+<a href="https://pinterest.github.io/ktlint/"><img src="https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg" alt="ktlint"></a>
 
-## Template ToDo list
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate) related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
-- [ ] Configure the [CODECOV_TOKEN](https://docs.codecov.com/docs/quick-start) secret for automated test coverage reports on PRs
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+**Kotlin Toolbox** is an IntelliJ plugin that provides a comprehensive set of tools to enhance your Kotlin development experience.
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
+To learn more about the features and capabilities of this plugin, please visit the [documentation](https://andrelmv.github.io/kotbox).
+
 <!-- Plugin description end -->
 
 ## Installation
 
 - Using the IDE built-in plugin system:
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "kotlin-dev-tools"</kbd> >
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "kotlin-toolbox"</kbd> >
   <kbd>Install</kbd>
 
 - Using JetBrains Marketplace:

@@ -1,15 +1,26 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.andrelmv.kotlindevtools</id>
-    <name>kotlin-dev-tools</name>
-    <vendor>andrelmv</vendor>
+    <id>com.github.andrelmv.kotbox</id>
+    <name>Kotlin Developer Toolbox</name>
+    <vendor email="andrelmv@gmail.com" url="https://github.com/andrelmv/kotbox">André Monteiro</vendor>
 
+    <!-- Product and plugin compatibility requirements -->
     <depends>com.intellij.modules.platform</depends>
-
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.andrelmv.kotlindevtools.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.andrelmv.kotlindevtools.startup.MyProjectActivity" />
+        <toolWindow factoryClass="com.github.andrelmv.kotbox.toolwindow.ui.window.MainWindowFactory" id="Kotlin ToolBox"
+                    icon="/icons/toolWindow.svg"/>
+
+        <codeInsight.inlayProvider
+                implementationClass="com.github.andrelmv.kotbox.inlay.config.InlayStringInterpolationProvider"
+                language="kotlin"/>
     </extensions>
+
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true"/>
+    </extensions>
+
 </idea-plugin>
