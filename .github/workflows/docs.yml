@@ -45,11 +45,14 @@ jobs:
 
       - name: Extract Version
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
-          elif [ -n "${{ github.event.release.tag_name }}" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          elif [ -n "$RELEASE_TAG" ]; then
+            VERSION="$RELEASE_TAG"
           else
             VERSION=$(grep "pluginVersion" gradle.properties | cut -d'=' -f2 | tr -d ' ')
           fi
@@ -57,6 +60,8 @@ jobs:
           echo "Deploying documentation for version: $VERSION"
 
       - name: Deploy with mike
+        env:
+          DEPLOY_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          mike deploy ${{ steps.version.outputs.version }} latest --push --update-aliases
+          mike deploy "$DEPLOY_VERSION" latest --push --update-aliases
           mike set-default latest --push

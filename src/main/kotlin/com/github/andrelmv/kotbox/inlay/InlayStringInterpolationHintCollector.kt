@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.analysis.api.permissions.KaAllowAnalysisOnEdt
 import org.jetbrains.kotlin.analysis.api.permissions.allowAnalysisOnEdt
 import org.jetbrains.kotlin.idea.structuralsearch.visitor.KotlinRecursiveElementVisitor
+import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtExpression
@@ -29,78 +30,73 @@ class InlayStringInterpolationHintCollector(
         editor: Editor,
         sink: InlayHintsSink,
     ): Boolean {
-        runReadAction {
-            element.accept(
-                object : KotlinRecursiveElementVisitor() {
-                    override fun visitBinaryExpression(expression: KtBinaryExpression) {
-                        if (expression.operationToken == org.jetbrains.kotlin.lexer.KtTokens.PLUS) {
-                            val parent = expression.parent
-
-                            if (parent !is KtBinaryExpression || parent.operationToken != org.jetbrains.kotlin.lexer.KtTokens.PLUS) {
-                                val stringTemplates = mutableListOf<KtStringTemplateExpression>()
-                                collectStringTemplates(expression, stringTemplates)
-
-                                stringTemplates.forEach { stringTemplate ->
-                                    if (settings.state.withStringInterpolationHint && stringTemplate.isKtStringTemplateExpression()) {
-                                        stringTemplate.getValue()
-                                            ?.let {
-                                                val offset = stringTemplate.lastChild.textOffset
-                                                val base = factory.text(it)
-                                                val inlayPresentation = factory.roundWithBackground(base)
-                                                sink.addInlineElement(offset, true, inlayPresentation, true)
-                                            }
-                                    }
-                                }
-                            }
-                        }
-                        super.visitBinaryExpression(expression)
-                    }
-
-                    override fun visitElement(element: PsiElement) {
-                        if (settings.state.withStringInterpolationHint && element.isKtStringTemplateExpression()) {
-                            val parent = element.parent
-                            if (parent !is KtBinaryExpression || parent.operationToken != org.jetbrains.kotlin.lexer.KtTokens.PLUS) {
-                                (element as KtStringTemplateExpression).getValue()
-                                    ?.let {
-                                        val offset = element.lastChild.textOffset
-                                        val base = factory.text(it)
-                                        val inlayPresentation = factory.roundWithBackground(base)
-                                        sink.addInlineElement(offset, true, inlayPresentation, true)
-                                    }
-                            }
-                            return
-                        } else if (settings.state.withStringConstantHint && element.isKtNameReferenceExpression()) {
-                            (element as KtNameReferenceExpression).getValue()
-                                ?.let {
-                                    val offset = element.getReferencedNameElement().text.length + element.textOffset
-                                    val base = factory.text(it)
-                                    val inlayPresentation = factory.roundWithBackground(base)
-                                    sink.addInlineElement(offset, true, inlayPresentation, false)
-                                }
-                        }
-                    }
-                },
-            )
-        }
+        runReadAction { element.accept(createVisitor(sink)) }
         return true
     }
-}
 
-private fun collectStringTemplates(
-    expr: KtExpression,
-    result: MutableList<KtStringTemplateExpression>,
-) {
-    when (expr) {
-        is KtBinaryExpression -> {
-            expr.left
-                ?.let { collectStringTemplates(it, result) }
-            expr.right
-                ?.let { collectStringTemplates(it, result) }
+    private fun createVisitor(sink: InlayHintsSink) =
+        object : KotlinRecursiveElementVisitor() {
+            override fun visitBinaryExpression(expression: KtBinaryExpression) {
+                if (settings.state.withStringInterpolationHint && expression.isTopLevelPlusExpression()) {
+                    collectStringTemplates(expression)
+                        .filter { it.isKtStringTemplateExpression() }
+                        .forEach { addStringTemplateHint(it, sink) }
+                }
+                super.visitBinaryExpression(expression)
+            }
+
+            override fun visitElement(element: PsiElement) {
+                when {
+                    settings.state.withStringInterpolationHint && element.isKtStringTemplateExpression() -> {
+                        if (!element.isInPlusExpression()) {
+                            addStringTemplateHint(element as KtStringTemplateExpression, sink)
+                        }
+                        return
+                    }
+                    settings.state.withStringConstantHint && element.isKtNameReferenceExpression() ->
+                        addNameReferenceHint(element as KtNameReferenceExpression, sink)
+                }
+            }
         }
 
-        is KtStringTemplateExpression -> result.add(expr)
+    private fun addStringTemplateHint(
+        template: KtStringTemplateExpression,
+        sink: InlayHintsSink,
+    ) {
+        template.getValue()?.let {
+            val offset = template.lastChild.textOffset
+            sink.addInlineElement(offset, true, factory.roundWithBackground(factory.text(it)), true)
+        }
+    }
+
+    private fun addNameReferenceHint(
+        reference: KtNameReferenceExpression,
+        sink: InlayHintsSink,
+    ) {
+        reference.getValue()?.let {
+            val offset = reference.getReferencedNameElement().text.length + reference.textOffset
+            sink.addInlineElement(offset, true, factory.roundWithBackground(factory.text(it)), false)
+        }
     }
 }
+
+private fun PsiElement.isInPlusExpression(): Boolean {
+    val parent = parent
+    return parent is KtBinaryExpression && parent.operationToken == KtTokens.PLUS
+}
+
+private fun KtBinaryExpression.isTopLevelPlusExpression(): Boolean = operationToken == KtTokens.PLUS && !isInPlusExpression()
+
+private fun collectStringTemplates(expr: KtExpression): List<KtStringTemplateExpression> =
+    when (expr) {
+        is KtBinaryExpression -> {
+            val left = expr.left?.let { collectStringTemplates(it) } ?: emptyList()
+            val right = expr.right?.let { collectStringTemplates(it) } ?: emptyList()
+            left + right
+        }
+        is KtStringTemplateExpression -> listOf(expr)
+        else -> emptyList()
+    }
 
 private fun PsiElement.isKtNameReferenceExpression(): Boolean {
     return this is KtNameReferenceExpression &&

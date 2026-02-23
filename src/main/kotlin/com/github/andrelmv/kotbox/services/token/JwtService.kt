@@ -23,9 +23,8 @@ object JwtService {
         config: SigningConfig,
     ): DecodeResult {
         val parts = encodedToken.split(".")
-        if (parts.size != 3) {
-            throw IllegalArgumentException("Invalid JWT: expected 3 parts separated by '.', found ${parts.size}")
-        }
+
+        require(parts.size == 3) { "Invalid JWT: expected 3 parts separated by '.', found ${parts.size}" }
 
         val headerJson = decodeBase64Url(parts[0])
         val payloadJson = decodeBase64Url(parts[1])
@@ -160,15 +159,7 @@ object JwtService {
                 sig.verify(signatureBytes)
             }
 
-            AlgorithmKind.ECDSA -> {
-                // Re-sign and compare; ECDSA is non-deterministic so this only validates
-                // tokens that were signed within this session
-                val expected = signPayload(encodedHeader, encodedPayload, config)
-                expected == encodedSignature
-            }
-
-            AlgorithmKind.EDDSA -> {
-                // EdDSA is deterministic, re-sign and compare works correctly
+            AlgorithmKind.ECDSA, AlgorithmKind.EDDSA -> {
                 val expected = signPayload(encodedHeader, encodedPayload, config)
                 expected == encodedSignature
             }
@@ -198,7 +189,7 @@ object JwtService {
         der: ByteArray,
         componentSize: Int,
     ): ByteArray {
-        if (der.size < 6) throw IllegalArgumentException("DER signature too short: ${der.size} bytes")
+        require(der.size >= 6) { "DER signature too short: ${der.size} bytes" }
         // DER: 0x30 <totalLen> 0x02 <rLen> <r> 0x02 <sLen> <s>
         var offset = 2 // skip SEQUENCE tag and length
         if (der[1].toInt() and 0x80 != 0) {
@@ -206,13 +197,13 @@ object JwtService {
         }
 
         // Read R
-        if (der[offset++].toInt() != 0x02) throw IllegalArgumentException("Expected INTEGER tag for R")
+        require(der[offset++].toInt() == 0x02) { "Expected INTEGER tag for R" }
         val rLen = der[offset++].toInt() and 0xFF
         val rBytes = der.copyOfRange(offset, offset + rLen)
         offset += rLen
 
         // Read S
-        if (der[offset++].toInt() != 0x02) throw IllegalArgumentException("Expected INTEGER tag for S")
+        require(der[offset++].toInt() == 0x02) { "Expected INTEGER tag for S" }
         val sLen = der[offset++].toInt() and 0xFF
         val sBytes = der.copyOfRange(offset, offset + sLen)
 
@@ -274,7 +265,7 @@ object JwtService {
         val bits = StringBuilder()
         for (c in cleaned) {
             val value = alphabet.indexOf(c)
-            if (value < 0) throw IllegalArgumentException("Invalid Base32 character: $c")
+            require(value >= 0) { "Invalid Base32 character: $c" }
             bits.append(value.toString(2).padStart(5, '0'))
         }
         val bytes = ByteArray(bits.length / 8)
