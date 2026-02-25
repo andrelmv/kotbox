@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.andrelmv.kotbox</id>
-    <name>Kotlin Developer Toolbox</name>
+    <name>Kotlin Toolbox</name>
     <vendor email="andrelmv@gmail.com" url="https://github.com/andrelmv/kotbox">André Monteiro</vendor>
 
     <!-- Product and plugin compatibility requirements -->
@@ -10,12 +10,16 @@
     <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+
+        <applicationService serviceImplementation="com.github.andrelmv.kotbox.inlay.config.InlayStringInterpolationSettings"/>
+
         <toolWindow factoryClass="com.github.andrelmv.kotbox.toolwindow.ui.window.MainWindowFactory" id="Kotlin ToolBox"
                     icon="/icons/toolWindow.svg"/>
 
         <codeInsight.inlayProvider
                 implementationClass="com.github.andrelmv.kotbox.inlay.config.InlayStringInterpolationProvider"
                 language="kotlin"/>
+
     </extensions>
 
 

@@ -78,7 +78,7 @@ After installation:
 
 ---
 
-## Why Use Kotlin Developer Toolbox?
+## Why Use Kotlin Toolbox?
 
 <div class="grid cards" markdown>
 

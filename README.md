@@ -1,4 +1,4 @@
-# <img src="src/main/resources/icons/pluginIcon.svg" width="80" height="80" />      **kotlin-toolbox** 
+# <img src="src/main/resources/META-INF/pluginIcon.svg" width="80" height="80" />      **kotlin-toolbox** 
 
 
 ![Build](https://github.com/andrelmv/kotlin-dev-tools/workflows/Build/badge.svg)
@@ -16,9 +16,9 @@
 
 **Kotlin Toolbox** is an IntelliJ plugin that provides a comprehensive set of tools to enhance your Kotlin development experience.
 
-To learn more about the features and capabilities of this plugin, please visit the [documentation](https://andrelmv.github.io/kotbox).
-
 <!-- Plugin description end -->
+
+To learn more about the features and capabilities of this plugin, please visit the [documentation](https://andrelmv.github.io/kotbox).
 
 ## Installation
 
