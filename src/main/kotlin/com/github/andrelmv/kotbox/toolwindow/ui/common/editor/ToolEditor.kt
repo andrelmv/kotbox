@@ -77,8 +77,8 @@ class ToolEditor(
         editorEx.setVerticalScrollbarVisible(true)
     }
 
-    private fun createComponent(): JPanel {
-        return if (showToolbar) {
+    private fun createComponent(): JPanel =
+        if (showToolbar) {
             JPanel(BorderLayout()).apply {
                 add(editor, BorderLayout.CENTER)
                 add(createToolbar(), BorderLayout.EAST)
@@ -88,10 +88,9 @@ class ToolEditor(
                 add(editor, BorderLayout.CENTER)
             }
         }
-    }
 
-    private fun createToolbar(): JPanel {
-        return JPanel(BorderLayout()).apply {
+    private fun createToolbar(): JPanel =
+        JPanel(BorderLayout()).apply {
             border = JBUI.Borders.empty(4, 6)
 
             val buttons =
@@ -117,14 +116,12 @@ class ToolEditor(
                 }
             add(buttons, BorderLayout.NORTH)
         }
-    }
 
-    private fun createCenteredButton(button: JComponent): JPanel {
-        return JPanel(FlowLayout(FlowLayout.CENTER, 0, 0)).apply {
+    private fun createCenteredButton(button: JComponent): JPanel =
+        JPanel(FlowLayout(FlowLayout.CENTER, 0, 0)).apply {
             isOpaque = false
             add(button)
         }
-    }
 
     fun onTextChanged(listener: () -> Unit) {
         editor.document.addDocumentListener(

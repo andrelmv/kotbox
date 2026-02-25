@@ -148,7 +148,8 @@ object JwtService {
             AlgorithmKind.RSA, AlgorithmKind.RSA_PSS -> {
                 val privateKey = parsePKCS8PrivateKey(config.privateKeyPem, "RSA") as RSAPrivateCrtKey
                 val publicKey =
-                    KeyFactory.getInstance("RSA")
+                    KeyFactory
+                        .getInstance("RSA")
                         .generatePublic(RSAPublicKeySpec(privateKey.modulus, privateKey.publicExponent))
                 val sig = Signature.getInstance(algorithm.jdkAlgorithm)
                 if (algorithm.kind == AlgorithmKind.RSA_PSS) {
@@ -171,7 +172,8 @@ object JwtService {
         algorithm: String,
     ): PrivateKey {
         val base64 =
-            pem.trim()
+            pem
+                .trim()
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
                 .replace("-----BEGIN RSA PRIVATE KEY-----", "")
@@ -213,8 +215,8 @@ object JwtService {
         return result
     }
 
-    fun getPSSParameterSpec(algorithm: SignatureAlgorithm): PSSParameterSpec {
-        return when (algorithm) {
+    fun getPSSParameterSpec(algorithm: SignatureAlgorithm): PSSParameterSpec =
+        when (algorithm) {
             SignatureAlgorithm.PS256 ->
                 PSSParameterSpec(
                     "SHA-256",
@@ -244,15 +246,13 @@ object JwtService {
 
             else -> throw IllegalArgumentException("Not a PSS algorithm: $algorithm")
         }
-    }
 
-    fun resolveSecretKeyBytes(config: SigningConfig): ByteArray {
-        return when (config.secretKeyEncoding) {
+    fun resolveSecretKeyBytes(config: SigningConfig): ByteArray =
+        when (config.secretKeyEncoding) {
             SecretKeyEncoding.RAW -> config.secretKey.toByteArray(Charsets.UTF_8)
             SecretKeyEncoding.BASE32 -> decodeBase32(config.secretKey)
             SecretKeyEncoding.BASE64 -> Base64.getDecoder().decode(config.secretKey)
         }
-    }
 
     private fun validateHmacKeyLength(config: SigningConfig): Boolean {
         if (config.algorithm.kind != AlgorithmKind.HMAC || !config.strictValidation) return true
@@ -275,13 +275,9 @@ object JwtService {
         return bytes
     }
 
-    fun decodeBase64Url(encoded: String): String {
-        return String(Base64.getUrlDecoder().decode(encoded))
-    }
+    fun decodeBase64Url(encoded: String): String = String(Base64.getUrlDecoder().decode(encoded))
 
-    fun encodeBase64Url(text: String): String {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(text.toByteArray(Charsets.UTF_8))
-    }
+    fun encodeBase64Url(text: String): String = Base64.getUrlEncoder().withoutPadding().encodeToString(text.toByteArray(Charsets.UTF_8))
 
     private fun copyWithPadding(
         src: ByteArray,

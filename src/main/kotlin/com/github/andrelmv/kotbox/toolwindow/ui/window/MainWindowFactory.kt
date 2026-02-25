@@ -80,17 +80,16 @@ class MainWindowFactory : ToolWindowFactory {
 
     override fun shouldBeAvailable(project: Project) = true
 
-    private fun createTools(project: Project): List<DeveloperTool> {
-        return listOf(
+    private fun createTools(project: Project): List<DeveloperTool> =
+        listOf(
             JwtEncoderDecoder(project),
         )
-    }
 
     private fun createHeaderPanel(
         menuButton: ActionButton,
         toolLabel: JBLabel,
-    ): JPanel {
-        return JPanel().apply {
+    ): JPanel =
+        JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
             add(
                 JPanel(FlowLayout(FlowLayout.LEFT, 4, 4)).apply {
@@ -100,7 +99,6 @@ class MainWindowFactory : ToolWindowFactory {
             )
             add(JSeparator())
         }
-    }
 
     private fun createToolMenuButton(
         icon: Icon,
@@ -125,15 +123,15 @@ class MainWindowFactory : ToolWindowFactory {
                             }
                         }
 
-                    JBPopupFactory.getInstance()
+                    JBPopupFactory
+                        .getInstance()
                         .createActionGroupPopup(
                             null,
                             group,
                             DataManager.getInstance().getDataContext(source),
                             JBPopupFactory.ActionSelectionAid.SPEEDSEARCH,
                             false,
-                        )
-                        .showUnderneathOf(source)
+                        ).showUnderneathOf(source)
                 }
             }
 

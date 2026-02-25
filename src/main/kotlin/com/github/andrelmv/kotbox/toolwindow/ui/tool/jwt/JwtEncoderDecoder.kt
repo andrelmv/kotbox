@@ -15,7 +15,9 @@ import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.TopGap
 import javax.swing.JButton
 
-class JwtEncoderDecoder(project: Project) : DeveloperTool(project) {
+class JwtEncoderDecoder(
+    project: Project,
+) : DeveloperTool(project) {
     override val displayName: String = "JWT Encoder/Decoder"
 
     // State

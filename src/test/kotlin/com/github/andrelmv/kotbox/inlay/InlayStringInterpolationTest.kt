@@ -6,9 +6,7 @@ import com.intellij.testFramework.utils.inlays.InlayHintsProviderTestCase
 
 @Suppress("UnstableApiUsage")
 class InlayStringInterpolationTest : InlayHintsProviderTestCase() {
-    override fun runInDispatchThread(): Boolean {
-        return true
-    }
+    override fun runInDispatchThread(): Boolean = true
 
     fun `test given a const interpolated string when evaluating hints then return inlay hint`() {
         val text =

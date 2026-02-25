@@ -1,7 +1,7 @@
 # <img src="src/main/resources/META-INF/pluginIcon.svg" width="80" height="80" />      **kotlin-toolbox** 
 
 
-![Build](https://github.com/andrelmv/kotlin-dev-tools/workflows/Build/badge.svg)
+![Build](https://github.com/andrelmv/kotbox/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/30324-kotbox.svg)](https://plugins.jetbrains.com/plugin/30324-kotbox)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/30324-kotbox.svg)](https://plugins.jetbrains.com/plugin/30324-kotbox)
 [![CodeFactor](https://www.codefactor.io/repository/github/andrelmv/kotbox/badge)](https://www.codefactor.io/repository/github/andrelmv/kotbox)
@@ -36,7 +36,7 @@ To learn more about the features and capabilities of this plugin, please visit t
 
 - Manually:
 
-  Download the [latest release](https://github.com/andrelmv/kotlin-dev-tools/releases/latest) and install it manually using
+  Download the [latest release](https://github.com/andrelmv/kotbox/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 

@@ -91,18 +91,17 @@ class SignatureConfigPanel(
         strictValidationCheckBox.addActionListener { onConfigChanged() }
     }
 
-    fun currentSigningConfig(): SigningConfig {
-        return SigningConfig(
+    fun currentSigningConfig(): SigningConfig =
+        SigningConfig(
             algorithm = algorithmComboBox.selectedItem as? SignatureAlgorithm ?: SignatureAlgorithm.HMAC256,
             secretKey = secretKeyField.text,
             privateKeyPem = privateKeyArea.text,
             strictValidation = strictValidationCheckBox.isSelected,
             secretKeyEncoding = secretKeyEncoding,
         )
-    }
 
-    private fun createKeyCardPanel(): JPanel {
-        return JPanel(keyCardLayout).also { cardPanel ->
+    private fun createKeyCardPanel(): JPanel =
+        JPanel(keyCardLayout).also { cardPanel ->
             cardPanel.add(
                 JPanel(BorderLayout()).apply {
                     add(
@@ -130,7 +129,6 @@ class SignatureConfigPanel(
             )
             keyCardLayout.show(cardPanel, CARD_SECRET)
         }
-    }
 
     private fun updateKeyUI(algorithm: SignatureAlgorithm) {
         keyLabel.text = algorithm.kind.label
@@ -145,7 +143,8 @@ class SignatureConfigPanel(
 
     private fun showSecretKeyEncodingMenu() {
         val encodings = SecretKeyEncoding.entries
-        JBPopupFactory.getInstance()
+        JBPopupFactory
+            .getInstance()
             .createPopupChooserBuilder(encodings.toList())
             .setRenderer { list, value, _, isSelected, _ ->
                 JBLabel(value.displayName).apply {
@@ -159,24 +158,21 @@ class SignatureConfigPanel(
                         foreground = list.selectionForeground
                     }
                 }
-            }
-            .setItemChosenCallback { selected ->
+            }.setItemChosenCallback { selected ->
                 secretKeyEncoding = selected
                 onConfigChanged()
-            }
-            .createPopup()
+            }.createPopup()
             .showUnderneathOf(secretKeyGearButton.component)
     }
 
-    private fun createDocumentListener(action: () -> Unit): DocumentListener {
-        return object : DocumentListener {
+    private fun createDocumentListener(action: () -> Unit): DocumentListener =
+        object : DocumentListener {
             override fun insertUpdate(e: DocumentEvent) = action()
 
             override fun removeUpdate(e: DocumentEvent) = action()
 
             override fun changedUpdate(e: DocumentEvent) = action()
         }
-    }
 
     companion object {
         private const val CARD_SECRET = "secret"
