@@ -8,7 +8,7 @@ changelog = "2.5.0"
 intelliJPlatform = "2.11.0"
 
 kotlin = "2.3.10"
-ktlint = "12.1.2"
+ktlint = "14.0.1"
 sonar = "7.2.2.6593"
 
 kover = "0.9.7"
