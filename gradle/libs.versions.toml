@@ -9,7 +9,7 @@ intelliJPlatform = "2.11.0"
 
 kotlin = "2.3.10"
 ktlint = "12.1.2"
-sonar = "7.1.0.6387"
+sonar = "7.2.2.6593"
 
 kover = "0.9.7"
 qodana = "2025.3.1"
