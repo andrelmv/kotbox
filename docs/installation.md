@@ -1,6 +1,6 @@
 # Installation
 
-This guide shows how to install **Kotlin Developer Toolbox** in IntelliJ IDEA.
+This guide shows how to install **Kotlin Toolbox** in IntelliJ IDEA.
 
 ---
 
