@@ -38,7 +38,8 @@ class InlayStringInterpolationConfig(
         withStringInterpolationHint.addChangeListener { listener.settingsChanged() }
         withStringConstantHint.addChangeListener { listener.settingsChanged() }
 
-        return FormBuilder.createFormBuilder()
+        return FormBuilder
+            .createFormBuilder()
             .addComponent(title)
             .addSeparator()
             .addLabeledComponent(STRING_CONSTANT_INTERPOLATION_INLAY_HINT, withStringInterpolationHint)

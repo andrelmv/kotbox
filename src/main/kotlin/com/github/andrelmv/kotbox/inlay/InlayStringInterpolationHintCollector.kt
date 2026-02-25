@@ -98,42 +98,40 @@ private fun collectStringTemplates(expr: KtExpression): List<KtStringTemplateExp
         else -> emptyList()
     }
 
-private fun PsiElement.isKtNameReferenceExpression(): Boolean {
-    return this is KtNameReferenceExpression &&
+private fun PsiElement.isKtNameReferenceExpression(): Boolean =
+    this is KtNameReferenceExpression &&
         (
             (this.context is KtCollectionLiteralExpression && this.isConstant()) ||
                 (this.context is KtValueArgument && this.isConstant()) ||
                 this.context is KtNamedFunction ||
                 this.context is KtBinaryExpression
         )
-}
 
 private fun PsiElement.isKtStringTemplateExpression(): Boolean {
     if (this !is KtStringTemplateExpression) return false
 
     return runReadAction {
         this.isPlain().not() && this.hasInterpolation() && this.isSingleQuoted()
-    } && this.isConstant()
+    } &&
+        this.isConstant()
 }
 
 @OptIn(KaAllowAnalysisOnEdt::class)
-private fun KtExpression.isConstant(): Boolean {
-    return allowAnalysisOnEdt {
+private fun KtExpression.isConstant(): Boolean =
+    allowAnalysisOnEdt {
         runReadAction {
             org.jetbrains.kotlin.analysis.api.analyze(this@isConstant) {
                 evaluate() != null
             }
         }
     }
-}
 
 @OptIn(KaAllowAnalysisOnEdt::class)
-private fun KtExpression.getValue(): String? {
-    return allowAnalysisOnEdt {
+private fun KtExpression.getValue(): String? =
+    allowAnalysisOnEdt {
         runReadAction {
             org.jetbrains.kotlin.analysis.api.analyze(this@getValue) {
                 evaluate()?.toString()?.removeSurrounding("\"")
             }
         }
     }
-}

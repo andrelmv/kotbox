@@ -1,6 +1,8 @@
 package com.github.andrelmv.kotbox.services.token
 
-enum class AlgorithmKind(val label: String) {
+enum class AlgorithmKind(
+    val label: String,
+) {
     HMAC("Secret key:"),
     RSA("Private key:"),
     ECDSA("Private key:"),
@@ -48,7 +50,9 @@ data class EncodeResult(
     val encodedSignature: String,
 )
 
-enum class SecretKeyEncoding(val displayName: String) {
+enum class SecretKeyEncoding(
+    val displayName: String,
+) {
     RAW("Raw"),
     BASE32("Base32 Encoded"),
     BASE64("Base64 Encoded"),
