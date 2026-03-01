@@ -41,20 +41,29 @@ The simplest way to install the plugin is directly from IntelliJ IDEA:
 
 You can also install from the JetBrains website:
 
-### Download
+[Open on JetBrains Marketplace](https://plugins.jetbrains.com/plugin/30324-kotbox){ .md-button .md-button--primary }
 
-[Open on JetBrains Marketplace](https://plugins.jetbrains.com/plugin/24019){ .md-button .md-button--primary }
+There are two ways to install from the Marketplace page:
+
+### Option A: Install button (IDE running)
+
+If your IDE is already open:
+
+1. Click the **Install** button on the Marketplace page
+2. The plugin will be installed directly into your running IDE
+3. Restart the IDE when prompted
+
+### Option B: Get button (install from disk)
+
+If you prefer to download the file first:
 
 1. Click the **Get** button
 2. Choose the version compatible with your IDE
 3. Download the file
-
-### Installation
-
-1. Open your IDE and press `Ctrl+Alt+S` to open Settings
-2. Go to **Plugins** → gear icon ⚙️ → **Install Plugin from Disk...**
-3. Select the downloaded file and click **OK**
-4. Restart the IDE when prompted
+4. Open your IDE and press `Ctrl+Alt+S` to open Settings
+5. Go to **Plugins** → gear icon ⚙️ → **Install Plugin from Disk...**
+6. Select the downloaded file and click **OK**
+7. Restart the IDE when prompted
 
 ---
 
