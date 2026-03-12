@@ -1,13 +1,16 @@
 package com.github.andrelmv.kotbox.services.token
 
+private const val PRIVATE_KEY_LABEL = "Private key:"
+private const val JDK_RSASSA_PSS = "RSASSA-PSS"
+
 enum class AlgorithmKind(
     val label: String,
 ) {
     HMAC("Secret key:"),
-    RSA("Private key:"),
-    ECDSA("Private key:"),
-    RSA_PSS("Private key:"),
-    EDDSA("Private key:"),
+    RSA(PRIVATE_KEY_LABEL),
+    ECDSA(PRIVATE_KEY_LABEL),
+    RSA_PSS(PRIVATE_KEY_LABEL),
+    EDDSA(PRIVATE_KEY_LABEL),
 }
 
 enum class SignatureAlgorithm(
@@ -27,9 +30,9 @@ enum class SignatureAlgorithm(
     ECDSA256("ECDSA256 (ES256)", "ES256", AlgorithmKind.ECDSA, "SHA256withECDSA", 0, 32),
     ECDSA384("ECDSA384 (ES384)", "ES384", AlgorithmKind.ECDSA, "SHA384withECDSA", 0, 48),
     ECDSA512("ECDSA512 (ES512)", "ES512", AlgorithmKind.ECDSA, "SHA512withECDSA", 0, 66),
-    PS256("PS256", "PS256", AlgorithmKind.RSA_PSS, "RSASSA-PSS", 0),
-    PS384("PS384", "PS384", AlgorithmKind.RSA_PSS, "RSASSA-PSS", 0),
-    PS512("PS512", "PS512", AlgorithmKind.RSA_PSS, "RSASSA-PSS", 0),
+    PS256("PS256", "PS256", AlgorithmKind.RSA_PSS, JDK_RSASSA_PSS, 0),
+    PS384("PS384", "PS384", AlgorithmKind.RSA_PSS, JDK_RSASSA_PSS, 0),
+    PS512("PS512", "PS512", AlgorithmKind.RSA_PSS, JDK_RSASSA_PSS, 0),
     EDDSA("EdDSA", "EdDSA", AlgorithmKind.EDDSA, "Ed25519", 0),
     ;
 

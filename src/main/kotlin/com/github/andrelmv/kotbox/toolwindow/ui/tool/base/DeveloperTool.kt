@@ -45,13 +45,23 @@ abstract class DeveloperTool(
 
     protected abstract fun Panel.buildUi()
 
-    protected open fun afterBuildUi() {}
+    protected open fun afterBuildUi() {
+        // No-op by default; subclasses may override to perform post-build initialization
+    }
 
-    open fun activated() {}
+    open fun activated() {
+        // No-op by default; subclasses may override to react when this tool becomes active
+    }
 
-    open fun deactivated() {}
+    open fun deactivated() {
+        // No-op by default; subclasses may override to react when this tool becomes inactive
+    }
 
-    open fun reset() {}
+    open fun reset() {
+        // No-op by default; subclasses may override to reset tool state
+    }
 
-    override fun dispose() {}
+    override fun dispose() {
+        // No resources to release in the base class; subclasses should override if needed
+    }
 }
