@@ -56,6 +56,10 @@ jobs:
           else
             VERSION=$(grep "pluginVersion" gradle.properties | cut -d'=' -f2 | tr -d ' ')
           fi
+          if ! [[ "$VERSION" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+            echo "Invalid version format: $VERSION"
+            exit 1
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Deploying documentation for version: $VERSION"
 
