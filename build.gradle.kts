@@ -148,6 +148,7 @@ kover {
 
 sonar {
     properties {
+        property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.projectKey", "andrelmv_kotbox")
         property("sonar.organization", "andrelmv")
         property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/kover/report.xml")
