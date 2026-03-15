@@ -2,10 +2,11 @@
 
 <div style="text-align: center;" markdown="1">
 ![Build](https://github.com/andrelmv/kotbox/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/24019-kotlin-constant-string-interpolation.svg)](https://plugins.jetbrains.com/plugin/24019-kotlin-constant-string-interpolation)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/24019-kotlin-constant-string-interpolation.svg)](https://plugins.jetbrains.com/plugin/24019-kotlin-constant-string-interpolation)
+[![Version](https://img.shields.io/jetbrains/plugin/v/30324-kotbox.svg)](https://plugins.jetbrains.com/plugin/30324-kotbox)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/30324-kotbox.svg)](https://plugins.jetbrains.com/plugin/30324-kotbox)
 [![CodeFactor](https://www.codefactor.io/repository/github/andrelmv/kotbox/badge)](https://www.codefactor.io/repository/github/andrelmv/kotbox)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=andrelmv_kotbox&metric=coverage)](https://sonarcloud.io/summary/new_code?id=andrelmv_kotbox)
+[![codecov](https://codecov.io/github/andrelmv/kotbox/graph/badge.svg?token=UDJM6BFZTJ)](https://codecov.io/github/andrelmv/kotbox)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=andrelmv_kotlin-const-string-interpolation-plugin&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=andrelmv_kotlin-const-string-interpolation-plugin)
 [![License: MIT](https://img.shields.io/github/license/andrelmv/kotbox)](https://github.com/andrelmv/kotbox/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/andrelmv/kotbox?style=social)](https://github.com/andrelmv/kotbox)
