@@ -7,8 +7,8 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/andrelmv/kotbox/badge)](https://www.codefactor.io/repository/github/andrelmv/kotbox)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=andrelmv_kotbox&metric=coverage)](https://sonarcloud.io/summary/new_code?id=andrelmv_kotbox)
 [![codecov](https://codecov.io/github/andrelmv/kotbox/graph/badge.svg?token=UDJM6BFZTJ)](https://codecov.io/github/andrelmv/kotbox)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=andrelmv_kotlin-const-string-interpolation-plugin&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=andrelmv_kotlin-const-string-interpolation-plugin)
-[![License: MIT](https://img.shields.io/github/license/andrelmv/kotbox)](https://github.com/andrelmv/kotbox/blob/main/LICENSE)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=andrelmv_kotbox&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=andrelmv_kotbox)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/andrelmv/kotbox/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/andrelmv/kotbox?style=social)](https://github.com/andrelmv/kotbox)
 <a href="https://pinterest.github.io/ktlint/"><img src="https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg" alt="ktlint"></a>
 </div>
