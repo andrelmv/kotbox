@@ -3,12 +3,11 @@ package com.github.andrelmv.kotbox.inlay
 import com.github.andrelmv.kotbox.inlay.config.InlayStringInterpolationSettings
 import com.intellij.codeInsight.hints.FactoryInlayHintsCollector
 import com.intellij.codeInsight.hints.InlayHintsSink
-import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.application.runReadActionBlocking
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.analysis.api.permissions.KaAllowAnalysisOnEdt
 import org.jetbrains.kotlin.analysis.api.permissions.allowAnalysisOnEdt
-import org.jetbrains.kotlin.idea.structuralsearch.visitor.KotlinRecursiveElementVisitor
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
@@ -16,6 +15,7 @@ import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.KtValueArgument
 import org.jetbrains.kotlin.psi.psiUtil.isPlain
 import org.jetbrains.kotlin.psi.psiUtil.isSingleQuoted
@@ -30,12 +30,12 @@ class InlayStringInterpolationHintCollector(
         editor: Editor,
         sink: InlayHintsSink,
     ): Boolean {
-        runReadAction { element.accept(createVisitor(sink)) }
+        runReadActionBlocking { element.accept(createVisitor(sink)) }
         return true
     }
 
     private fun createVisitor(sink: InlayHintsSink) =
-        object : KotlinRecursiveElementVisitor() {
+        object : KtTreeVisitorVoid() {
             override fun visitBinaryExpression(expression: KtBinaryExpression) {
                 if (settings.state.withStringInterpolationHint && expression.isTopLevelPlusExpression()) {
                     collectStringTemplates(expression)
@@ -51,7 +51,6 @@ class InlayStringInterpolationHintCollector(
                         if (!element.isInPlusExpression()) {
                             addStringTemplateHint(element as KtStringTemplateExpression, sink)
                         }
-                        return
                     }
                     settings.state.withStringConstantHint && element.isKtNameReferenceExpression() ->
                         addNameReferenceHint(element as KtNameReferenceExpression, sink)
@@ -110,7 +109,7 @@ private fun PsiElement.isKtNameReferenceExpression(): Boolean =
 private fun PsiElement.isKtStringTemplateExpression(): Boolean {
     if (this !is KtStringTemplateExpression) return false
 
-    return runReadAction {
+    return runReadActionBlocking {
         this.isPlain().not() && this.hasInterpolation() && this.isSingleQuoted()
     } &&
         this.isConstant()
@@ -119,7 +118,7 @@ private fun PsiElement.isKtStringTemplateExpression(): Boolean {
 @OptIn(KaAllowAnalysisOnEdt::class)
 private fun KtExpression.isConstant(): Boolean =
     allowAnalysisOnEdt {
-        runReadAction {
+        runReadActionBlocking {
             org.jetbrains.kotlin.analysis.api.analyze(this@isConstant) {
                 evaluate() != null
             }
@@ -129,7 +128,7 @@ private fun KtExpression.isConstant(): Boolean =
 @OptIn(KaAllowAnalysisOnEdt::class)
 private fun KtExpression.getValue(): String? =
     allowAnalysisOnEdt {
-        runReadAction {
+        runReadActionBlocking {
             org.jetbrains.kotlin.analysis.api.analyze(this@getValue) {
                 evaluate()?.toString()?.removeSurrounding("\"")
             }
