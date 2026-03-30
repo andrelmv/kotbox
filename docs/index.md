@@ -39,6 +39,14 @@
 
     [:octicons-arrow-right-24: Learn more](features/kotlin-inlay-hints.md)
 
+-   :material-lock-reset:{ .lg .middle } **Password Generator**
+
+    ---
+
+    Generate secure random, memorable, or PIN passwords with bulk generation support.
+
+    [:octicons-arrow-right-24: Learn more](features/password-generator.md)
+
 </div>
 
 ---
