@@ -96,4 +96,5 @@ nav:
   - Features:
     - JWT Encoder/Decoder: features/jwt-encoder-decoder.md
     - Kotlin Inlay Hints: features/kotlin-inlay-hints.md
+    - Password Generator: features/password-generator.md
   - Changelog: changelog.md

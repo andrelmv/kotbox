@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+### Added
+
+- Password Generator tool with Random, Memorable, and PIN modes
+- Customizable password length, Numbers and Symbols options
+- Bulk password generation with configurable quantity (1–1000)
+
+## [2.0.0] - 2026-03-25
+
+### Fixed
+
+- Compatibility with Kotlin K2 compiler: replaced deprecated `KotlinRecursiveElementVisitor` with `KtTreeVisitorVoid`
+- Replaced `runReadAction` with `runReadActionBlocking` in inlay hint collector for correct coroutine context handling
+
+### Changed
+
+- Updated Gradle wrapper and plugin dependencies
+
 ## [1.0.0] - 2026-03-15
 
 ### Added
@@ -16,5 +33,6 @@
 
 - Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
 
-[Unreleased]: https://github.com/andrelmv/kotbox/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/andrelmv/kotbox/commits/v1.0.0
+[Unreleased]: https://github.com/andrelmv/kotbox/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/andrelmv/kotbox/compare/1.0.0...2.0.0
+[1.0.0]: https://github.com/andrelmv/kotbox/commits/1.0.0
