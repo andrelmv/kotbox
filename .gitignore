@@ -9,3 +9,5 @@ build
 # MkDocs
 site/
 .mkdocs_cache/
+
+*.hprof
