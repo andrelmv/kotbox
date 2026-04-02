@@ -1,0 +1,21 @@
+<html>
+<body>
+Wraps the selected code block with a Kotlin coroutine builder.
+<p>
+  Select any block of code inside a Kotlin file, then invoke this intention via
+  <b>Alt+Enter</b> (or <b>Option+Space</b> on macOS) to choose from the available
+  coroutine builders, or use the direct keyboard shortcuts:
+</p>
+<table>
+  <tr><th>Builder</th><th>Shortcut</th></tr>
+  <tr><td><code>async { }</code></td><td><b>Ctrl+Shift+Alt+Y</b></td></tr>
+  <tr><td><code>coroutineScope { }</code></td><td><b>Ctrl+Shift+Alt+O</b></td></tr>
+  <tr><td><code>launch { }</code></td><td><b>Ctrl+Shift+Alt+J</b></td></tr>
+  <tr><td><code>withContext(Dispatchers.IO) { }</code></td><td><b>Ctrl+Shift+Alt+W</b></td></tr>
+  <tr><td><code>supervisorScope { }</code></td><td><b>Ctrl+Shift+Alt+S</b></td></tr>
+  <tr><td><code>runBlocking { }</code></td><td><b>Ctrl+Shift+Alt+B</b></td></tr>
+  <tr><td><code>withTimeout(timeMillis) { }</code></td><td><b>Ctrl+Shift+Alt+T</b></td></tr>
+</table>
+<p>The required imports are added automatically.</p>
+</body>
+</html>

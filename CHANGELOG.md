@@ -9,6 +9,7 @@
 - Password Generator tool with Random, Memorable, and PIN modes
 - Customizable password length, Numbers and Symbols options
 - Bulk password generation with configurable quantity (1–1000)
+- Wrap with coroutine build feature
 
 ## [2.0.0] - 2026-03-25
 

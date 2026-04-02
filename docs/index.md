@@ -47,6 +47,14 @@
 
     [:octicons-arrow-right-24: Learn more](features/password-generator.md)
 
+-   :material-wrap:{ .lg .middle } **Wrap with Coroutine Builder**
+
+    ---
+
+    Wrap selected code with any coroutine builder in one keystroke, with imports added automatically.
+
+    [:octicons-arrow-right-24: Learn more](features/wrap-with-coroutine.md)
+
 </div>
 
 ---
