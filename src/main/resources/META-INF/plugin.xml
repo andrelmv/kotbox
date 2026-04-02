@@ -14,7 +14,7 @@
         <applicationService serviceImplementation="com.github.andrelmv.kotbox.inlay.config.InlayStringInterpolationSettings"/>
 
         <toolWindow factoryClass="com.github.andrelmv.kotbox.toolwindow.ui.window.MainWindowFactory" id="Kotlin ToolBox"
-                    icon="/icons/toolWindow.svg"/>
+                    icon="/icons/toolWindow.svg" anchor="right" secondary="false"/>
 
         <codeInsight.inlayProvider
                 implementationClass="com.github.andrelmv.kotbox.inlay.config.InlayStringInterpolationProvider"

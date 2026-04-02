@@ -2,6 +2,7 @@ package com.github.andrelmv.kotbox.toolwindow.ui.window
 
 import com.github.andrelmv.kotbox.toolwindow.ui.tool.base.DeveloperTool
 import com.github.andrelmv.kotbox.toolwindow.ui.tool.jwt.JwtEncoderDecoder
+import com.github.andrelmv.kotbox.toolwindow.ui.tool.passwordgenerator.PasswordGeneratorTool
 import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.AnAction
@@ -83,6 +84,7 @@ class MainWindowFactory : ToolWindowFactory {
     private fun createTools(project: Project): List<DeveloperTool> =
         listOf(
             JwtEncoderDecoder(project),
+            PasswordGeneratorTool(project),
         )
 
     private fun createHeaderPanel(
