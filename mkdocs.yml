@@ -98,4 +98,5 @@ nav:
     - Kotlin Inlay Hints: features/kotlin-inlay-hints.md
     - Password Generator: features/password-generator.md
     - Wrap with Coroutine Builder: features/wrap-with-coroutine.md
+    - DSL Builder Generator: features/dsl-builder-generator.md
   - Changelog: changelog.md

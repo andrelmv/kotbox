@@ -1,8 +1,5 @@
-package com.github.andrelmv.kotbox.intentions
+package com.github.andrelmv.kotbox.wrap
 
-import com.github.andrelmv.kotbox.wrap.CoroutineWrapperRegistry
-import com.github.andrelmv.kotbox.wrap.WrapSelectionEngine
-import com.github.andrelmv.kotbox.wrap.WrapperDescriptor
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.codeInsight.intention.LowPriorityAction
 import com.intellij.openapi.editor.Editor
