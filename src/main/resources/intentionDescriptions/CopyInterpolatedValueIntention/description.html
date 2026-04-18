@@ -1,0 +1,32 @@
+<html lang="en">
+<body>
+<p>Copy the evaluated value of interpolated strings to the clipboard.</p>
+
+<p>
+    This intention enables you to quickly copy the evaluated result of string interpolation expressions.
+    Instead of copying the template itself, it evaluates all variable references and copies the final string value.
+</p>
+
+<p><strong>Example:</strong></p>
+<pre><code>
+val name = "John"
+val greeting = "Hello, $name!"  // Position cursor here and invoke the intention
+// Result: "Hello, John!" is copied to the clipboard
+</code></pre>
+
+<p>
+    The intention recursively evaluates variable references within the string template, so nested interpolations
+    are also resolved.
+</p>
+
+<!-- tooltip end -->
+
+<p>
+    <strong>How it works:</strong><br>
+    This intention is available when your cursor is positioned within a property that contains a string template expression
+    (a string with interpolations like <code>${"$variable"}</code>). When invoked, it evaluates the expression by resolving
+    all variable references and copies the resulting string to your clipboard.
+</p>
+
+</body>
+</html>

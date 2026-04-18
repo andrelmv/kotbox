@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- Copy Interpolated String value intention
+
 ## [2.0.1] - 2026-04-04
 
 ### Added
