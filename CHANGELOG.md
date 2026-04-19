@@ -6,6 +6,7 @@
 
 ### Added
 
+- Copy Interpolated String value intention
 - DSL builder generator
 - Update shortcuts for wrap with coroutine builders
 

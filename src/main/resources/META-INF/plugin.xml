@@ -32,6 +32,12 @@
             <category>Kotlin Toolbox</category>
         </intentionAction>
 
+      <intentionAction>
+        <language>kotlin</language>
+        <className>com.github.andrelmv.kotbox.inlay.CopyInterpolatedValueIntention</className>
+        <category>Kotlin Toolbox</category>
+      </intentionAction>
+
     </extensions>
 
 

@@ -1,0 +1,14 @@
+<html>
+<body>
+Copies the resolved value of a Kotlin string interpolation to the clipboard.
+<p>
+  Place the caret inside a property whose initializer is a string template, then invoke
+  this intention via <b>Alt+Enter</b> (or <b>Option+Space</b> on macOS).
+  All interpolated references are resolved and the resulting string is copied to the clipboard.
+</p>
+<p>
+  Only available when all variable references in the string can be statically evaluated
+  (e.g. <code>const val</code> chains). Unresolvable references disable the intention.
+</p>
+</body>
+</html>
