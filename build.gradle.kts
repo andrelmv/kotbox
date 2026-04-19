@@ -141,6 +141,11 @@ kover {
                         "com.github.andrelmv.kotbox.toolwindow.ui",
                         "com.github.andrelmv.kotbox.inlay.config",
                     )
+                    classes(
+                        "com.github.andrelmv.kotbox.dslbuilder.DslBuilderPlacementDialog",
+                        "com.github.andrelmv.kotbox.dslbuilder.DslBuilderAction",
+                        "com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderGenerator",
+                    )
                 }
             }
         }
@@ -155,7 +160,7 @@ sonar {
         property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/kover/report.xml")
         property(
             "sonar.coverage.exclusions",
-            "**/toolwindow/ui/**,**/inlay/config/**",
+            "**/toolwindow/ui/**,**/inlay/config/**,**/dslbuilder/DslBuilderPlacementDialog.kt,**/dslbuilder/DslBuilderAction.kt,**/dslbuilder/generator/DslBuilderGenerator.kt",
         )
     }
 }
