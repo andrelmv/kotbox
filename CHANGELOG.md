@@ -7,6 +7,7 @@
 ### Added
 
 - DSL builder generator
+- Update shortcuts for wrap with coroutine builders
 
 ## [2.0.1] - 2026-04-04
 

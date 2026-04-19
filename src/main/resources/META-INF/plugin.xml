@@ -56,7 +56,7 @@
                 description="Envolve o código selecionado com async { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt Y"/>
+                               first-keystroke="ctrl alt meta Y"/>
         </action>
 
         <!-- Action: wrap com coroutineScope { } -->
@@ -66,7 +66,7 @@
                 description="Envolve o código selecionado com coroutineScope { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt O"/>
+                               first-keystroke="ctrl alt meta O"/>
         </action>
 
         <!-- Action: wrap com launch { } -->
@@ -76,7 +76,7 @@
                 description="Envolve o código selecionado com launch { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt J"/>
+                               first-keystroke="ctrl alt meta J"/>
         </action>
 
         <!-- Action: wrap com withContext(Dispatchers.IO) { } -->
@@ -86,7 +86,7 @@
                 description="Envolve o código selecionado com withContext(Dispatchers.IO) { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt W"/>
+                               first-keystroke="ctrl alt meta W"/>
         </action>
 
         <!-- Action: wrap com supervisorScope { } -->
@@ -96,7 +96,7 @@
                 description="Envolve o código selecionado com supervisorScope { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt S"/>
+                               first-keystroke="ctrl alt meta S"/>
         </action>
 
         <!-- Action: wrap com runBlocking { } -->
@@ -106,7 +106,7 @@
                 description="Envolve o código selecionado com runBlocking { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt B"/>
+                               first-keystroke="ctrl alt meta B"/>
         </action>
 
         <!-- Action: wrap com withTimeout(timeMillis) { } -->
@@ -116,7 +116,7 @@
                 description="Envolve o código selecionado com withTimeout(timeMillis) { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt T"/>
+                               first-keystroke="ctrl alt meta T"/>
         </action>
 
         <!-- Action: Generate DSL Builder -->
