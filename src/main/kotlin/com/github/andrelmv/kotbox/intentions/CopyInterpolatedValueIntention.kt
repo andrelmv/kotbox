@@ -2,20 +2,16 @@ package com.github.andrelmv.kotbox.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
-import org.jetbrains.kotlin.idea.references.mainReference
-import org.jetbrains.kotlin.psi.KtEscapeStringTemplateEntry
+import org.jetbrains.kotlin.analysis.api.analyze
+import org.jetbrains.kotlin.analysis.api.permissions.KaAllowAnalysisOnEdt
+import org.jetbrains.kotlin.analysis.api.permissions.allowAnalysisOnEdt
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
-import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtProperty
-import org.jetbrains.kotlin.psi.KtSimpleNameStringTemplateEntry
-import org.jetbrains.kotlin.psi.KtStringTemplateExpression
-import java.awt.Toolkit.getDefaultToolkit
 import java.awt.datatransfer.StringSelection
 
 class CopyInterpolatedValueIntention : IntentionAction {
@@ -30,8 +26,9 @@ class CopyInterpolatedValueIntention : IntentionAction {
     ): Boolean {
         if (editor == null || file !is KtFile) return false
         val offset = editor.caretModel.offset
-        val element = file.findElementAt(offset) ?: return false
-        return element.parentOfType<KtProperty>()?.initializer is KtStringTemplateExpression
+        val property = file.findElementAt(offset)?.parentOfType<KtProperty>() ?: return false
+        val initializer = property.initializer ?: return false
+        return initializer.evaluateToString() != null
     }
 
     override fun invoke(
@@ -42,35 +39,22 @@ class CopyInterpolatedValueIntention : IntentionAction {
         if (editor == null || file !is KtFile) return
 
         val offset = editor.caretModel.offset
-        val element: PsiElement = file.findElementAt(offset) ?: return
-        val property: KtProperty = element.parentOfType<KtProperty>() ?: return
+        val property = file.findElementAt(offset)?.parentOfType<KtProperty>() ?: return
         val valueExpr: KtExpression = property.initializer ?: return
 
-        val evaluated = evaluateExpression(expression = valueExpr)
+        val evaluated = valueExpr.evaluateToString() ?: return
 
-        val clipboard = StringSelection(evaluated)
-        getDefaultToolkit().systemClipboard.setContents(clipboard, clipboard)
+        CopyPasteManager.getInstance().setContents(StringSelection(evaluated))
     }
 
     override fun startInWriteAction() = false
-
-    private fun evaluateExpression(expression: KtExpression): String =
-        when (expression) {
-            is KtStringTemplateExpression ->
-                expression.entries.joinToString("") { entry ->
-                    when {
-                        entry is KtLiteralStringTemplateEntry -> entry.text
-                        entry is KtEscapeStringTemplateEntry -> entry.unescapedValue
-                        entry is KtSimpleNameStringTemplateEntry -> {
-                            val resolved = (entry.expression as? KtNameReferenceExpression)?.mainReference?.resolve()
-                            val initializer = (resolved as? KtProperty)?.initializer
-                            if (initializer != null) evaluateExpression(initializer) else ""
-                        }
-
-                        else -> ""
-                    }
-                }
-
-            else -> expression.text // fallback
-        }
 }
+
+@OptIn(KaAllowAnalysisOnEdt::class)
+private fun KtExpression.evaluateToString(): String? =
+    allowAnalysisOnEdt {
+        analyze(this@evaluateToString) {
+            if (expressionType != builtinTypes.string) return@analyze null
+            evaluate()?.toString()?.removeSurrounding("\"")
+        }
+    }
