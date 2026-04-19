@@ -55,6 +55,14 @@
 
     [:octicons-arrow-right-24: Learn more](features/wrap-with-coroutine.md)
 
+-   :material-code-braces:{ .lg .middle } **DSL Builder Generator**
+
+    ---
+
+    Generate type-safe DSL builders for data classes with `@DslMarker`, nested hierarchy support, and collection accessors.
+
+    [:octicons-arrow-right-24: Learn more](features/dsl-builder-generator.md)
+
 </div>
 
 ---

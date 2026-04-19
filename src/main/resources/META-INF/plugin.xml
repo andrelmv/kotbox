@@ -22,7 +22,13 @@
 
         <intentionAction>
             <language>kotlin</language>
-            <className>com.github.andrelmv.kotbox.intentions.WrapWithCoroutineIntention</className>
+            <className>com.github.andrelmv.kotbox.wrap.WrapWithCoroutineIntention</className>
+            <category>Kotlin Toolbox</category>
+        </intentionAction>
+
+        <intentionAction>
+            <language>kotlin</language>
+            <className>com.github.andrelmv.kotbox.dslbuilder.DslBuilderIntention</className>
             <category>Kotlin Toolbox</category>
         </intentionAction>
 
@@ -51,72 +57,81 @@
 
         <!-- Action: wrap com async { } -->
         <action id="KotlinToolbox.WrapAsync"
-                class="com.github.andrelmv.kotbox.actions.wrappers.WrapAsyncAction"
+                class="com.github.andrelmv.kotbox.wrap.wrappers.WrapAsyncAction"
                 text="Wrap with async { }"
                 description="Envolve o código selecionado com async { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt Y"/>
+                               first-keystroke="ctrl alt meta Y"/>
         </action>
 
         <!-- Action: wrap com coroutineScope { } -->
         <action id="KotlinToolbox.WrapCoroutineScope"
-                class="com.github.andrelmv.kotbox.actions.wrappers.WrapCoroutineScopeAction"
+                class="com.github.andrelmv.kotbox.wrap.wrappers.WrapCoroutineScopeAction"
                 text="Wrap with coroutineScope { }"
                 description="Envolve o código selecionado com coroutineScope { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt O"/>
+                               first-keystroke="ctrl alt meta O"/>
         </action>
 
         <!-- Action: wrap com launch { } -->
         <action id="KotlinToolbox.WrapLaunch"
-                class="com.github.andrelmv.kotbox.actions.wrappers.WrapLaunchAction"
+                class="com.github.andrelmv.kotbox.wrap.wrappers.WrapLaunchAction"
                 text="Wrap with launch { }"
                 description="Envolve o código selecionado com launch { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt J"/>
+                               first-keystroke="ctrl alt meta J"/>
         </action>
 
         <!-- Action: wrap com withContext(Dispatchers.IO) { } -->
         <action id="KotlinToolbox.WrapWithContext"
-                class="com.github.andrelmv.kotbox.actions.wrappers.WrapWithContextAction"
+                class="com.github.andrelmv.kotbox.wrap.wrappers.WrapWithContextAction"
                 text="Wrap with withContext(Dispatchers.IO) { }"
                 description="Envolve o código selecionado com withContext(Dispatchers.IO) { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt W"/>
+                               first-keystroke="ctrl alt meta W"/>
         </action>
 
         <!-- Action: wrap com supervisorScope { } -->
         <action id="KotlinToolbox.WrapSupervisorScope"
-                class="com.github.andrelmv.kotbox.actions.wrappers.WrapSupervisorScopeAction"
+                class="com.github.andrelmv.kotbox.wrap.wrappers.WrapSupervisorScopeAction"
                 text="Wrap with supervisorScope { }"
                 description="Envolve o código selecionado com supervisorScope { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt S"/>
+                               first-keystroke="ctrl alt meta S"/>
         </action>
 
         <!-- Action: wrap com runBlocking { } -->
         <action id="KotlinToolbox.WrapRunBlocking"
-                class="com.github.andrelmv.kotbox.actions.wrappers.WrapRunBlockingAction"
+                class="com.github.andrelmv.kotbox.wrap.wrappers.WrapRunBlockingAction"
                 text="Wrap with runBlocking { }"
                 description="Envolve o código selecionado com runBlocking { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt B"/>
+                               first-keystroke="ctrl alt meta B"/>
         </action>
 
         <!-- Action: wrap com withTimeout(timeMillis) { } -->
         <action id="KotlinToolbox.WrapWithTimeout"
-                class="com.github.andrelmv.kotbox.actions.wrappers.WrapWithTimeoutAction"
+                class="com.github.andrelmv.kotbox.wrap.wrappers.WrapWithTimeoutAction"
                 text="Wrap with withTimeout(timeMillis) { }"
                 description="Envolve o código selecionado com withTimeout(timeMillis) { }">
             <add-to-group group-id="KotlinToolbox.WrapGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt T"/>
+                               first-keystroke="ctrl alt meta T"/>
+        </action>
+
+        <!-- Action: Generate DSL Builder -->
+        <action id="KotlinToolbox.GenerateDslBuilder"
+                class="com.github.andrelmv.kotbox.dslbuilder.DslBuilderAction"
+                text="DSL Builder..."
+                description="Generate a type-safe DSL builder for this data class">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt shift D"/>
         </action>
 
     </actions>

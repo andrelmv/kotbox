@@ -1,0 +1,6 @@
+fun fetchData() {
+    launch {
+        val result = networkCall()
+        process(result)
+    }
+}

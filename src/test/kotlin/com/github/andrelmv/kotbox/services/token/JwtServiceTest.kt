@@ -103,15 +103,8 @@ class JwtServiceTest {
             val payload = """{"sub":"1234567890","name":"André","iat":1516239022}"""
             val signature = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
             val token = "${JwtService.encodeBase64Url(header)}.${JwtService.encodeBase64Url(payload)}.$signature"
-            val config =
-                SigningConfig(
-                    algorithm = SignatureAlgorithm.HMAC256,
-                    secretKey = "your-256-bit-secret",
-                    privateKeyPem = "",
-                    strictValidation = false,
-                )
 
-            val result = JwtService.decode(token, config)
+            val result = JwtService.decode(token)
 
             assertTrue(result.header.contains("HS256"))
             assertTrue(result.payload.contains("André"))
@@ -121,54 +114,22 @@ class JwtServiceTest {
 
         @Test(expected = IllegalArgumentException::class)
         fun `throws for token with only 2 parts`() {
-            val config =
-                SigningConfig(
-                    algorithm = SignatureAlgorithm.HMAC256,
-                    secretKey = "secret",
-                    privateKeyPem = "",
-                    strictValidation = false,
-                )
-
-            JwtService.decode("header.payload", config)
+            JwtService.decode("header.payload")
         }
 
         @Test(expected = IllegalArgumentException::class)
         fun `throws for token with 4 parts`() {
-            val config =
-                SigningConfig(
-                    algorithm = SignatureAlgorithm.HMAC256,
-                    secretKey = "secret",
-                    privateKeyPem = "",
-                    strictValidation = false,
-                )
-
-            JwtService.decode("header.payload.signature.extra", config)
+            JwtService.decode("header.payload.signature.extra")
         }
 
         @Test(expected = IllegalArgumentException::class)
         fun `throws for empty token`() {
-            val config =
-                SigningConfig(
-                    algorithm = SignatureAlgorithm.HMAC256,
-                    secretKey = "secret",
-                    privateKeyPem = "",
-                    strictValidation = false,
-                )
-
-            JwtService.decode("", config)
+            JwtService.decode("")
         }
 
         @Test(expected = IllegalArgumentException::class)
         fun `throws for whitespace-only token`() {
-            val config =
-                SigningConfig(
-                    algorithm = SignatureAlgorithm.HMAC256,
-                    secretKey = "secret",
-                    privateKeyPem = "",
-                    strictValidation = false,
-                )
-
-            JwtService.decode("   ", config)
+            JwtService.decode("   ")
         }
 
         @Test
@@ -176,15 +137,8 @@ class JwtServiceTest {
             val longHeader = """{"alg":"HS256","typ":"JWT","custom":"${"x".repeat(1000)}"}"""
             val longPayload = """{"sub":"user","data":"${"y".repeat(1000)}"}"""
             val token = "${JwtService.encodeBase64Url(longHeader)}.${JwtService.encodeBase64Url(longPayload)}.signature"
-            val config =
-                SigningConfig(
-                    algorithm = SignatureAlgorithm.HMAC256,
-                    secretKey = "secret",
-                    privateKeyPem = "",
-                    strictValidation = false,
-                )
 
-            val result = JwtService.decode(token, config)
+            val result = JwtService.decode(token)
 
             assertTrue(result.header.contains("HS256"))
             assertTrue(result.payload.contains("user"))
@@ -212,7 +166,7 @@ class JwtServiceTest {
             assertEquals(result.encodedPayload, parts[1])
             assertEquals(result.encodedSignature, parts[2])
 
-            val decoded = JwtService.decode(result.encodedToken, config)
+            val decoded = JwtService.decode(result.encodedToken)
             assertTrue(decoded.header.contains("HS256"))
             assertTrue(decoded.payload.contains("André"))
         }
