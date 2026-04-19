@@ -63,6 +63,14 @@
 
     [:octicons-arrow-right-24: Learn more](features/dsl-builder-generator.md)
 
+-   :material-content-copy:{ .lg .middle } **Copy Interpolated Value**
+
+    ---
+
+    Resolve all variable references in a string interpolation and copy the final value to the clipboard in one keystroke.
+
+    [:octicons-arrow-right-24: Learn more](features/copy-interpolated-value.md)
+
 </div>
 
 ---

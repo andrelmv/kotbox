@@ -99,4 +99,5 @@ nav:
     - Password Generator: features/password-generator.md
     - Wrap with Coroutine Builder: features/wrap-with-coroutine.md
     - DSL Builder Generator: features/dsl-builder-generator.md
+    - Copy Interpolated Value: features/copy-interpolated-value.md
   - Changelog: changelog.md

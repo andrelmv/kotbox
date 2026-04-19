@@ -1,4 +1,4 @@
-package com.github.andrelmv.kotbox.intentions
+package com.github.andrelmv.kotbox.inlay
 
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.openapi.editor.Editor
@@ -12,12 +12,13 @@ import org.jetbrains.kotlin.analysis.api.permissions.allowAnalysisOnEdt
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtProperty
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import java.awt.datatransfer.StringSelection
 
 class CopyInterpolatedValueIntention : IntentionAction {
-    override fun getText() = "Copy string value"
+    override fun getText() = "Copy interpolated value"
 
-    override fun getFamilyName() = "Kotlin intentions"
+    override fun getFamilyName() = "Kotlin Toolbox"
 
     override fun isAvailable(
         project: Project,
@@ -28,6 +29,7 @@ class CopyInterpolatedValueIntention : IntentionAction {
         val offset = editor.caretModel.offset
         val property = file.findElementAt(offset)?.parentOfType<KtProperty>() ?: return false
         val initializer = property.initializer ?: return false
+        if (initializer !is KtStringTemplateExpression || !initializer.hasInterpolation()) return false
         return initializer.evaluateToString() != null
     }
 
@@ -50,6 +52,7 @@ class CopyInterpolatedValueIntention : IntentionAction {
     override fun startInWriteAction() = false
 }
 
+// allowAnalysisOnEdt is required: isAvailable can be called on EDT (e.g. from popup selection path)
 @OptIn(KaAllowAnalysisOnEdt::class)
 private fun KtExpression.evaluateToString(): String? =
     allowAnalysisOnEdt {

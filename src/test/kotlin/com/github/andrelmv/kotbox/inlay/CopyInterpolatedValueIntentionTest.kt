@@ -1,4 +1,4 @@
-package com.github.andrelmv.kotbox.intentions
+package com.github.andrelmv.kotbox.inlay
 
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.psi.util.startOffset
@@ -16,7 +16,7 @@ class CopyInterpolatedValueIntentionTest : BasePlatformTestCase() {
         myFixture.configureByText("test.kt", text)
         myFixture.editor.caretModel.moveToOffset(myFixture.file.lastChild.startOffset)
 
-        val action = myFixture.findSingleIntention("Copy string value")
+        val action = myFixture.findSingleIntention("Copy interpolated value")
         Assert.assertNotNull(action)
         myFixture.launchAction(action)
 
@@ -24,23 +24,27 @@ class CopyInterpolatedValueIntentionTest : BasePlatformTestCase() {
         Assert.assertEquals("Name Last Name", data)
     }
 
-    fun `test plain string with no interpolation`() {
+    fun `test intention not available for plain string with no interpolation`() {
         val text = "const val GREETING = \"Hello, World!\""
-        val data = launchIntention(text, text.indexOf("\"Hello"))
-        Assert.assertEquals("Hello, World!", data)
+        myFixture.configureByText("test.kt", text)
+        myFixture.editor.caretModel.moveToOffset(text.indexOf("\"Hello"))
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
+        Assert.assertTrue(intentions.isEmpty())
     }
 
-    fun `test string with escape sequences`() {
+    fun `test intention not available for string with escape sequences only`() {
         val text = "const val MSG = \"line1\\nline2\\ttabbed\""
-        val data = launchIntention(text, text.indexOf("\"line1"))
-        Assert.assertEquals("line1\nline2\ttabbed", data)
+        myFixture.configureByText("test.kt", text)
+        myFixture.editor.caretModel.moveToOffset(text.indexOf("\"line1"))
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
+        Assert.assertTrue(intentions.isEmpty())
     }
 
     fun `test intention not available for unresolvable variable reference`() {
         val text = "const val MSG = \"Hello \$UNKNOWN\""
         myFixture.configureByText("test.kt", text)
         myFixture.editor.caretModel.moveToOffset(text.indexOf("\"Hello"))
-        val intentions = myFixture.filterAvailableIntentions("Copy string value")
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
         Assert.assertTrue(intentions.isEmpty())
     }
 
@@ -58,7 +62,7 @@ class CopyInterpolatedValueIntentionTest : BasePlatformTestCase() {
         val text = "const val NUMBER = 42"
         myFixture.configureByText("test.kt", text)
         myFixture.editor.caretModel.moveToOffset(text.indexOf("42"))
-        val intentions = myFixture.filterAvailableIntentions("Copy string value")
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
         Assert.assertTrue(intentions.isEmpty())
     }
 
@@ -66,7 +70,7 @@ class CopyInterpolatedValueIntentionTest : BasePlatformTestCase() {
         val text = "fun main() { println(\"hello\") }"
         myFixture.configureByText("test.kt", text)
         myFixture.editor.caretModel.moveToOffset(text.indexOf("fun"))
-        val intentions = myFixture.filterAvailableIntentions("Copy string value")
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
         Assert.assertTrue(intentions.isEmpty())
     }
 
@@ -74,7 +78,7 @@ class CopyInterpolatedValueIntentionTest : BasePlatformTestCase() {
         val text = "val name: String"
         myFixture.configureByText("test.kt", text)
         myFixture.editor.caretModel.moveToOffset(text.indexOf("name"))
-        val intentions = myFixture.filterAvailableIntentions("Copy string value")
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
         Assert.assertTrue(intentions.isEmpty())
     }
 
@@ -144,13 +148,37 @@ class CopyInterpolatedValueIntentionTest : BasePlatformTestCase() {
         Assert.assertEquals("unchanged", data)
     }
 
+    fun `test intention not available for empty string`() {
+        val text = "const val EMPTY = \"\""
+        myFixture.configureByText("test.kt", text)
+        myFixture.editor.caretModel.moveToOffset(text.indexOf("\"\""))
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
+        Assert.assertTrue(intentions.isEmpty())
+    }
+
+    fun `test intention not available for string with embedded quotes only`() {
+        val text = "const val QUOTED = \"\\\"hello\\\"\""
+        myFixture.configureByText("test.kt", text)
+        myFixture.editor.caretModel.moveToOffset(text.indexOf("\"\\\""))
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
+        Assert.assertTrue(intentions.isEmpty())
+    }
+
+    fun `test intention not available for local variable inside function body`() {
+        val text = "fun main() { val x = \"hello\" }"
+        myFixture.configureByText("test.kt", text)
+        myFixture.editor.caretModel.moveToOffset(text.indexOf("\"hello"))
+        val intentions = myFixture.filterAvailableIntentions("Copy interpolated value")
+        Assert.assertTrue(intentions.isEmpty())
+    }
+
     private fun launchIntention(
         text: String,
         offset: Int,
     ): String? {
         myFixture.configureByText("test.kt", text)
         myFixture.editor.caretModel.moveToOffset(offset)
-        val action = myFixture.findSingleIntention("Copy string value")
+        val action = myFixture.findSingleIntention("Copy interpolated value")
         Assert.assertNotNull(action)
         myFixture.launchAction(action)
         return CopyPasteManager.getInstance().getContents<String>(DataFlavor.stringFlavor)

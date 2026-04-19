@@ -1,0 +1,3 @@
+const val NAME = "John"
+const val SURNAME = "Doe"
+const val GREETING = "Hello, $NAME $SURNAME!"

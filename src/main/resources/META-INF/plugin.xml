@@ -34,7 +34,7 @@
 
       <intentionAction>
         <language>kotlin</language>
-        <className>com.github.andrelmv.kotbox.intentions.CopyInterpolatedValueIntention</className>
+        <className>com.github.andrelmv.kotbox.inlay.CopyInterpolatedValueIntention</className>
         <category>Kotlin Toolbox</category>
       </intentionAction>
 
