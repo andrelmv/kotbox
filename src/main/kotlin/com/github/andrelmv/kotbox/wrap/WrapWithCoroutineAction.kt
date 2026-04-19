@@ -1,7 +1,5 @@
-package com.github.andrelmv.kotbox.actions
+package com.github.andrelmv.kotbox.wrap
 
-import com.github.andrelmv.kotbox.wrap.CoroutineWrapperRegistry
-import com.github.andrelmv.kotbox.wrap.WrapSelectionEngine
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent

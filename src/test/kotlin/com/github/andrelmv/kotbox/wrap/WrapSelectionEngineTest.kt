@@ -1,47 +1,33 @@
 package com.github.andrelmv.kotbox.wrap
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.junit.Test
 
 class WrapSelectionEngineTest : BasePlatformTestCase() {
     override fun getTestDataPath() = "src/test/testData/wrap"
 
-    // ──────────────────────────────────────────────────────────────
-    // isAvailable
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test isAvailable returns false when no selection`() {
         myFixture.configureByText("Test.kt", "fun test() {}")
         assertFalse(WrapSelectionEngine.isAvailable(myFixture.editor, myFixture.file))
     }
 
-    @Test
     fun `test isAvailable returns false for non-Kotlin file`() {
         myFixture.configureByText("Test.java", "class Test {}")
         myFixture.editor.selectionModel.setSelection(0, 5)
         assertFalse(WrapSelectionEngine.isAvailable(myFixture.editor, myFixture.file))
     }
 
-    @Test
     fun `test isAvailable returns true with selection in Kotlin file`() {
         myFixture.configureByText("Test.kt", "fun test() {}")
         myFixture.editor.selectionModel.setSelection(0, 3)
         assertTrue(WrapSelectionEngine.isAvailable(myFixture.editor, myFixture.file))
     }
 
-    @Test
     fun `test isAvailable returns false for xml file with selection`() {
         myFixture.configureByText("config.xml", "<root/>")
         myFixture.editor.selectionModel.setSelection(0, 5)
         assertFalse(WrapSelectionEngine.isAvailable(myFixture.editor, myFixture.file))
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // wrap — async
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap with async adds async braces and import`() {
         myFixture.configureByText(
             "Test.kt",
@@ -77,11 +63,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // wrap — coroutineScope
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap with coroutineScope`() {
         myFixture.configureByText(
             "Test.kt",
@@ -112,11 +93,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // wrap — launch
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap with launch adds braces and import`() {
         myFixture.configureByText(
             "Test.kt",
@@ -147,7 +123,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    @Test
     fun `test wrap with launch handles multiline selection`() {
         myFixture.configureByText(
             "Test.kt",
@@ -182,11 +157,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // wrap — withContext
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap with withContext adds braces and import`() {
         myFixture.configureByText(
             "Test.kt",
@@ -218,7 +188,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    @Test
     fun `test wrap with withContext handles multiline selection`() {
         myFixture.configureByText(
             "Test.kt",
@@ -252,11 +221,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // wrap — supervisorScope
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap with supervisorScope adds braces and import`() {
         myFixture.configureByText(
             "Test.kt",
@@ -289,11 +253,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // wrap — runBlocking
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap with runBlocking adds braces and import`() {
         myFixture.configureByText(
             "Test.kt",
@@ -324,7 +283,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    @Test
     fun `test wrap with runBlocking handles multiline selection`() {
         myFixture.configureByText(
             "Test.kt",
@@ -359,11 +317,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // wrap — withTimeout
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap with withTimeout adds braces and import`() {
         myFixture.configureByText(
             "Test.kt",
@@ -394,7 +347,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    @Test
     fun `test wrap with withTimeout handles multiline selection`() {
         myFixture.configureByText(
             "Test.kt",
@@ -427,11 +379,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Edge cases — import deduplication
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap does not duplicate launch import when already present`() {
         myFixture.configureByText(
             "Test.kt",
@@ -458,7 +405,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         assertEquals("Import should appear exactly once", 1, importCount)
     }
 
-    @Test
     fun `test wrap does not duplicate async import when already present`() {
         myFixture.configureByText(
             "Test.kt",
@@ -485,7 +431,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         assertEquals("Import should appear exactly once", 1, importCount)
     }
 
-    @Test
     fun `test wrap does not duplicate runBlocking import when already present`() {
         myFixture.configureByText(
             "Test.kt",
@@ -512,11 +457,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         assertEquals("Import should appear exactly once", 1, importCount)
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Edge cases — indentation
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap preserves outer indentation for deeply nested selection`() {
         myFixture.configureByText(
             "Test.kt",
@@ -551,11 +491,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         )
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Edge cases — no selection
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap does nothing when no selection`() {
         val originalCode = "fun test() {\n    doWork()\n}"
         myFixture.configureByText("Test.kt", originalCode)
@@ -570,11 +505,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         assertEquals(originalCode, myFixture.file.text)
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // Edge cases — file with no existing imports
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
     fun `test wrap adds import to file with no existing imports`() {
         myFixture.configureByText(
             "Test.kt",
@@ -595,7 +525,6 @@ class WrapSelectionEngineTest : BasePlatformTestCase() {
         assertTrue(myFixture.file.text.contains("import kotlinx.coroutines.launch"))
     }
 
-    @Test
     fun `test wrap adds withTimeout import to file with no existing imports`() {
         myFixture.configureByText(
             "Test.kt",

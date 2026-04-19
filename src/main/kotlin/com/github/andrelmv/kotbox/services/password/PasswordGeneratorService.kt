@@ -1,6 +1,6 @@
 package com.github.andrelmv.kotbox.services.password
 
-object PasswordGeneratorService {
+internal object PasswordGeneratorService {
     private val LOWERCASE = ('a'..'z').toList()
     private val UPPERCASE = ('A'..'Z').toList()
     private val DIGITS = ('0'..'9').toList()

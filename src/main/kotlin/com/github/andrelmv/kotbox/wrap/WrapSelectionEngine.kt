@@ -5,10 +5,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
-import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
-import org.jetbrains.kotlin.resolve.ImportPath
 
 /**
  * Transformation engine that applies a [WrapperDescriptor] to the text
@@ -20,7 +18,7 @@ import org.jetbrains.kotlin.resolve.ImportPath
  *  - Add the required import via KtPsiFactory (compatible with K1 and K2)
  *  - Register the operation as a single command (single undo step)
  */
-object WrapSelectionEngine {
+internal object WrapSelectionEngine {
     /**
      * Checks whether wrapping can be applied in the current context.
      * Called by both the IntentionAction and the AnAction to control
@@ -119,11 +117,9 @@ object WrapSelectionEngine {
             }
         if (alreadyImported) return
 
-        // Create and insert the import
+        // Create and insert the import (avoids deprecated ImportPath API)
         val importDirective =
-            factory.createImportDirective(
-                ImportPath(FqName(fqName), isAllUnder = false),
-            )
+            factory.createFile("import $fqName\n").importDirectives.firstOrNull() ?: return
         importList.add(factory.createNewLine())
         importList.add(importDirective)
     }

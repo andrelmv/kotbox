@@ -10,7 +10,7 @@ package com.github.andrelmv.kotbox.wrap
  * @param id             unique identifier, used internally and in plugin.xml
  * @param displayName    text shown in the Alt+Enter popup and in the menu
  * @param wrapTemplate   template for the generated code; %s is replaced by the selection
- * @param requiredImports fully-qualified imports to add (may be empty)
+ * @param requiredImports fully-qualified imports to add (maybe empty)
  * @param actionId        ID of the associated AnAction for keyboard shortcut binding
  */
 data class WrapperDescriptor(

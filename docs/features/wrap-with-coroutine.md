@@ -19,13 +19,13 @@ Select the code and press the shortcut for the builder you want directly:
 
 | Builder                           | Shortcut           |
 |-----------------------------------|--------------------|
-| `async { }`                       | `Ctrl+Shift+Alt+Y` |
-| `coroutineScope { }`              | `Ctrl+Shift+Alt+O` |
-| `launch { }`                      | `Ctrl+Shift+Alt+J` |
-| `withContext(Dispatchers.IO) { }` | `Ctrl+Shift+Alt+W` |
-| `supervisorScope { }`             | `Ctrl+Shift+Alt+S` |
-| `runBlocking { }`                 | `Ctrl+Shift+Alt+B` |
-| `withTimeout(timeMillis) { }`     | `Ctrl+Shift+Alt+T` |
+| `async { }`                       | `Ctrl+Alt+Cmd+Y` |
+| `coroutineScope { }`              | `Ctrl+Alt+Cmd+O` |
+| `launch { }`                      | `Ctrl+Alt+Cmd+J` |
+| `withContext(Dispatchers.IO) { }` | `Ctrl+Alt+Cmd+W` |
+| `supervisorScope { }`             | `Ctrl+Alt+Cmd+S` |
+| `runBlocking { }`                 | `Ctrl+Alt+Cmd+B` |
+| `withTimeout(timeMillis) { }`     | `Ctrl+Alt+Cmd+T` |
 
 ### Via Right-Click Menu
 
