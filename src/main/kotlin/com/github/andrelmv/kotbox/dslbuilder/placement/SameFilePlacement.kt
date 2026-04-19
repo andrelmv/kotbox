@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
 
-object SameFilePlacement {
+internal object SameFilePlacement {
     fun insert(
         file: KtFile,
         generatedCode: String,

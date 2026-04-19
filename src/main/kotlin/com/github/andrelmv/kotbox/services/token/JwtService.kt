@@ -18,10 +18,7 @@ import javax.crypto.spec.SecretKeySpec
 object JwtService {
     private val LOG = thisLogger()
 
-    fun decode(
-        encodedToken: String,
-        config: SigningConfig,
-    ): DecodeResult {
+    fun decode(encodedToken: String): DecodeResult {
         val parts = encodedToken.split(".")
 
         require(parts.size == 3) { "Invalid JWT: expected 3 parts separated by '.', found ${parts.size}" }
@@ -40,7 +37,7 @@ object JwtService {
         encodedToken: String,
         config: SigningConfig,
     ): DecodeResult {
-        val result = decode(encodedToken, config)
+        val result = decode(encodedToken)
         val parts = encodedToken.split(".")
         val isValid =
             try {

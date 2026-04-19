@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.psi.KtParameter
  * Uses ktClass.isData() which is a syntactic PSI check — no resolve needed,
  * safe to call on source-declared classes without K2.
  */
-fun KtClass.isDataClass(): Boolean = isData()
+internal fun KtClass.isDataClass(): Boolean = isData()
 
 /**
  * Result of K2 analysis for a constructor parameter: nullability and default-value
@@ -21,7 +21,7 @@ data class ParamAnalysis(
     val hasDefault: Boolean,
 )
 
-fun KtParameter.analyzeK2(): ParamAnalysis {
+internal fun KtParameter.analyzeK2(): ParamAnalysis {
     // PSI-syntactic fallbacks — no resolve required, work in all contexts including tests.
     // Covers the common cases: explicit "?" marker and "= expr" default.
     val isNullablePsi = typeReference?.text?.trim()?.endsWith("?") ?: false
@@ -47,7 +47,7 @@ fun KtParameter.analyzeK2(): ParamAnalysis {
  *
  * Examples: "List<String>?" → "List"  |  "Address?" → "Address"
  */
-fun KtParameter.simpleTypeName(): String? {
+internal fun KtParameter.simpleTypeName(): String? {
     val typeText = typeReference?.text ?: return null
     return typeText
         .substringBefore("<") // remove type args

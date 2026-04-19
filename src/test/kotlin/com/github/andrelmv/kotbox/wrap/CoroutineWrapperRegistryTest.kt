@@ -6,10 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CoroutineWrapperRegistryTest {
-    // ──────────────────────────────────────────────────────────────
-    // Structural integrity
-    // ──────────────────────────────────────────────────────────────
-
     @Test
     fun `registry contains exactly 7 wrappers`() {
         assertEquals(7, CoroutineWrapperRegistry.all.size)
@@ -79,10 +75,6 @@ class CoroutineWrapperRegistryTest {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // findById
-    // ──────────────────────────────────────────────────────────────
-
     @Test
     fun `findById returns null for unknown id`() {
         assertNull(CoroutineWrapperRegistry.findById("doesNotExist"))
@@ -95,10 +87,6 @@ class CoroutineWrapperRegistryTest {
         assertNull(CoroutineWrapperRegistry.findById("Launch"))
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // async
-    // ──────────────────────────────────────────────────────────────
-
     @Test
     fun `async descriptor is correct`() {
         val d = CoroutineWrapperRegistry.findById("async")!!
@@ -108,10 +96,6 @@ class CoroutineWrapperRegistryTest {
         assertEquals("KotlinToolbox.WrapAsync", d.actionId)
         assertTrue(d.wrapTemplate.startsWith("async {"))
     }
-
-    // ──────────────────────────────────────────────────────────────
-    // coroutineScope
-    // ──────────────────────────────────────────────────────────────
 
     @Test
     fun `coroutineScope descriptor is correct`() {
@@ -123,10 +107,6 @@ class CoroutineWrapperRegistryTest {
         assertTrue(d.wrapTemplate.startsWith("coroutineScope {"))
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // launch
-    // ──────────────────────────────────────────────────────────────
-
     @Test
     fun `launch descriptor is correct`() {
         val d = CoroutineWrapperRegistry.findById("launch")!!
@@ -136,10 +116,6 @@ class CoroutineWrapperRegistryTest {
         assertEquals("KotlinToolbox.WrapLaunch", d.actionId)
         assertTrue(d.wrapTemplate.startsWith("launch {"))
     }
-
-    // ──────────────────────────────────────────────────────────────
-    // withContext
-    // ──────────────────────────────────────────────────────────────
 
     @Test
     fun `withContext descriptor is correct`() {
@@ -167,10 +143,6 @@ class CoroutineWrapperRegistryTest {
         assertTrue(d.wrapTemplate.startsWith("supervisorScope {"))
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // runBlocking
-    // ──────────────────────────────────────────────────────────────
-
     @Test
     fun `runBlocking descriptor is correct`() {
         val d = CoroutineWrapperRegistry.findById("runBlocking")!!
@@ -181,10 +153,6 @@ class CoroutineWrapperRegistryTest {
         assertTrue(d.wrapTemplate.startsWith("runBlocking {"))
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // withTimeout
-    // ──────────────────────────────────────────────────────────────
-
     @Test
     fun `withTimeout descriptor is correct`() {
         val d = CoroutineWrapperRegistry.findById("withTimeout")!!
@@ -194,10 +162,6 @@ class CoroutineWrapperRegistryTest {
         assertEquals("KotlinToolbox.WrapWithTimeout", d.actionId)
         assertTrue(d.wrapTemplate.startsWith("withTimeout(timeMillis) {"))
     }
-
-    // ──────────────────────────────────────────────────────────────
-    // Template format contract
-    // ──────────────────────────────────────────────────────────────
 
     @Test
     fun `template format produces valid code for single-line body`() {

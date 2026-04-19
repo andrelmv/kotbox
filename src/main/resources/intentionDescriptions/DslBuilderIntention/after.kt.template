@@ -1,0 +1,21 @@
+data class Person(
+    val name: String,
+    val age: Int,
+)
+
+@DslMarker
+annotation class PersonDsl
+
+@PersonDsl
+class PersonBuilder {
+    var name: String = ""
+    var age: Int = 0
+
+    fun build(): Person = Person(
+        name = name,
+        age = age,
+    )
+}
+
+fun person(block: PersonBuilder.() -> Unit): Person =
+    PersonBuilder().apply(block).build()

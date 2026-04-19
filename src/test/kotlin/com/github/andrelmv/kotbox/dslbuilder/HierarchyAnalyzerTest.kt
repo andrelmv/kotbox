@@ -6,10 +6,8 @@ import com.github.andrelmv.kotbox.dslbuilder.generator.HierarchyAnalyzer
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtClass
-import org.junit.Test
 
 class HierarchyAnalyzerTest : BasePlatformTestCase() {
-    @Test
     fun `test analyzes single data class`() {
         myFixture.configureByText("Test.kt", "data class User(val name: String, val age: Int)")
         val h = analyze("User")
@@ -18,7 +16,6 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         assertTrue(h.builders.first().isRoot)
     }
 
-    @Test
     fun `test analyzes nested hierarchy in topological order`() {
         myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
         myFixture.configureByText("User.kt", "package com.ex\ndata class User(val name: String, val address: Address)")
@@ -28,7 +25,6 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         assertEquals("User", h.builders[1].dataClassName)
     }
 
-    @Test
     fun `test handles three-level hierarchy`() {
         myFixture.addFileToProject("Coords.kt", "package com.ex\ndata class Coordinates(val lat: Double, val lng: Double)")
         myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String, val coordinates: Coordinates)")
@@ -40,7 +36,6 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         assertEquals("User", h.builders[2].dataClassName)
     }
 
-    @Test
     fun `test does not expand external library classes`() {
         myFixture.configureByText("Test.kt", "import java.time.LocalDate\ndata class User(val name: String, val born: LocalDate)")
         val h = analyze("User")
@@ -53,7 +48,6 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         )
     }
 
-    @Test
     fun `test classifies List of String as SimpleList in hierarchy`() {
         myFixture.configureByText("Test.kt", "data class User(val tags: List<String>)")
         val h = analyze("User")
@@ -66,13 +60,11 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         assertEquals("String", (tagsField as BuilderField.SimpleList).elementTypeName)
     }
 
-    @Test
     fun `test dslMarkerName uses root class name`() {
         myFixture.configureByText("Test.kt", "data class Order(val id: Long)")
         assertEquals("OrderDsl", analyze("Order").dslMarkerName)
     }
 
-    @Test
     fun `test handles class with no fields`() {
         myFixture.configureByText("Test.kt", "data class Empty()")
         val h = analyze("Empty")
@@ -85,7 +77,6 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         )
     }
 
-    @Test
     fun `test does not infinite loop on mutual cycle between two data classes`() {
         // A references B and B references A — cycle must be detected via visited set
         myFixture.addFileToProject("B.kt", "data class B(val value: String)")
@@ -98,7 +89,6 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         assertEquals(classNames.distinct(), classNames)
     }
 
-    @Test
     fun `test List of data class produces NestedBuilderList in hierarchy`() {
         myFixture.addFileToProject("Item.kt", "package com.ex\ndata class Item(val label: String)")
         myFixture.configureByText("Cart.kt", "package com.ex\ndata class Cart(val items: List<Item>)")
@@ -111,7 +101,6 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         assertTrue(itemsField is BuilderField.NestedBuilderList)
     }
 
-    @Test
     fun `test collects required imports for nested data class types`() {
         myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
         myFixture.configureByText("User.kt", "package com.ex\ndata class User(val address: Address)")

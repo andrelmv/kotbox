@@ -5,10 +5,8 @@ import com.github.andrelmv.kotbox.dslbuilder.generator.FieldClassifier
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtClass
-import org.junit.Test
 
 class FieldClassifierTest : BasePlatformTestCase() {
-    @Test
     fun `test classifies String field as Simple required`() {
         myFixture.configureByText("Test.kt", "data class User(val name: String)")
         val cls = getClass("User")
@@ -19,19 +17,16 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertTrue(field.isRequired)
     }
 
-    @Test
     fun `test classifies nullable field as not required`() {
         myFixture.configureByText("Test.kt", "data class User(val nick: String?)")
         assertFalse(classify(getClass("User"), 0).isRequired)
     }
 
-    @Test
     fun `test classifies field with default as not required`() {
         myFixture.configureByText("Test.kt", "data class User(val active: Boolean = true)")
         assertFalse(classify(getClass("User"), 0).isRequired)
     }
 
-    @Test
     fun `test classifies data class field as NestedBuilder`() {
         myFixture.configureByText(
             "Test.kt",
@@ -46,7 +41,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("AddressBuilder", field.builderTypeName)
     }
 
-    @Test
     fun `test classifies List of String as SimpleList`() {
         myFixture.configureByText("Test.kt", "data class User(val tags: List<String>)")
         val field = classify(getClass("User"), 0)
@@ -54,7 +48,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("String", (field as BuilderField.SimpleList).elementTypeName)
     }
 
-    @Test
     fun `test classifies List of data class as NestedBuilderList`() {
         myFixture.configureByText(
             "Test.kt",
@@ -68,7 +61,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("RoleBuilder", (field as BuilderField.NestedBuilderList).elementBuilderTypeName)
     }
 
-    @Test
     fun `test classifies Set field as SimpleSet`() {
         myFixture.configureByText("Test.kt", "data class User(val codes: Set<String>)")
         val field = classify(getClass("User"), 0)
@@ -76,7 +68,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("String", (field as BuilderField.SimpleSet).elementTypeName)
     }
 
-    @Test
     fun `test classifies Map field correctly`() {
         myFixture.configureByText("Test.kt", "data class User(val meta: Map<String, Int>)")
         val field = classify(getClass("User"), 0)
@@ -86,7 +77,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("Int", field.valueTypeName)
     }
 
-    @Test
     fun `test classifies MutableList field as SimpleList`() {
         myFixture.configureByText("Test.kt", "data class User(val tags: MutableList<String>)")
         val field = classify(getClass("User"), 0)
@@ -94,7 +84,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("String", (field as BuilderField.SimpleList).elementTypeName)
     }
 
-    @Test
     fun `test classifies MutableSet field as SimpleSet`() {
         myFixture.configureByText("Test.kt", "data class User(val codes: MutableSet<Int>)")
         val field = classify(getClass("User"), 0)
@@ -102,7 +91,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("Int", (field as BuilderField.SimpleSet).elementTypeName)
     }
 
-    @Test
     fun `test classifies MutableMap field as SimpleMap`() {
         myFixture.configureByText("Test.kt", "data class User(val meta: MutableMap<String, Any>)")
         val field = classify(getClass("User"), 0)
@@ -112,7 +100,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("Any", field.valueTypeName)
     }
 
-    @Test
     fun `test classifies nullable data class field as NestedBuilder`() {
         myFixture.configureByText(
             "Test.kt",
@@ -127,7 +114,6 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("AddressBuilder", (field as BuilderField.NestedBuilder).builderTypeName)
     }
 
-    @Test
     fun `test classifies nullable List of data class as NestedBuilderList`() {
         myFixture.configureByText(
             "Test.kt",

@@ -13,7 +13,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 
-object DslBuilderGenerator {
+internal object DslBuilderGenerator {
     fun generate(
         project: Project,
         targetClass: KtClass,

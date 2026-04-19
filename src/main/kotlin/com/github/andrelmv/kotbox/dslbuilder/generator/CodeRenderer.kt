@@ -5,7 +5,7 @@ package com.github.andrelmv.kotbox.dslbuilder.generator
  * No IntelliJ dependencies — testable as plain JUnit.
  *
  * Emits import statements when [BuilderHierarchy.requiredImports] is non-empty,
- * skipping any type that already lives in [ownPackage] (same-package imports are redundant).
+ * skipping any type that already lives in the same-package (same-package imports are redundant).
  */
 class CodeRenderer {
     fun render(

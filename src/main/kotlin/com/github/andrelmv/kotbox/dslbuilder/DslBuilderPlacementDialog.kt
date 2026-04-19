@@ -5,10 +5,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBRadioButton
 import com.intellij.ui.components.JBTextField
+import com.intellij.util.ui.JBUI
 import org.jetbrains.kotlin.psi.KtClass
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
-import java.awt.Insets
 import javax.swing.ButtonGroup
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -16,7 +16,7 @@ import javax.swing.JPanel
 
 class DslBuilderPlacementDialog(
     project: Project,
-    private val targetClass: KtClass,
+    targetClass: KtClass,
 ) : DialogWrapper(project, true) {
     private val sameFileButton = JBRadioButton("Same file", true)
     private val newFileButton = JBRadioButton("New file")
@@ -39,7 +39,7 @@ class DslBuilderPlacementDialog(
         val gbc =
             GridBagConstraints().apply {
                 anchor = GridBagConstraints.WEST
-                insets = Insets(4, 4, 4, 4)
+                insets = JBUI.insets(4)
             }
 
         gbc.gridx = 0
