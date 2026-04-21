@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-04-21
+
 ### Added
 
 - Copy Interpolated String value intention
@@ -42,7 +44,8 @@
 
 - Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
 
-[Unreleased]: https://github.com/andrelmv/kotbox/compare/2.0.1...HEAD
+[Unreleased]: https://github.com/andrelmv/kotbox/compare/2.0.2...HEAD
+[2.0.2]: https://github.com/andrelmv/kotbox/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/andrelmv/kotbox/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/andrelmv/kotbox/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/andrelmv/kotbox/commits/1.0.0
