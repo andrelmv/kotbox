@@ -128,6 +128,20 @@ class FieldClassifierTest : BasePlatformTestCase() {
         assertEquals("RoleBuilder", (field as BuilderField.NestedBuilderList).elementBuilderTypeName)
     }
 
+    fun `test classifies Class star field preserves full generic type`() {
+        myFixture.configureByText("Test.kt", "data class Event(val type: Class<*>)")
+        val field = classify(getClass("Event"), 0)
+        assertTrue(field is BuilderField.Simple)
+        assertEquals("Class<*>", (field as BuilderField.Simple).typeName)
+    }
+
+    fun `test classifies generic non-data-class field preserves full generic type`() {
+        myFixture.configureByText("Test.kt", "data class Event(val handler: Comparable<String>)")
+        val field = classify(getClass("Event"), 0)
+        assertTrue(field is BuilderField.Simple)
+        assertEquals("Comparable<String>", (field as BuilderField.Simple).typeName)
+    }
+
     // Helpers
     private fun getClass(name: String) =
         myFixture.file.children
