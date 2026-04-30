@@ -35,28 +35,29 @@ class FieldClassifier(
             isListType(rawTypeText) -> classifyList(param, rawTypeText, isRequired)
             isSetType(rawTypeText) -> classifySet(param, rawTypeText, isRequired)
             isMapType(rawTypeText) -> classifyMap(param, rawTypeText, isRequired)
-            else -> classifyScalar(param, scalarName, analysis.isNullable, isRequired)
+            else -> classifyScalar(param, rawTypeText, scalarName, analysis.isNullable, isRequired)
         }
     }
 
     private fun classifyScalar(
         param: KtParameter,
-        typeName: String,
+        rawTypeName: String,
+        scalarName: String,
         isNullable: Boolean,
         isRequired: Boolean,
     ): BuilderField {
-        val dataClass = findDataClassInModule(typeName)
+        val dataClass = findDataClassInModule(scalarName)
         return if (dataClass != null && isSameModule(dataClass)) {
             BuilderField.NestedBuilder(
                 name = param.name ?: "",
-                typeName = typeName,
-                builderTypeName = "${typeName}Builder",
+                typeName = scalarName,
+                builderTypeName = "${scalarName}Builder",
                 isRequired = isRequired,
             )
         } else {
             BuilderField.Simple(
                 name = param.name ?: "",
-                typeName = typeName,
+                typeName = rawTypeName,
                 isNullableInOriginal = isNullable,
                 isRequired = isRequired,
             )

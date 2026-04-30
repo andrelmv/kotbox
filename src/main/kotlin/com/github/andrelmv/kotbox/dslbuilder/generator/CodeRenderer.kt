@@ -8,6 +8,8 @@ package com.github.andrelmv.kotbox.dslbuilder.generator
  * skipping any type that already lives in the same-package (same-package imports are redundant).
  */
 class CodeRenderer {
+    private fun String.escapeIfKeyword(): String = if (this in KOTLIN_HARD_KEYWORDS) "`$this`" else this
+
     fun render(
         hierarchy: BuilderHierarchy,
         ownPackage: String = "",
@@ -69,56 +71,60 @@ class CodeRenderer {
      */
     private fun nullableType(typeName: String): String = if (typeName.contains("->")) "($typeName)?" else "$typeName?"
 
-    private fun renderField(field: BuilderField): String =
-        when (field) {
-            is BuilderField.Simple -> "var ${field.name}: ${nullableType(field.typeName)} = null"
-            is BuilderField.NestedBuilder -> "private var ${field.name}: ${nullableType(field.typeName)} = null"
-            is BuilderField.SimpleList -> "private val ${field.name}: MutableList<${field.elementTypeName}> = mutableListOf()"
-            is BuilderField.NestedBuilderList -> "private val ${field.name}: MutableList<${field.elementTypeName}> = mutableListOf()"
-            is BuilderField.SimpleSet -> "private val ${field.name}: MutableSet<${field.elementTypeName}> = mutableSetOf()"
+    private fun renderField(field: BuilderField): String {
+        val n = field.name.escapeIfKeyword()
+        return when (field) {
+            is BuilderField.Simple -> "var $n: ${nullableType(field.typeName)} = null"
+            is BuilderField.NestedBuilder -> "private var $n: ${nullableType(field.typeName)} = null"
+            is BuilderField.SimpleList -> "private val $n: MutableList<${field.elementTypeName}> = mutableListOf()"
+            is BuilderField.NestedBuilderList -> "private val $n: MutableList<${field.elementTypeName}> = mutableListOf()"
+            is BuilderField.SimpleSet -> "private val $n: MutableSet<${field.elementTypeName}> = mutableSetOf()"
             is BuilderField.SimpleMap ->
-                "private val ${field.name}: MutableMap<${field.keyTypeName}, ${field.valueTypeName}> = mutableMapOf()"
+                "private val $n: MutableMap<${field.keyTypeName}, ${field.valueTypeName}> = mutableMapOf()"
         }
+    }
 
-    private fun renderDslMethod(field: BuilderField): String =
-        when (field) {
+    private fun renderDslMethod(field: BuilderField): String {
+        val n = field.name.escapeIfKeyword()
+        return when (field) {
             is BuilderField.NestedBuilder ->
                 """
-                fun ${field.name}(block: ${field.builderTypeName}.() -> Unit) {
-                    ${field.name} = ${field.builderTypeName}().apply(block).build()
+                fun $n(block: ${field.builderTypeName}.() -> Unit) {
+                    $n = ${field.builderTypeName}().apply(block).build()
                 }
                 """.trimIndent()
 
             is BuilderField.NestedBuilderList ->
                 """
-                fun ${field.name}(block: ${field.elementBuilderTypeName}.() -> Unit) {
-                    ${field.name}.add(${field.elementBuilderTypeName}().apply(block).build())
+                fun $n(block: ${field.elementBuilderTypeName}.() -> Unit) {
+                    $n.add(${field.elementBuilderTypeName}().apply(block).build())
                 }
                 """.trimIndent()
 
             is BuilderField.SimpleList ->
                 """
-                fun ${field.name}(vararg items: ${field.elementTypeName}) {
-                    ${field.name}.addAll(items.toList())
+                fun $n(vararg items: ${field.elementTypeName}) {
+                    $n.addAll(items.toList())
                 }
                 """.trimIndent()
 
             is BuilderField.SimpleSet ->
                 """
-                fun ${field.name}(vararg items: ${field.elementTypeName}) {
-                    ${field.name}.addAll(items.toList())
+                fun $n(vararg items: ${field.elementTypeName}) {
+                    $n.addAll(items.toList())
                 }
                 """.trimIndent()
 
             is BuilderField.SimpleMap ->
                 """
-                fun ${field.name}(key: ${field.keyTypeName}, value: ${field.valueTypeName}) {
-                    ${field.name}[key] = value
+                fun $n(key: ${field.keyTypeName}, value: ${field.valueTypeName}) {
+                    $n[key] = value
                 }
                 """.trimIndent()
 
             else -> ""
         }
+    }
 
     private fun renderBuildMethod(model: BuilderClassModel): String {
         val sb = StringBuilder()
@@ -133,13 +139,14 @@ class CodeRenderer {
         builderName: String,
     ): String {
         val n = field.name
+        val e = n.escapeIfKeyword()
         return when (field) {
-            is BuilderField.Simple -> if (field.isRequired) "$n = $n ?: error(\"$builderName: '$n' is required\")," else "$n = $n,"
-            is BuilderField.NestedBuilder -> if (field.isRequired) "$n = $n ?: error(\"$builderName: '$n' is required\")," else "$n = $n,"
-            is BuilderField.SimpleList -> "$n = $n.toList(),"
-            is BuilderField.NestedBuilderList -> "$n = $n.toList(),"
-            is BuilderField.SimpleSet -> "$n = $n.toSet(),"
-            is BuilderField.SimpleMap -> "$n = $n.toMap(),"
+            is BuilderField.Simple -> if (field.isRequired) "$e = $e ?: error(\"$builderName: '$n' is required\")," else "$e = $e,"
+            is BuilderField.NestedBuilder -> if (field.isRequired) "$e = $e ?: error(\"$builderName: '$n' is required\")," else "$e = $e,"
+            is BuilderField.SimpleList -> "$e = $e.toList(),"
+            is BuilderField.NestedBuilderList -> "$e = $e.toList(),"
+            is BuilderField.SimpleSet -> "$e = $e.toSet(),"
+            is BuilderField.SimpleMap -> "$e = $e.toMap(),"
         }
     }
 
@@ -147,5 +154,39 @@ class CodeRenderer {
         val funcName = model.dataClassName.replaceFirstChar { it.lowercaseChar() }
         return "fun $funcName(block: ${model.builderClassName}.() -> Unit): ${model.dataClassName} " +
             "=\n    ${model.builderClassName}().apply(block).build()"
+    }
+
+    companion object {
+        private val KOTLIN_HARD_KEYWORDS =
+            setOf(
+                "as",
+                "break",
+                "class",
+                "continue",
+                "do",
+                "else",
+                "false",
+                "for",
+                "fun",
+                "if",
+                "in",
+                "interface",
+                "is",
+                "null",
+                "object",
+                "package",
+                "return",
+                "super",
+                "this",
+                "throw",
+                "true",
+                "try",
+                "typealias",
+                "typeof",
+                "val",
+                "var",
+                "when",
+                "while",
+            )
     }
 }

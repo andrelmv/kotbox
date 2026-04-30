@@ -397,6 +397,82 @@ class CodeRendererTest {
         assertFalse(result.contains("fun leaf(block: LeafBuilder.() -> Unit): Leaf"))
     }
 
+    @Test
+    fun `escapes Kotlin hard keyword as Simple field name with backticks`() {
+        val result =
+            renderer.render(
+                hierarchy(
+                    listOf(
+                        BuilderField.Simple("class", "String", false, isRequired = true),
+                    ),
+                ),
+            )
+        assertTrue(result.contains("var `class`: String? = null"))
+        assertTrue(result.contains("`class` = `class` ?: error("))
+        assertTrue(result.contains("'class' is required"))
+    }
+
+    @Test
+    fun `escapes Kotlin hard keyword as NestedBuilder field name with backticks`() {
+        val result =
+            renderer.render(
+                hierarchy(
+                    listOf(
+                        BuilderField.NestedBuilder("object", "Config", "ConfigBuilder", isRequired = false),
+                    ),
+                ),
+            )
+        assertTrue(result.contains("private var `object`: Config? = null"))
+        assertTrue(result.contains("fun `object`(block: ConfigBuilder.() -> Unit)"))
+        assertTrue(result.contains("`object` = ConfigBuilder().apply(block).build()"))
+        assertTrue(result.contains("`object` = `object`,"))
+    }
+
+    @Test
+    fun `escapes Kotlin hard keyword as SimpleList field name with backticks`() {
+        val result =
+            renderer.render(
+                hierarchy(
+                    listOf(
+                        BuilderField.SimpleList("in", "String", isRequired = false),
+                    ),
+                ),
+            )
+        assertTrue(result.contains("private val `in`: MutableList<String> = mutableListOf()"))
+        assertTrue(result.contains("fun `in`(vararg items: String)"))
+        assertTrue(result.contains("`in`.addAll(items.toList())"))
+        assertTrue(result.contains("`in` = `in`.toList(),"))
+    }
+
+    @Test
+    fun `renders Simple field with generic type preserving type arguments`() {
+        val result =
+            renderer.render(
+                hierarchy(
+                    listOf(
+                        BuilderField.Simple("type", "Class<*>", false, isRequired = true),
+                    ),
+                ),
+            )
+        assertTrue(result.contains("var type: Class<*>? = null"))
+        assertFalse(result.contains("var type: Class? = null"))
+    }
+
+    @Test
+    fun `does not escape non-keyword field names`() {
+        val result =
+            renderer.render(
+                hierarchy(
+                    listOf(
+                        BuilderField.Simple("value", "Int", false, isRequired = false),
+                    ),
+                ),
+            )
+        // "value" is not a hard keyword — must not be wrapped in backticks
+        assertTrue(result.contains("var value: Int? = null"))
+        assertFalse(result.contains("`value`"))
+    }
+
     // Helper
     private fun hierarchy(
         fields: List<BuilderField>,
