@@ -1,0 +1,143 @@
+package com.github.andrelmv.kotbox.proto.generator
+
+internal sealed interface MappedProtoType {
+    data class Scalar(
+        val protoType: String,
+        val isNullable: Boolean,
+    ) : MappedProtoType
+
+    data class MapType(
+        val keyProto: String,
+        val valueProto: String, // scalar Proto type OR custom type name
+        val isCustomValue: Boolean,
+    ) : MappedProtoType
+
+    data class CollectionType(
+        val elementProto: String, // scalar Proto type OR custom type name
+        val isCustomType: Boolean,
+    ) : MappedProtoType
+}
+
+/**
+ * Maps a Kotlin type name (as it appears in a KtTypeReference's text) to a
+ * Proto3 [MappedProtoType]. Returns null when the type is a user-defined message
+ *
+ */
+internal object ProtoTypeMapper {
+    /**
+     * Resolves [kotlinType] - the raw text of a Kotlin type reference to a [MappedProtoType].
+     *
+     * Returns null when the type cannot be mapped to a scalar and must be
+     * treated as a nested message by the caller.
+     */
+    fun resolve(kotlinType: String): MappedProtoType? {
+        val kotlinTypeResolved = kotlinType.trim()
+
+        return when {
+            kotlinTypeResolved.endsWith('?') -> {
+                val scalar = scalarMap[kotlinTypeResolved.dropLast(1).trim()] ?: return null
+
+                MappedProtoType.Scalar(
+                    protoType = scalar,
+                    isNullable = true,
+                )
+            }
+            kotlinTypeResolved.isCollection() -> {
+                val elementKotlin = kotlinTypeResolved.substringAfter('<').removeSuffix(">").trim()
+                val elementProto = scalarMap[elementKotlin]
+
+                MappedProtoType.CollectionType(
+                    elementProto = elementProto ?: elementKotlin,
+                    isCustomType = elementProto == null,
+                )
+            }
+            kotlinTypeResolved.isMap() -> resolveMapType(kotlinTypeResolved)
+            else ->
+                scalarMap[kotlinTypeResolved]?.let {
+                    MappedProtoType.Scalar(
+                        protoType = it,
+                        isNullable = false,
+                    )
+                }
+        }
+    }
+
+    private fun resolveMapType(kotlinType: String): MappedProtoType.MapType? {
+        val inner = kotlinType.removePrefix("Map<").removeSuffix(">")
+        val commaIdx = findTopLevelComma(inner).takeIf { it != -1 } ?: return null
+
+        val keyKotlin = inner.substring(0, commaIdx).trim()
+        val keyProto = scalarMap[keyKotlin]?.takeIf { it in validProtoMapKeyTypes } ?: return null
+
+        val valueKotlin = inner.substring(commaIdx + 1).trim()
+        val valueProto = scalarMap[valueKotlin]
+
+        return MappedProtoType.MapType(
+            keyProto = keyProto,
+            valueProto = valueProto ?: valueKotlin,
+            isCustomValue = valueProto == null,
+        )
+    }
+
+    private fun String.isCollection() =
+        (this.startsWith("List<") || this.startsWith("Set<")) &&
+            this.endsWith('>')
+
+    private fun String.isMap() = this.startsWith("Map<") && this.endsWith('>')
+
+    /**
+     * Finds the index of the first comma in [s] that is not nested inside angle brackets.
+     *
+     * Used to split a `Map<K, V>` type string into its key and value components.
+     *
+     * Examples:
+     * - `"String, Int"` → 6
+     * - `"String, List<Int>"` → 6  (the comma inside List<> is ignored)
+     * - `"String"` → -1  (no top-level comma found)
+     *
+     * @return the index of the top-level comma, or -1 if none exists.
+     */
+    private fun findTopLevelComma(s: String): Int {
+        s.foldIndexed(0) { i, depth, c ->
+            when (c) {
+                '<' -> depth + 1
+                '>' -> depth - 1
+                ',' -> if (depth == 0) return i else depth
+                else -> depth
+            }
+        }
+        return -1
+    }
+
+    private val scalarMap: Map<String, String> by lazy {
+        mapOf(
+            "String" to "string",
+            "Int" to "int32",
+            "Long" to "int64",
+            "Short" to "int32",
+            "Byte" to "int32",
+            "Float" to "float",
+            "Double" to "double",
+            "Boolean" to "bool",
+            "ByteArray" to "bytes",
+            "Any" to "google.protobuf.Any",
+        )
+    }
+
+    private val validProtoMapKeyTypes by lazy {
+        setOf(
+            "string",
+            "int32",
+            "int64",
+            "uint32",
+            "uint64",
+            "sint32",
+            "sint64",
+            "fixed32",
+            "fixed64",
+            "sfixed32",
+            "sfixed64",
+            "bool",
+        )
+    }
+}
