@@ -1,13 +1,12 @@
 package com.github.andrelmv.kotbox.dslbuilder
 
 import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderGenerator
+import com.github.andrelmv.kotbox.utils.getDataClass
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.DumbService
-import com.intellij.psi.util.PsiTreeUtil
-import org.jetbrains.kotlin.psi.KtClass
 
 class DslBuilderAction : AnAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
@@ -31,14 +30,5 @@ class DslBuilderAction : AnAction() {
         val project = e.project ?: return
         val ktClass = getDataClass(e) ?: return
         DslBuilderGenerator.generate(project, ktClass)
-    }
-
-    private fun getDataClass(e: AnActionEvent): KtClass? {
-        val editor = e.getData(CommonDataKeys.EDITOR) ?: return null
-        val file = e.getData(CommonDataKeys.PSI_FILE) ?: return null
-        val element = file.findElementAt(editor.caretModel.offset) ?: return null
-        return PsiTreeUtil
-            .getParentOfType(element, KtClass::class.java)
-            ?.takeIf { it.isData() }
     }
 }

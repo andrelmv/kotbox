@@ -4,6 +4,7 @@ import com.github.andrelmv.kotbox.dslbuilder.DslBuilderPlacementDialog
 import com.github.andrelmv.kotbox.dslbuilder.placement.NewFilePlacement
 import com.github.andrelmv.kotbox.dslbuilder.placement.PlacementStrategy
 import com.github.andrelmv.kotbox.dslbuilder.placement.SameFilePlacement
+import com.github.andrelmv.kotbox.utils.isDataClass
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager

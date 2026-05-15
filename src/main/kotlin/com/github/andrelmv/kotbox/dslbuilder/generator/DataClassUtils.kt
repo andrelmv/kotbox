@@ -2,15 +2,7 @@ package com.github.andrelmv.kotbox.dslbuilder.generator
 
 import org.jetbrains.kotlin.analysis.api.analyze
 import org.jetbrains.kotlin.analysis.api.symbols.KaValueParameterSymbol
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtParameter
-
-/**
- * Returns true if this class is a data class.
- * Uses ktClass.isData() which is a syntactic PSI check — no resolve needed,
- * safe to call on source-declared classes without K2.
- */
-internal fun KtClass.isDataClass(): Boolean = isData()
 
 /**
  * Result of K2 analysis for a constructor parameter: nullability and default-value

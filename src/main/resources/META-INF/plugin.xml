@@ -8,6 +8,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.kotlin</depends>
+    <depends optional="true" config-file="withProto.xml">com.intellij.plugins.protobuf</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 
@@ -35,6 +36,12 @@
       <intentionAction>
         <language>kotlin</language>
         <className>com.github.andrelmv.kotbox.inlay.CopyInterpolatedValueIntention</className>
+        <category>Kotlin Toolbox</category>
+      </intentionAction>
+
+      <intentionAction>
+        <language>kotlin</language>
+        <className>com.github.andrelmv.kotbox.proto.ProtoIntention</className>
         <category>Kotlin Toolbox</category>
       </intentionAction>
 
@@ -131,7 +138,15 @@
                 text="DSL Builder..."
                 description="Generate a type-safe DSL builder for this data class">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="alt shift D"/>
+          <keyboard-shortcut keymap="$default" first-keystroke="alt shift D"/>
+        </action>
+
+        <action id="Kotbox.GenerateProto"
+                class="com.github.andrelmv.kotbox.proto.ProtoAction"
+                text="Generate Proto Message"
+                description="Converts a Kotlin data class to a Proto3 message definition">
+          <!-- Alt+Insert / Code > Generate menu -->
+          <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>
 
     </actions>
