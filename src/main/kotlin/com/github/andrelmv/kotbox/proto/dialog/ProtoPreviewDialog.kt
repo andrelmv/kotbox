@@ -18,7 +18,6 @@ class ProtoPreviewDialog(
     project: Project,
     private val protoContent: String,
 ) : DialogWrapper(project, true) {
-
     private val textArea by lazy {
         JTextArea(protoContent).apply {
             isEditable = false
@@ -34,16 +33,15 @@ class ProtoPreviewDialog(
         init()
     }
 
-    override fun createActions(): Array<Action> {
-        return arrayOf(
+    override fun createActions(): Array<Action> =
+        arrayOf(
             object : DialogWrapperAction("Copy to clipboard") {
                 override fun doAction(e: ActionEvent) {
                     CopyPasteManager.getInstance().setContents(StringSelection(protoContent))
                     close(OK_EXIT_CODE)
                 }
-            }
+            },
         )
-    }
 
     override fun createCenterPanel(): JComponent =
         JBScrollPane(textArea).apply {
