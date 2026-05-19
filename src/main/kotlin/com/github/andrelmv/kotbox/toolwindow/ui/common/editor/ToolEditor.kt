@@ -44,8 +44,6 @@ class ToolEditor(
 
     val component: JPanel by lazy { createComponent() }
 
-    val document get() = editor.document
-
     private fun createEditorTextField(): EditorTextField {
         val lang = language.getLanguage()
 

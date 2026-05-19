@@ -38,6 +38,12 @@
         <category>Kotlin Toolbox</category>
       </intentionAction>
 
+      <intentionAction>
+        <language>kotlin</language>
+        <className>com.github.andrelmv.kotbox.proto.ProtoIntention</className>
+        <category>Kotlin Toolbox</category>
+      </intentionAction>
+
     </extensions>
 
 

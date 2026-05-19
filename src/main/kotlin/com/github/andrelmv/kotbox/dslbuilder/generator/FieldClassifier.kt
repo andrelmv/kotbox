@@ -155,16 +155,16 @@ class FieldClassifier(
         var depth = 0
         var current = StringBuilder()
         for (char in typeName.substring(start + 1, end)) {
-            when {
-                char == '<' -> {
+            when (char) {
+                '<' -> {
                     depth++
                     current.append(char)
                 }
-                char == '>' -> {
+                '>' -> {
                     depth--
                     current.append(char)
                 }
-                char == ',' && depth == 0 -> {
+                ',' if depth == 0 -> {
                     parts.add(current.toString().trim())
                     current = StringBuilder()
                 }

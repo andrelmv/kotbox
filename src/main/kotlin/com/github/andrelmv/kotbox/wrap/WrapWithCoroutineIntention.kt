@@ -61,7 +61,7 @@ class WrapWithCoroutineIntention :
                     if (finalChoice) {
                         WrapSelectionEngine.wrap(project, editor, ktFile, selectedValue)
                     }
-                    return PopupStep.FINAL_CHOICE
+                    return FINAL_CHOICE
                 }
 
                 override fun isSpeedSearchEnabled(): Boolean = true

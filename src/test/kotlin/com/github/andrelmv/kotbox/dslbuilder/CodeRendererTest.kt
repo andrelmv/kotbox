@@ -215,7 +215,7 @@ class CodeRendererTest {
                             "Coordinates",
                             "CoordinatesBuilder",
                             "com.example",
-                            listOf(BuilderField.Simple("lat", "Double", false, true)),
+                            listOf(BuilderField.Simple("lat", "Double", isNullableInOriginal = false, isRequired = true)),
                             "UserDsl",
                             false,
                         ),

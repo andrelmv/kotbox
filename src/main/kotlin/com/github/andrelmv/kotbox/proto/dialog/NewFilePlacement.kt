@@ -1,4 +1,4 @@
-package com.github.andrelmv.kotbox.proto.placement
+package com.github.andrelmv.kotbox.proto.dialog
 
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project

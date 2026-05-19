@@ -17,10 +17,6 @@ import com.intellij.openapi.project.DumbService
 class ProtoAction : AnAction() {
     override fun getActionUpdateThread() = ActionUpdateThread.BGT
 
-    /**
-     * Hide the action when the caret is not inside a data class so it doesn't
-     * clutter the Generate menu in irrelevant contexts.
-     */
     override fun update(event: AnActionEvent) {
         val project = event.project ?: return
         val enabled = !DumbService.isDumb(project) && getDataClass(event) != null

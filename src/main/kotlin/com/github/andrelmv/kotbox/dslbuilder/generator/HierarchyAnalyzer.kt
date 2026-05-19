@@ -84,8 +84,7 @@ class HierarchyAnalyzer(
 
     private fun findDataClass(simpleName: String): KtClass? {
         val cleanName = simpleName.substringBefore("<").trim()
-        return KotlinClassShortNameIndex
-            .get(cleanName, project, scope)
+        return KotlinClassShortNameIndex[cleanName, project, scope]
             .filterIsInstance<KtClass>()
             .firstOrNull { it.isDataClass() }
     }

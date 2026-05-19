@@ -1,4 +1,4 @@
-package com.github.andrelmv.kotbox.proto.placement
+package com.github.andrelmv.kotbox.proto.dialog
 
 sealed interface PlacementStrategy {
     object PreviewAndCopy : PlacementStrategy

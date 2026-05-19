@@ -1,6 +1,5 @@
 package com.github.andrelmv.kotbox.proto.dialog
 
-import com.github.andrelmv.kotbox.proto.placement.PlacementStrategy
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBRadioButton

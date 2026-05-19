@@ -1,9 +1,9 @@
 package com.github.andrelmv.kotbox.proto.generator
 
+import com.github.andrelmv.kotbox.proto.dialog.NewFilePlacement
+import com.github.andrelmv.kotbox.proto.dialog.PlacementStrategy
 import com.github.andrelmv.kotbox.proto.dialog.ProtoPlacementDialog
 import com.github.andrelmv.kotbox.proto.dialog.ProtoPreviewDialog
-import com.github.andrelmv.kotbox.proto.placement.NewFilePlacement
-import com.github.andrelmv.kotbox.proto.placement.PlacementStrategy
 import com.github.andrelmv.kotbox.utils.isDataClass
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
