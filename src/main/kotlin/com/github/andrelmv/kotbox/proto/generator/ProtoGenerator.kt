@@ -1,9 +1,9 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-import com.github.andrelmv.kotbox.proto.ProtoPlacementDialog
+import com.github.andrelmv.kotbox.proto.dialog.ProtoPreviewDialog
+import com.github.andrelmv.kotbox.proto.dialog.ProtoPlacementDialog
 import com.github.andrelmv.kotbox.proto.placement.NewFilePlacement
 import com.github.andrelmv.kotbox.proto.placement.PlacementStrategy
-import com.github.andrelmv.kotbox.proto.placement.SameFilePlacement
 import com.github.andrelmv.kotbox.utils.isDataClass
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
@@ -68,14 +68,14 @@ internal object ProtoGenerator {
                         if (!dialog.showAndGet()) return@invokeLater
 
                         when (val strategy = dialog.getPlacementStrategy()) {
-                            is PlacementStrategy.SameFile ->
-                                SameFilePlacement.insert(sourceFile, result.protoText, project)
+                            is PlacementStrategy.PreviewAndCopy ->
+                                ProtoPreviewDialog(project, result.protoText).show()
                             is PlacementStrategy.NewFile ->
                                 NewFilePlacement.insert(
-                                    sourceFile = sourceFile,
-                                    fileName = strategy.fileName.ensureProtoExtension(),
-                                    generatedCode = result.protoText,
-                                    project = project,
+                                    sourceFile,
+                                    strategy.fileName.ensureProtoExtension(),
+                                    result.protoText,
+                                    project,
                                 )
                         }
                     }

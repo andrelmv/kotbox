@@ -1,4 +1,4 @@
-package com.github.andrelmv.kotbox.proto
+package com.github.andrelmv.kotbox.proto.dialog
 
 import com.github.andrelmv.kotbox.proto.placement.PlacementStrategy
 import com.intellij.openapi.project.Project
@@ -19,8 +19,8 @@ class ProtoPlacementDialog(
     project: Project,
     targetClass: KtClass,
 ) : DialogWrapper(project, true) {
-    private val sameFileButton = JBRadioButton("Same file", true)
-    private val newFileButton = JBRadioButton("New file")
+    private val newFileButton = JBRadioButton("New file", true)
+    private val previewAndCopyButton = JBRadioButton("Preview & copy")
     private val newFileNameField = JBTextField(targetClass.name, 20)
 
     init {
@@ -28,11 +28,13 @@ class ProtoPlacementDialog(
         init()
 
         val group = ButtonGroup()
-        group.add(sameFileButton)
         group.add(newFileButton)
+        group.add(previewAndCopyButton)
 
-        newFileNameField.isEnabled = false
-        newFileButton.addChangeListener { newFileNameField.isEnabled = newFileButton.isSelected }
+        newFileNameField.isEnabled = true
+        previewAndCopyButton.addChangeListener {
+            newFileNameField.isEnabled = newFileButton.isSelected
+        }
     }
 
     override fun createCenterPanel(): JComponent {
@@ -45,19 +47,19 @@ class ProtoPlacementDialog(
 
         gbc.gridx = 0
         gbc.gridy = 0
-        panel.add(sameFileButton, gbc)
-
-        gbc.gridx = 0
-        gbc.gridy = 1
         panel.add(newFileButton, gbc)
 
         gbc.gridx = 1
-        gbc.gridy = 1
+        gbc.gridy = 0
         panel.add(newFileNameField, gbc)
 
         gbc.gridx = 2
-        gbc.gridy = 1
+        gbc.gridy = 0
         panel.add(JLabel(".proto"), gbc)
+
+        gbc.gridx = 0
+        gbc.gridy = 1
+        panel.add(previewAndCopyButton, gbc)
 
         return panel
     }
@@ -65,6 +67,6 @@ class ProtoPlacementDialog(
     fun getPlacementStrategy(): PlacementStrategy =
         when {
             newFileButton.isSelected -> PlacementStrategy.NewFile(newFileNameField.text.trim())
-            else -> PlacementStrategy.SameFile
+            else -> PlacementStrategy.PreviewAndCopy
         }
 }
