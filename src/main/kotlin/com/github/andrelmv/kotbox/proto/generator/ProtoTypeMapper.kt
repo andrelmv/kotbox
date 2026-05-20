@@ -18,17 +18,11 @@ internal sealed interface MappedProtoType {
     ) : MappedProtoType
 }
 
-/**
- * Maps a Kotlin type name (as it appears in a KtTypeReference's text) to a
- * Proto3 [MappedProtoType]. Returns null when the type is a user-defined message
- *
- */
 internal object ProtoTypeMapper {
     /**
-     * Resolves [type] - the raw text of a Kotlin type reference to a [MappedProtoType].
+     * Maps a Kotlin type name [type] into a [MappedProtoType].
      *
-     * Returns null when the type cannot be mapped to a scalar and must be
-     * treated as a nested message by the caller.
+     * Returns null when the type is a user-defined message
      */
     fun resolve(type: String): MappedProtoType? {
         val kotlinTypeTrimmed = type.trim()
@@ -88,9 +82,9 @@ internal object ProtoTypeMapper {
      * Used to split a `Map<K, V>` type string into its key and value components.
      *
      * Examples:
-     * - `"String, Int"` → 6
-     * - `"String, List<Int>"` → 6  (the comma inside List<> is ignored)
-     * - `"String"` → -1  (no top-level comma found)
+     * - `"String, Int"` -> 6
+     * - `"String, List<Int>"` -> 6 (the comma inside List<> is ignored)
+     * - `"String"` -> -1 (no top-level comma found)
      *
      * @return the index of the top-level comma, or -1 if none exists.
      */

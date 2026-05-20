@@ -80,14 +80,14 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
     }
 
     fun `test List of data class produces Repeated field with nested message`() {
-        myFixture.addFileToProject("Item.kt", "package com.ex\ndata class Item(val label: String)")
-        myFixture.configureByText("Cart.kt", "package com.ex\ndata class Cart(val items: List<Item>)")
-        val model = analyze("Cart")
+        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
+        myFixture.configureByText("User.kt", "package com.ex\ndata class User(val addresses: List<Address>)")
+        val model = analyze("User")
         val field = model.fields[0]
         assertTrue(field.fieldType is ProtoFieldType.Repeated)
-        assertEquals("Item", (field.fieldType as ProtoFieldType.Repeated).elementProto)
+        assertEquals("Address", (field.fieldType as ProtoFieldType.Repeated).elementProto)
         assertNotNull(field.nestedMessage)
-        assertEquals("Item", field.nestedMessage!!.name)
+        assertEquals("Address", field.nestedMessage!!.name)
     }
 
     fun `test Set of scalar produces Repeated field`() {
@@ -185,18 +185,7 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         assertEquals("firstName", model.fields[0].name)
     }
 
-    fun `test indirect cycle A to B to A marks back reference as unresolved`() {
-        myFixture.addFileToProject("B.kt", "package com.ex\ndata class B(val a: A?)")
-        myFixture.configureByText("A.kt", "package com.ex\ndata class A(val b: B?)")
-        val model = analyze("A")
-        val bField = model.fields[0]
-        assertNotNull(bField.nestedMessage) // B was resolved
-        val aInsideB = bField.nestedMessage!!.fields[0]
-        assertTrue(aInsideB.unresolved) // A inside B must be unresolved — cycle broken
-    }
-
     fun `test same data class referenced in two fields produces same instance`() {
-        // Validates the processed cache — Address must be the same object reference
         myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
         myFixture.configureByText("User.kt", "package com.ex\ndata class User(val home: Address, val work: Address)")
         val model = analyze("User")

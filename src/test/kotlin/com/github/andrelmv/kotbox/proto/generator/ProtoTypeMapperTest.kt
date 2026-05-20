@@ -253,10 +253,6 @@ internal class ProtoTypeMapperTest {
         assertNull(ProtoTypeMapper.resolve("   "))
     }
 
-    // -------------------------------------------------------------------------
-    // Helper
-    // -------------------------------------------------------------------------
-
     private inline fun <reified T : MappedProtoType> resolve(kotlinType: String): T {
         val result = ProtoTypeMapper.resolve(kotlinType)
         assertNotNull("Expected ${T::class.simpleName} but got null for input '$kotlinType'", result)

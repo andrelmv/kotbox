@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.psi.KtClass
  * Uses ktClass.isData() which is a syntactic PSI check — no resolve needed,
  * safe to call on source-declared classes without K2.
  */
-internal fun KtClass.isDataClass(): Boolean = isData()
+internal fun KtClass.isDataClass(): Boolean = this.isData()
 
 internal fun getDataClass(e: AnActionEvent): KtClass? {
     val editor = e.getData(CommonDataKeys.EDITOR) ?: return null

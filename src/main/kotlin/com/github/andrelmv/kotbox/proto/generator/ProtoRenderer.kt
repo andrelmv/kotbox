@@ -25,8 +25,6 @@ internal class ProtoRenderer {
                 appendLine()
             }
 
-            appendLine()
-
             append(messageBlock)
         }.trimEnd() + "\n"
     }
@@ -79,19 +77,19 @@ internal class ProtoRenderer {
                     val declaration =
                         when (val type = field.fieldType) {
                             is ProtoFieldType.Scalar -> {
-                                val prefix = if (type.modifier != ProtoModifier.NONE) "${type.modifier.keyword} " else ""
+                                val prefix = type.modifier.toPrefix()
                                 "$prefix${type.protoType} ${field.name.toSnakeCase()} = ${field.number};"
                             }
                             is ProtoFieldType.MessageRef -> {
-                                val prefix = if (type.modifier != ProtoModifier.NONE) "${type.modifier.keyword} " else ""
-                                "$prefix${type.typeName} ${field.name.toSnakeCase()} = ${field.number};"
+                                val prefix = type.modifier.toPrefix()
+                                "${prefix}${type.typeName} ${field.name.toSnakeCase()} = ${field.number};"
                             }
                             is ProtoFieldType.Repeated -> "repeated ${type.elementProto} ${field.name.toSnakeCase()} = ${field.number};"
                             is ProtoFieldType.Map -> {
                                 "map<${type.keyProto}, ${type.valueProto}> ${field.name.toSnakeCase()} = ${field.number};"
                             }
                             is ProtoFieldType.EnumRef -> {
-                                val prefix = if (type.modifier != ProtoModifier.NONE) "${type.modifier.keyword} " else ""
+                                val prefix = type.modifier.toPrefix()
                                 "$prefix${type.typeName} ${field.name.toSnakeCase()} = ${field.number};"
                             }
                         }
@@ -119,8 +117,10 @@ internal class ProtoRenderer {
         }
     }
 
-    /** Converts camelCase identifiers to snake_case per proto style guide. */
-    private fun String.toSnakeCase(): String = replace(CAMEL_CASE_REGEX) { "${it.groupValues[1]}_${it.groupValues[2]}" }.lowercase()
+    // Converts camelCase identifiers to snake_case per proto style guide
+    private fun String.toSnakeCase(): String = this.replace(CAMEL_CASE_REGEX) { "${it.groupValues[1]}_${it.groupValues[2]}" }.lowercase()
+
+    private fun ProtoModifier.toPrefix() = if (this != ProtoModifier.NONE) "${this.keyword} " else ""
 }
 
 // 2 spaces, proto style guide

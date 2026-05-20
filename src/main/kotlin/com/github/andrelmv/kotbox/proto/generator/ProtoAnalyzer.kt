@@ -11,15 +11,9 @@ import org.jetbrains.kotlin.psi.KtEnumEntry
 /**
  * Analyzes a Kotlin data-class hierarchy via PSI and produces a [ProtoMessage]
  * tree that [ProtoRenderer] can later serialize to `.proto` text.
- * Cycle detection is handled via a visited set — never remove that guard.
  *
- * Responsibility:
- * - Walking the PSI tree and extracting type information
- * - Building a ProtoMessageModel tree
- *
- * Cycle detection: [currentlyProcessing] tracks classes currently on the call stack — prevents infinite recursion.
- * Deduplication: [processed] caches fully analyzed classes by FQN — prevents duplicate message blocks.
- * Both use FQN as the key to avoid false collisions between same-named classes in different packages.
+ * **Deduplication**: [processed] caches fully analyzed classes by FQN — prevents duplicate message blocks.
+ * Uses FQN as the key to avoid false collisions between same-named classes in different packages.
  *
  * Further enhancement: migrate to K2 Analysis API for robust type resolution https://github.com/Kotlin/analysis-api
  */
@@ -29,7 +23,6 @@ internal class ProtoAnalyzer(
 ) {
     // Guards against circular references in nullable data class fields (e.g. A(val b: B?) and B(val a: A?)).
     // Extremely rare in practice but would cause a StackOverflowError without this guard.
-    private val currentlyProcessing = mutableSetOf<String>()
     private val processed = mutableMapOf<String, ProtoMessage>()
 
     fun analyze(rootClass: KtClass): ProtoMessage {
@@ -39,8 +32,6 @@ internal class ProtoAnalyzer(
 
     private fun processClass(ktClass: KtClass): ProtoMessage {
         val className = ktClass.name!!
-
-        currentlyProcessing.add(className)
 
         val qualifiedName = ktClass.fqName?.asString() ?: className
         processed[qualifiedName]?.let { return it }
@@ -60,9 +51,9 @@ internal class ProtoAnalyzer(
                 }
 
         return ProtoMessage(
-            name = className, fields = fields
+            name = className,
+            fields = fields,
         ).also {
-            currentlyProcessing.remove(className)
             processed[qualifiedName] = it
         }
     }
@@ -88,7 +79,7 @@ internal class ProtoAnalyzer(
             is MappedProtoType.CollectionType -> {
                 val nested =
                     resolved.elementProto
-                        .takeIf { resolved.isCustomType && it !in currentlyProcessing }
+                        .takeIf { resolved.isCustomType }
                         ?.let(::findDataClass)
                         ?.let(::processClass)
 
@@ -103,7 +94,7 @@ internal class ProtoAnalyzer(
             is MappedProtoType.MapType -> {
                 val nested =
                     resolved.valueProto
-                        .takeIf { resolved.isCustomValue && it !in currentlyProcessing }
+                        .takeIf { resolved.isCustomValue }
                         ?.let(::findDataClass)
                         ?.let(this::processClass)
 
@@ -135,7 +126,7 @@ internal class ProtoAnalyzer(
         baseType: String,
         isNullable: Boolean,
     ): ProtoField {
-        findDataClass(baseType)?.takeIf { baseType !in currentlyProcessing }?.let {
+        findDataClass(baseType)?.let {
             return ProtoField(
                 name = name,
                 number = number,

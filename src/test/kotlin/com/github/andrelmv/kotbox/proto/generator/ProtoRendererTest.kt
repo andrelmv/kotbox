@@ -87,7 +87,7 @@ class ProtoRendererTest {
     }
 
     // -------------------------------------------------------------------------
-    // camelCase → snake_case
+    // camelCase -> snake_case
     // -------------------------------------------------------------------------
 
     @Test
@@ -248,8 +248,6 @@ class ProtoRendererTest {
         val enumIdx = output.indexOf("enum Score")
         val messageIdx = output.indexOf("message User")
         assertTrue(enumIdx < messageIdx)
-
-        // TODO 3 lines above were commented
     }
 
     @Test
@@ -347,18 +345,6 @@ class ProtoRendererTest {
         val output = renderer.render(model)
         assertTrue(output.contains("optional Score score = 1;"))
     }
-
-    /* TODO
-    @Test
-    fun `test converts multi-word camelCase to snake_case`() {
-        val model = message("User", scalarField("phoneNumber", "string", number = 1))
-        val output = renderer.render(model)
-        assertTrue(output.contains("string phone_number = 1;"))
-    }*/
-
-    // -------------------------------------------------------------------------
-    // Helpers — mirror CodeRendererTest's builder-style model construction
-    // -------------------------------------------------------------------------
 
     private fun message(
         name: String,
