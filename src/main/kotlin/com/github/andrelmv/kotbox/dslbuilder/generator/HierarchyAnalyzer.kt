@@ -1,5 +1,6 @@
 package com.github.andrelmv.kotbox.dslbuilder.generator
 
+import com.github.andrelmv.kotbox.utils.isDataClass
 import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
