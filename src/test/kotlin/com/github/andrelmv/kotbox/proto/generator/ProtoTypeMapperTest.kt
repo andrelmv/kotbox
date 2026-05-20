@@ -14,54 +14,54 @@ internal class ProtoTypeMapperTest {
 
     @Test
     fun `test maps String to string`() {
-        val result = resolve<MappedProtoType.Scalar>("String")
+        val result = resolve<MappedProtoType.ScalarType>("String")
         assertEquals("string", result.protoType)
         assertFalse(result.isNullable)
     }
 
     @Test
     fun `test maps Int to int32`() {
-        assertEquals("int32", resolve<MappedProtoType.Scalar>("Int").protoType)
+        assertEquals("int32", resolve<MappedProtoType.ScalarType>("Int").protoType)
     }
 
     @Test
     fun `test maps Long to int64`() {
-        assertEquals("int64", resolve<MappedProtoType.Scalar>("Long").protoType)
+        assertEquals("int64", resolve<MappedProtoType.ScalarType>("Long").protoType)
     }
 
     @Test
     fun `test maps Short to int32`() {
-        assertEquals("int32", resolve<MappedProtoType.Scalar>("Short").protoType)
+        assertEquals("int32", resolve<MappedProtoType.ScalarType>("Short").protoType)
     }
 
     @Test
     fun `test maps Byte to int32`() {
-        assertEquals("int32", resolve<MappedProtoType.Scalar>("Byte").protoType)
+        assertEquals("int32", resolve<MappedProtoType.ScalarType>("Byte").protoType)
     }
 
     @Test
     fun `test maps Float to float`() {
-        assertEquals("float", resolve<MappedProtoType.Scalar>("Float").protoType)
+        assertEquals("float", resolve<MappedProtoType.ScalarType>("Float").protoType)
     }
 
     @Test
     fun `test maps Double to double`() {
-        assertEquals("double", resolve<MappedProtoType.Scalar>("Double").protoType)
+        assertEquals("double", resolve<MappedProtoType.ScalarType>("Double").protoType)
     }
 
     @Test
     fun `test maps Boolean to bool`() {
-        assertEquals("bool", resolve<MappedProtoType.Scalar>("Boolean").protoType)
+        assertEquals("bool", resolve<MappedProtoType.ScalarType>("Boolean").protoType)
     }
 
     @Test
     fun `test maps ByteArray to bytes`() {
-        assertEquals("bytes", resolve<MappedProtoType.Scalar>("ByteArray").protoType)
+        assertEquals("bytes", resolve<MappedProtoType.ScalarType>("ByteArray").protoType)
     }
 
     @Test
     fun `test maps Any to google protobuf Any`() {
-        assertEquals("google.protobuf.Any", resolve<MappedProtoType.Scalar>("Any").protoType)
+        assertEquals("google.protobuf.Any", resolve<MappedProtoType.ScalarType>("Any").protoType)
     }
 
     @Test
@@ -71,7 +71,7 @@ internal class ProtoTypeMapperTest {
 
     @Test
     fun `test trims whitespace before resolving`() {
-        assertEquals("string", resolve<MappedProtoType.Scalar>("  String  ").protoType)
+        assertEquals("string", resolve<MappedProtoType.ScalarType>("  String  ").protoType)
     }
 
     // -------------------------------------------------------------------------
@@ -80,14 +80,14 @@ internal class ProtoTypeMapperTest {
 
     @Test
     fun `test maps nullable String to optional scalar`() {
-        val result = resolve<MappedProtoType.Scalar>("String?")
+        val result = resolve<MappedProtoType.ScalarType>("String?")
         assertEquals("string", result.protoType)
         assertTrue(result.isNullable)
     }
 
     @Test
     fun `test maps nullable Int to optional scalar`() {
-        val result = resolve<MappedProtoType.Scalar>("Int?")
+        val result = resolve<MappedProtoType.ScalarType>("Int?")
         assertEquals("int32", result.protoType)
         assertTrue(result.isNullable)
     }
@@ -95,6 +95,43 @@ internal class ProtoTypeMapperTest {
     @Test
     fun `test nullable unknown type returns null`() {
         assertNull(ProtoTypeMapper.resolve("Address?"))
+    }
+
+    @Test
+    fun `test nullable List of scalar is resolved as CollectionType`() {
+        val result = resolve<MappedProtoType.CollectionType>("List<String>?")
+        assertEquals("string", result.elementProto)
+        assertFalse(result.isCustomType)
+    }
+
+    @Test
+    fun `test nullable Set of scalar is resolved as CollectionType`() {
+        val result = resolve<MappedProtoType.CollectionType>("Set<Int>?")
+        assertEquals("int32", result.elementProto)
+        assertFalse(result.isCustomType)
+    }
+
+    @Test
+    fun `test nullable List of custom type is resolved as CollectionType with isCustomType true`() {
+        val result = resolve<MappedProtoType.CollectionType>("List<Address>?")
+        assertEquals("Address", result.elementProto)
+        assertTrue(result.isCustomType)
+    }
+
+    @Test
+    fun `test nullable Map of scalar key and scalar value is resolved as MapType`() {
+        val result = resolve<MappedProtoType.MapType>("Map<String, Int>?")
+        assertEquals("string", result.keyProto)
+        assertEquals("int32", result.valueProto)
+        assertFalse(result.isCustomValue)
+    }
+
+    @Test
+    fun `test nullable Map of scalar key and custom value is resolved as MapType`() {
+        val result = resolve<MappedProtoType.MapType>("Map<String, Address>?")
+        assertEquals("string", result.keyProto)
+        assertEquals("Address", result.valueProto)
+        assertTrue(result.isCustomValue)
     }
 
     // -------------------------------------------------------------------------

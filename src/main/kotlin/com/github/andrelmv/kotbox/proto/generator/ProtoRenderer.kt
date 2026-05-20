@@ -9,7 +9,7 @@ internal class ProtoRenderer {
      *                     file's package so generated stubs land in the right place).
      */
     fun render(
-        model: ProtoMessageModel,
+        model: ProtoMessage,
         javaPackage: String = "",
     ): String {
         // First pass: collect all nested messages and build the top-level message
@@ -25,7 +25,6 @@ internal class ProtoRenderer {
                 appendLine()
             }
 
-            appendLine("""import "google/protobuf/any.proto";""")
             appendLine()
 
             append(messageBlock)
@@ -38,19 +37,19 @@ internal class ProtoRenderer {
      * output self-contained in a single file.
      */
     private fun renderMessage(
-        model: ProtoMessageModel,
+        model: ProtoMessage,
         indent: Int,
     ): String {
-        val pad = TAB.repeat(indent)
-        val innerPad = TAB.repeat(indent + 1)
+        val pad = PROTO_STANDARD_TAB.repeat(indent)
+        val innerPad = PROTO_STANDARD_TAB.repeat(indent + 1)
 
         return buildString {
             // Sibling enums first
             model.fields
-                .mapNotNull { it.nestedEnum }
-                .distinctBy { it.name }
+                .filter { it.fieldType is ProtoFieldType.EnumRef }
+                .distinctBy { it.nestedEnum!! }
                 .forEach {
-                    append(renderEnum(it, indent))
+                    append(renderEnum(it.nestedEnum!!, indent))
                     appendLine()
                     appendLine()
                 }
@@ -58,7 +57,7 @@ internal class ProtoRenderer {
             // Sibling nested messages
             model.fields
                 .mapNotNull { it.nestedMessage }
-                .distinctBy { it.name }
+                .distinctBy { it }
                 .forEach {
                     append(renderMessage(it, indent))
                     appendLine()
@@ -83,10 +82,18 @@ internal class ProtoRenderer {
                                 val prefix = if (type.modifier != ProtoModifier.NONE) "${type.modifier.keyword} " else ""
                                 "$prefix${type.protoType} ${field.name.toSnakeCase()} = ${field.number};"
                             }
-                            is ProtoFieldType.Repeated ->
-                                "repeated ${type.elementProto} ${field.name.toSnakeCase()} = ${field.number};"
-                            is ProtoFieldType.Map ->
+                            is ProtoFieldType.MessageRef -> {
+                                val prefix = if (type.modifier != ProtoModifier.NONE) "${type.modifier.keyword} " else ""
+                                "$prefix${type.typeName} ${field.name.toSnakeCase()} = ${field.number};"
+                            }
+                            is ProtoFieldType.Repeated -> "repeated ${type.elementProto} ${field.name.toSnakeCase()} = ${field.number};"
+                            is ProtoFieldType.Map -> {
                                 "map<${type.keyProto}, ${type.valueProto}> ${field.name.toSnakeCase()} = ${field.number};"
+                            }
+                            is ProtoFieldType.EnumRef -> {
+                                val prefix = if (type.modifier != ProtoModifier.NONE) "${type.modifier.keyword} " else ""
+                                "$prefix${type.typeName} ${field.name.toSnakeCase()} = ${field.number};"
+                            }
                         }
 
                     appendLine(declaration)
@@ -100,8 +107,8 @@ internal class ProtoRenderer {
         model: ProtoEnumModel,
         indent: Int,
     ): String {
-        val pad = TAB.repeat(indent)
-        val innerPad = TAB.repeat(indent + 1)
+        val pad = PROTO_STANDARD_TAB.repeat(indent)
+        val innerPad = PROTO_STANDARD_TAB.repeat(indent + 1)
 
         return buildString {
             appendLine("${pad}enum ${model.name} {")
@@ -116,5 +123,6 @@ internal class ProtoRenderer {
     private fun String.toSnakeCase(): String = replace(CAMEL_CASE_REGEX) { "${it.groupValues[1]}_${it.groupValues[2]}" }.lowercase()
 }
 
-private const val TAB = "  "
+// 2 spaces, proto style guide
+private const val PROTO_STANDARD_TAB = "  "
 private val CAMEL_CASE_REGEX = Regex("([a-z])([A-Z])")

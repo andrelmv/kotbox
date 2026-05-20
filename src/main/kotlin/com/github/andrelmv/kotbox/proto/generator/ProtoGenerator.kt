@@ -1,9 +1,9 @@
 package com.github.andrelmv.kotbox.proto.generator
 
 import com.github.andrelmv.kotbox.proto.dialog.NewFilePlacement
+import com.github.andrelmv.kotbox.proto.dialog.PlacementDialog
 import com.github.andrelmv.kotbox.proto.dialog.PlacementStrategy
-import com.github.andrelmv.kotbox.proto.dialog.ProtoPlacementDialog
-import com.github.andrelmv.kotbox.proto.dialog.ProtoPreviewDialog
+import com.github.andrelmv.kotbox.proto.dialog.PreviewDialog
 import com.github.andrelmv.kotbox.utils.isDataClass
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
@@ -64,16 +64,16 @@ internal object ProtoGenerator {
 
                     // Placement dialog must run on the EDT
                     ApplicationManager.getApplication().invokeLater {
-                        val dialog = ProtoPlacementDialog("Proto", project, targetClass)
+                        val dialog = PlacementDialog("Proto", project, targetClass.name!!)
                         if (!dialog.showAndGet()) return@invokeLater
 
                         when (val strategy = dialog.getPlacementStrategy()) {
                             is PlacementStrategy.PreviewAndCopy ->
-                                ProtoPreviewDialog(project, result.protoText).show()
+                                PreviewDialog(project, result.protoText).show()
                             is PlacementStrategy.NewFile ->
                                 NewFilePlacement.insert(
                                     sourceFile,
-                                    strategy.fileName.ensureProtoExtension(),
+                                    strategy.fileName,
                                     result.protoText,
                                     project,
                                 )
@@ -91,6 +91,4 @@ internal object ProtoGenerator {
         com.intellij.openapi.ui.Messages
             .showErrorDialog(project, message, "Proto Generator")
     }
-
-    private fun String.ensureProtoExtension(): String = if (endsWith(".proto")) this else "$this.proto"
 }

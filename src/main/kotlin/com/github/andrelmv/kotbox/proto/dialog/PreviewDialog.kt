@@ -1,37 +1,27 @@
 package com.github.andrelmv.kotbox.proto.dialog
 
+import com.intellij.lang.Language
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.ui.components.JBScrollPane
-import com.intellij.util.ui.JBUI
-import java.awt.Dimension
-import java.awt.Font
 import java.awt.datatransfer.StringSelection
 import java.awt.event.ActionEvent
 import javax.swing.Action
 import javax.swing.JComponent
-import javax.swing.JTextArea
-import javax.swing.UIManager
 
-class ProtoPreviewDialog(
+class PreviewDialog(
     project: Project,
     private val protoContent: String,
 ) : DialogWrapper(project, true) {
-    private val textArea by lazy {
-        JTextArea(protoContent).apply {
-            isEditable = false
-            font = Font("JetBrains Mono", Font.PLAIN, 13)
-            margin = JBUI.insets(8)
-            background = UIManager.getColor("Editor.background")
-            foreground = UIManager.getColor("Editor.foreground")
-        }
-    }
+    private val editorComponent by lazy { ProtoEditorProvider.create(project, protoContent) }
 
     init {
         title = "Proto Preview"
         init()
     }
+
+    override fun createCenterPanel(): JComponent = editorComponent
 
     override fun createActions(): Array<Action> =
         arrayOf(
@@ -43,8 +33,15 @@ class ProtoPreviewDialog(
             },
         )
 
-    override fun createCenterPanel(): JComponent =
-        JBScrollPane(textArea).apply {
-            preferredSize = Dimension(600, 400)
+    override fun dispose() {
+        if (!isProtoPluginAvailable()) {
+            EditorFactory
+                .getInstance()
+                .getEditors(EditorFactory.getInstance().createDocument(protoContent))
+                .forEach { EditorFactory.getInstance().releaseEditor(it) }
         }
+        super.dispose()
+    }
+
+    private fun isProtoPluginAvailable(): Boolean = Language.findLanguageByID(PROTOBUF) != null
 }

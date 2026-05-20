@@ -1,6 +1,6 @@
 package com.github.andrelmv.kotbox.proto.dialog
 
-sealed interface PlacementStrategy {
+internal sealed interface PlacementStrategy {
     object PreviewAndCopy : PlacementStrategy
 
     data class NewFile(

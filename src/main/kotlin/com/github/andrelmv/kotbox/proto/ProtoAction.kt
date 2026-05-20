@@ -14,7 +14,7 @@ import com.intellij.openapi.project.DumbService
  * Delegates immediately to [ProtoGenerator], which owns the orchestration
  * (background analysis, dialog, file placement).
  */
-class ProtoAction : AnAction() {
+internal class ProtoAction : AnAction() {
     override fun getActionUpdateThread() = ActionUpdateThread.BGT
 
     override fun update(event: AnActionEvent) {

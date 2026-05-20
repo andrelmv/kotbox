@@ -121,7 +121,7 @@ class ProtoRendererTest {
         val nested =
             message(
                 "Item",
-                scalarField("label", "string", number = 1),
+                messageRefField("label", "string", number = 1),
             )
         val model =
             message(
@@ -153,7 +153,7 @@ class ProtoRendererTest {
         val nested =
             message(
                 "Address",
-                scalarField("street", "string", number = 1),
+                messageRefField("street", "string", number = 1),
             )
         val model =
             message(
@@ -192,17 +192,17 @@ class ProtoRendererTest {
         val coords =
             message(
                 "Coordinates",
-                scalarField("lat", "double", number = 1),
+                messageRefField("lat", "double", number = 1),
             )
         val address =
             message(
                 "Address",
-                scalarField("coordinates", "Coordinates", number = 1, nested = coords),
+                messageRefField("coordinates", "Coordinates", number = 1, nested = coords),
             )
         val model =
             message(
                 "User",
-                scalarField("address", "Address", number = 1, nested = address),
+                messageRefField("address", "Address", number = 1, nested = address),
             )
         val output = renderer.render(model)
         assertTrue(output.contains("message Coordinates {"))
@@ -248,6 +248,8 @@ class ProtoRendererTest {
         val enumIdx = output.indexOf("enum Score")
         val messageIdx = output.indexOf("message User")
         assertTrue(enumIdx < messageIdx)
+
+        // TODO 3 lines above were commented
     }
 
     @Test
@@ -316,6 +318,44 @@ class ProtoRendererTest {
         assertTrue(output.contains("}"))
     }
 
+    @Test
+    fun `test renders optional MessageRef field`() {
+        val nested = message("Address", scalarField("street", "string", number = 1))
+        val model =
+            message(
+                "User",
+                messageRefField("address", "Address", number = 1, modifier = ProtoModifier.OPTIONAL, nested = nested),
+            )
+        val output = renderer.render(model)
+        assertTrue(output.contains("optional Address address = 1;"))
+    }
+
+    @Test
+    fun `test renders optional EnumRef field`() {
+        val enum = ProtoEnumModel("Score", setOf("HIGH", "LOW"))
+        val model =
+            message(
+                "User",
+                ProtoField(
+                    name = "score",
+                    number = 1,
+                    fieldType = ProtoFieldType.EnumRef(typeName = "Score", modifier = ProtoModifier.OPTIONAL),
+                    nestedEnum = enum,
+                    nestedMessage = null,
+                ),
+            )
+        val output = renderer.render(model)
+        assertTrue(output.contains("optional Score score = 1;"))
+    }
+
+    /* TODO
+    @Test
+    fun `test converts multi-word camelCase to snake_case`() {
+        val model = message("User", scalarField("phoneNumber", "string", number = 1))
+        val output = renderer.render(model)
+        assertTrue(output.contains("string phone_number = 1;"))
+    }*/
+
     // -------------------------------------------------------------------------
     // Helpers — mirror CodeRendererTest's builder-style model construction
     // -------------------------------------------------------------------------
@@ -323,14 +363,14 @@ class ProtoRendererTest {
     private fun message(
         name: String,
         vararg fields: ProtoField,
-    ) = ProtoMessageModel(name = name, fields = fields.toList())
+    ) = ProtoMessage(name = name, fields = fields.toList())
 
     private fun scalarField(
         name: String,
         protoType: String,
         number: Int,
         modifier: ProtoModifier = ProtoModifier.NONE,
-        nested: ProtoMessageModel? = null,
+        nested: ProtoMessage? = null,
     ) = ProtoField(
         name = name,
         number = number,
@@ -343,7 +383,7 @@ class ProtoRendererTest {
         name: String,
         elementProto: String,
         number: Int,
-        nested: ProtoMessageModel? = null,
+        nested: ProtoMessage? = null,
     ) = ProtoField(
         name = name,
         number = number,
@@ -357,7 +397,7 @@ class ProtoRendererTest {
         keyProto: String,
         valueProto: String,
         number: Int,
-        nestedValue: ProtoMessageModel? = null,
+        nestedValue: ProtoMessage? = null,
     ) = ProtoField(
         name = name,
         number = number,
@@ -374,8 +414,22 @@ class ProtoRendererTest {
     ) = ProtoField(
         name = name,
         number = number,
-        fieldType = ProtoFieldType.Scalar(protoType = protoType, modifier = ProtoModifier.NONE),
+        fieldType = ProtoFieldType.EnumRef(typeName = protoType, modifier = ProtoModifier.NONE),
         nestedEnum = enum,
         nestedMessage = null,
+    )
+
+    private fun messageRefField(
+        name: String,
+        protoType: String,
+        number: Int,
+        modifier: ProtoModifier = ProtoModifier.NONE,
+        nested: ProtoMessage? = null,
+    ) = ProtoField(
+        name = name,
+        number = number,
+        fieldType = ProtoFieldType.MessageRef(typeName = protoType, modifier = modifier),
+        nestedMessage = nested,
+        nestedEnum = null,
     )
 }

@@ -1,9 +1,9 @@
 package com.github.andrelmv.kotbox.proto.dialog
 
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFileFactory
-import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
 
 internal object NewFilePlacement {
@@ -13,13 +13,17 @@ internal object NewFilePlacement {
         generatedCode: String,
         project: Project,
     ) {
+        val protoFileName = fileName.ensureProtoExtension()
+
         val dir = sourceFile.containingDirectory ?: return
         WriteCommandAction.runWriteCommandAction(project, "Generate Proto", null, {
             val newFile =
                 PsiFileFactory
                     .getInstance(project)
-                    .createFileFromText(fileName, KotlinFileType.INSTANCE, generatedCode)
+                    .createFileFromText(protoFileName, PlainTextFileType.INSTANCE, generatedCode)
             dir.add(newFile)
         })
     }
+
+    private fun String.ensureProtoExtension(): String = if (endsWith(".proto")) this else "$this.proto"
 }

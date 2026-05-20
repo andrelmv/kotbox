@@ -32,8 +32,8 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
 
         val addressField = model.fields[1]
         assertEquals("address", addressField.name)
-        assertTrue(addressField.fieldType is ProtoFieldType.Scalar)
-        assertEquals("Address", (addressField.fieldType as ProtoFieldType.Scalar).protoType)
+        assertTrue(addressField.fieldType is ProtoFieldType.MessageRef)
+        assertEquals("Address", (addressField.fieldType as ProtoFieldType.MessageRef).typeName)
         assertNotNull(addressField.nestedMessage)
         assertEquals("Address", addressField.nestedMessage!!.name)
     }
@@ -65,8 +65,8 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.ex\ndata class User(val address: Address?)")
         val model = analyze("User")
         val field = model.fields[0]
-        assertTrue(field.fieldType is ProtoFieldType.Scalar)
-        assertEquals(ProtoModifier.OPTIONAL, (field.fieldType as ProtoFieldType.Scalar).modifier)
+        assertTrue(field.fieldType is ProtoFieldType.MessageRef)
+        assertEquals(ProtoModifier.OPTIONAL, (field.fieldType as ProtoFieldType.MessageRef).modifier)
         assertNotNull(field.nestedMessage)
     }
 
@@ -127,8 +127,8 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.ex\ndata class User(val score: Score)")
         val model = analyze("User")
         val field = model.fields[0]
-        assertTrue(field.fieldType is ProtoFieldType.Scalar)
-        assertEquals("Score", (field.fieldType as ProtoFieldType.Scalar).protoType)
+        assertTrue(field.fieldType is ProtoFieldType.EnumRef)
+        assertEquals("Score", (field.fieldType as ProtoFieldType.EnumRef).typeName)
         assertNotNull(field.nestedEnum)
         assertEquals("Score", field.nestedEnum!!.name)
         assertEquals(setOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum.entries)
@@ -139,8 +139,8 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.ex\ndata class User(val score: Score?)")
         val model = analyze("User")
         val field = model.fields[0]
-        assertTrue(field.fieldType is ProtoFieldType.Scalar)
-        assertEquals(ProtoModifier.OPTIONAL, (field.fieldType as ProtoFieldType.Scalar).modifier)
+        assertTrue(field.fieldType is ProtoFieldType.EnumRef)
+        assertEquals(ProtoModifier.OPTIONAL, (field.fieldType as ProtoFieldType.EnumRef).modifier)
         assertNotNull(field.nestedEnum)
     }
 
@@ -149,7 +149,7 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         val model = analyze("User")
         val field = model.fields[0]
         assertTrue(field.unresolved)
-        assertEquals("SomeExternalType", (field.fieldType as ProtoFieldType.Scalar).protoType)
+        assertEquals("SomeExternalType", (field.fieldType as ProtoFieldType.MessageRef).typeName)
     }
 
     fun `test class with no fields produces empty field list`() {
@@ -185,7 +185,43 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         assertEquals("firstName", model.fields[0].name)
     }
 
-    private fun analyze(className: String): ProtoMessageModel {
+    fun `test indirect cycle A to B to A marks back reference as unresolved`() {
+        myFixture.addFileToProject("B.kt", "package com.ex\ndata class B(val a: A?)")
+        myFixture.configureByText("A.kt", "package com.ex\ndata class A(val b: B?)")
+        val model = analyze("A")
+        val bField = model.fields[0]
+        assertNotNull(bField.nestedMessage) // B was resolved
+        val aInsideB = bField.nestedMessage!!.fields[0]
+        assertTrue(aInsideB.unresolved) // A inside B must be unresolved — cycle broken
+    }
+
+    fun `test same data class referenced in two fields produces same instance`() {
+        // Validates the processed cache — Address must be the same object reference
+        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
+        myFixture.configureByText("User.kt", "package com.ex\ndata class User(val home: Address, val work: Address)")
+        val model = analyze("User")
+        val home = model.fields[0].nestedMessage
+        val work = model.fields[1].nestedMessage
+        assertNotNull(home)
+        assertNotNull(work)
+        assertTrue(home === work)
+    }
+
+    fun `test nullable List produces Repeated field`() {
+        myFixture.configureByText("User.kt", "data class User(val tags: List<String>?)")
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertTrue(field.fieldType is ProtoFieldType.Repeated)
+    }
+
+    fun `test nullable Map produces Map field`() {
+        myFixture.configureByText("User.kt", "data class User(val scores: Map<String, Int>?)")
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertTrue(field.fieldType is ProtoFieldType.Map)
+    }
+
+    private fun analyze(className: String): ProtoMessage {
         val cls =
             myFixture.file.children
                 .filterIsInstance<KtClass>()

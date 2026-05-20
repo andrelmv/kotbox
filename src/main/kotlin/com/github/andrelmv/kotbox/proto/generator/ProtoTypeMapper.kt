@@ -1,7 +1,7 @@
 package com.github.andrelmv.kotbox.proto.generator
 
 internal sealed interface MappedProtoType {
-    data class Scalar(
+    data class ScalarType(
         val protoType: String,
         val isNullable: Boolean,
     ) : MappedProtoType
@@ -25,41 +25,38 @@ internal sealed interface MappedProtoType {
  */
 internal object ProtoTypeMapper {
     /**
-     * Resolves [kotlinType] - the raw text of a Kotlin type reference to a [MappedProtoType].
+     * Resolves [type] - the raw text of a Kotlin type reference to a [MappedProtoType].
      *
      * Returns null when the type cannot be mapped to a scalar and must be
      * treated as a nested message by the caller.
      */
-    fun resolve(kotlinType: String): MappedProtoType? {
-        val kotlinTypeResolved = kotlinType.trim()
+    fun resolve(type: String): MappedProtoType? {
+        val kotlinTypeTrimmed = type.trim()
+
+        val isNullable = kotlinTypeTrimmed.endsWith('?')
+        val kotlinType = if (isNullable) kotlinTypeTrimmed.dropLast(1) else kotlinTypeTrimmed
 
         return when {
-            kotlinTypeResolved.endsWith('?') -> {
-                val scalar = scalarMap[kotlinTypeResolved.dropLast(1).trim()] ?: return null
-
-                MappedProtoType.Scalar(
-                    protoType = scalar,
-                    isNullable = true,
-                )
-            }
-            kotlinTypeResolved.isCollection() -> {
-                val elementKotlin = kotlinTypeResolved.substringAfter('<').removeSuffix(">").trim()
-                val elementProto = scalarMap[elementKotlin]
-
-                MappedProtoType.CollectionType(
-                    elementProto = elementProto ?: elementKotlin,
-                    isCustomType = elementProto == null,
-                )
-            }
-            kotlinTypeResolved.isMap() -> resolveMapType(kotlinTypeResolved)
+            kotlinType.isCollection() -> resolveCollectionType(kotlinType)
+            kotlinType.isMap() -> resolveMapType(kotlinType)
             else ->
-                scalarMap[kotlinTypeResolved]?.let {
-                    MappedProtoType.Scalar(
+                scalarMap[kotlinType]?.let {
+                    MappedProtoType.ScalarType(
                         protoType = it,
-                        isNullable = false,
+                        isNullable = isNullable,
                     )
                 }
         }
+    }
+
+    private fun resolveCollectionType(kotlinType: String): MappedProtoType.CollectionType {
+        val elementKotlin = kotlinType.substringAfter('<').removeSuffix(">").trim()
+        val elementProto = scalarMap[elementKotlin]
+
+        return MappedProtoType.CollectionType(
+            elementProto = elementProto ?: elementKotlin,
+            isCustomType = elementProto == null,
+        )
     }
 
     private fun resolveMapType(kotlinType: String): MappedProtoType.MapType? {

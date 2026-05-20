@@ -10,7 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 
-class ProtoIntention : IntentionAction {
+internal class ProtoIntention : IntentionAction {
     override fun getText(): String = "Generate proto"
 
     override fun getFamilyName(): String = "Kotlin Toolbox"

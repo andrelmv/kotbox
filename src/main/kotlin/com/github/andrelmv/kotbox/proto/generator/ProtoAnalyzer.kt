@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtEnumEntry
 
 /**
- * Analyzes a Kotlin data-class hierarchy via PSI and produces a [ProtoMessageModel]
+ * Analyzes a Kotlin data-class hierarchy via PSI and produces a [ProtoMessage]
  * tree that [ProtoRenderer] can later serialize to `.proto` text.
  * Cycle detection is handled via a visited set — never remove that guard.
  *
@@ -17,22 +17,33 @@ import org.jetbrains.kotlin.psi.KtEnumEntry
  * - Walking the PSI tree and extracting type information
  * - Building a ProtoMessageModel tree
  *
+ * Cycle detection: [currentlyProcessing] tracks classes currently on the call stack — prevents infinite recursion.
+ * Deduplication: [processed] caches fully analyzed classes by FQN — prevents duplicate message blocks.
+ * Both use FQN as the key to avoid false collisions between same-named classes in different packages.
+ *
+ * Further enhancement: migrate to K2 Analysis API for robust type resolution https://github.com/Kotlin/analysis-api
  */
 internal class ProtoAnalyzer(
     private val project: Project,
     private val scope: GlobalSearchScope,
 ) {
-    // Tracks classes currently being visited to detect direct cycles.
+    // Guards against circular references in nullable data class fields (e.g. A(val b: B?) and B(val a: A?)).
+    // Extremely rare in practice but would cause a StackOverflowError without this guard.
     private val currentlyProcessing = mutableSetOf<String>()
+    private val processed = mutableMapOf<String, ProtoMessage>()
 
-    fun analyze(rootClass: KtClass): ProtoMessageModel {
+    fun analyze(rootClass: KtClass): ProtoMessage {
         require(rootClass.isDataClass()) { "'${rootClass.name}' is not a data class" }
         return processClass(rootClass)
     }
 
-    private fun processClass(ktClass: KtClass): ProtoMessageModel {
+    private fun processClass(ktClass: KtClass): ProtoMessage {
         val className = ktClass.name!!
+
         currentlyProcessing.add(className)
+
+        val qualifiedName = ktClass.fqName?.asString() ?: className
+        processed[qualifiedName]?.let { return it }
 
         val fields =
             ktClass.primaryConstructorParameters
@@ -48,12 +59,12 @@ internal class ProtoAnalyzer(
                     )
                 }
 
-        currentlyProcessing.remove(className)
-
-        return ProtoMessageModel(
-            name = className,
-            fields = fields,
-        )
+        return ProtoMessage(
+            name = className, fields = fields
+        ).also {
+            currentlyProcessing.remove(className)
+            processed[qualifiedName] = it
+        }
     }
 
     private fun resolveField(
@@ -63,21 +74,16 @@ internal class ProtoAnalyzer(
     ): ProtoField {
         val isNullable = typeText.endsWith('?')
         return when (val resolved = ProtoTypeMapper.resolve(typeText)) {
-            is MappedProtoType.Scalar ->
-                field {
-                    this.name = name
-                    this.number = number
-                    this.fieldType =
+            is MappedProtoType.ScalarType ->
+                ProtoField(
+                    name = name,
+                    number = number,
+                    fieldType =
                         ProtoFieldType.Scalar(
                             protoType = resolved.protoType,
-                            modifier =
-                                if (resolved.isNullable) {
-                                    ProtoModifier.OPTIONAL
-                                } else {
-                                    ProtoModifier.NONE
-                                },
-                        )
-                }
+                            modifier = if (resolved.isNullable) ProtoModifier.OPTIONAL else ProtoModifier.NONE,
+                        ),
+                )
 
             is MappedProtoType.CollectionType -> {
                 val nested =
@@ -86,12 +92,12 @@ internal class ProtoAnalyzer(
                         ?.let(::findDataClass)
                         ?.let(::processClass)
 
-                field {
-                    this.name = name
-                    this.number = number
-                    this.fieldType = ProtoFieldType.Repeated(resolved.elementProto)
-                    this.nestedMessage = nested
-                }
+                ProtoField(
+                    name = name,
+                    number = number,
+                    fieldType = ProtoFieldType.Repeated(resolved.elementProto),
+                    nestedMessage = nested,
+                )
             }
 
             is MappedProtoType.MapType -> {
@@ -101,64 +107,58 @@ internal class ProtoAnalyzer(
                         ?.let(::findDataClass)
                         ?.let(this::processClass)
 
-                field {
-                    this.name = name
-                    this.number = number
-                    this.fieldType = ProtoFieldType.Map(resolved.keyProto, resolved.valueProto)
-                    this.nestedMessage = nested
-                }
+                ProtoField(
+                    name = name,
+                    number = number,
+                    fieldType = ProtoFieldType.Map(resolved.keyProto, resolved.valueProto),
+                    nestedMessage = nested,
+                )
             }
 
             null -> {
-                val baseType = typeText.trimEnd('?').trim()
-                findDataClass(baseType)?.takeIf { baseType !in currentlyProcessing }?.let {
-                    return field {
-                        this.name = name
-                        this.number = number
-                        this.fieldType =
-                            ProtoFieldType.Scalar(
-                                protoType = baseType,
-                                modifier =
-                                    if (isNullable) {
-                                        ProtoModifier.OPTIONAL
-                                    } else {
-                                        ProtoModifier.NONE
-                                    },
-                            )
-                        this.nestedMessage = processClass(it)
-                    }
-                }
-
-                findEnumClass(baseType)?.let {
-                    return field {
-                        this.name = name
-                        this.number = number
-                        this.fieldType =
-                            ProtoFieldType.Scalar(
-                                protoType = baseType,
-                                modifier =
-                                    if (isNullable) {
-                                        ProtoModifier.OPTIONAL
-                                    } else {
-                                        ProtoModifier.NONE
-                                    },
-                            )
-                        this.nestedEnum = analyzeEnum(it)
-                    }
-                }
-
-                field {
-                    this.name = name
-                    this.number = number
-                    this.fieldType =
-                        ProtoFieldType.Scalar(
-                            protoType = baseType,
-                            modifier = ProtoModifier.NONE,
-                        )
-                    this.unresolved = true
-                }
+                handleUnmappedType(
+                    name = name,
+                    number = number,
+                    baseType = typeText.trimEnd('?').trim(),
+                    isNullable = isNullable,
+                )
             }
         }
+    }
+
+    /**
+     * Handles custom types that were not possible to map to a Protobuf type
+     */
+    private fun handleUnmappedType(
+        name: String,
+        number: Int,
+        baseType: String,
+        isNullable: Boolean,
+    ): ProtoField {
+        findDataClass(baseType)?.takeIf { baseType !in currentlyProcessing }?.let {
+            return ProtoField(
+                name = name,
+                number = number,
+                fieldType = ProtoFieldType.MessageRef(baseType, if (isNullable) ProtoModifier.OPTIONAL else ProtoModifier.NONE),
+                nestedMessage = processClass(it),
+            )
+        }
+
+        findEnumClass(baseType)?.let {
+            return ProtoField(
+                name = name,
+                number = number,
+                fieldType = ProtoFieldType.EnumRef(baseType, if (isNullable) ProtoModifier.OPTIONAL else ProtoModifier.NONE),
+                nestedEnum = analyzeEnum(it),
+            )
+        }
+
+        return ProtoField(
+            name = name,
+            number = number,
+            fieldType = ProtoFieldType.MessageRef(baseType, ProtoModifier.NONE),
+            unresolved = true,
+        )
     }
 
     private fun analyzeEnum(ktClass: KtClass): ProtoEnumModel {

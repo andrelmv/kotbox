@@ -5,7 +5,6 @@ import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBRadioButton
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
-import org.jetbrains.kotlin.psi.KtClass
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.ButtonGroup
@@ -13,14 +12,14 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class ProtoPlacementDialog(
+internal class PlacementDialog(
     title: String,
     project: Project,
-    targetClass: KtClass,
+    targetClassName: String,
 ) : DialogWrapper(project, true) {
     private val newFileButton = JBRadioButton("New file", true)
     private val previewAndCopyButton = JBRadioButton("Preview & copy")
-    private val newFileNameField = JBTextField(targetClass.name, 20)
+    private val newFileNameField = JBTextField(targetClassName, 20)
 
     init {
         this.title = "Generate $title"
