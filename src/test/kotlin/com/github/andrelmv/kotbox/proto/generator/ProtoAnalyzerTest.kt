@@ -210,6 +210,161 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         assertTrue(field.fieldType is ProtoFieldType.Map)
     }
 
+    fun `test resolves class from explicit import over same-named class in different package`() {
+        myFixture.addFileToProject(
+            "com/example/dto/Address.kt",
+            "package com.example.dto\ndata class Address(val street: String)",
+        )
+        myFixture.addFileToProject(
+            "com/example/model/Address.kt",
+            "package com.example.model\ndata class Address(val city: String)",
+        )
+        // User imports dto.Address explicitly — must resolve to that one
+        myFixture.configureByText(
+            "User.kt",
+            """
+            package com.example
+            import com.example.dto.Address
+            data class User(val address: Address)
+            """.trimIndent(),
+        )
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertNotNull(field.nestedMessage)
+        assertEquals("street", field.nestedMessage!!.fields[0].name)
+    }
+
+    fun `test resolves class from same package when no explicit import`() {
+        myFixture.addFileToProject(
+            "Address.kt",
+            "package com.example\ndata class Address(val street: String)",
+        )
+        myFixture.configureByText(
+            "User.kt",
+            "package com.example\ndata class User(val address: Address)",
+        )
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertNotNull(field.nestedMessage)
+        assertEquals("Address", field.nestedMessage!!.name)
+    }
+
+    fun `test resolves class from same package over other package when no import`() {
+        // Two classes named Address — one in same package, one elsewhere
+        myFixture.addFileToProject(
+            "com/example/Address.kt",
+            "package com.example\ndata class Address(val street: String)",
+        )
+        myFixture.addFileToProject(
+            "com/other/Address.kt",
+            "package com.other\ndata class Address(val city: String)",
+        )
+        myFixture.configureByText(
+            "User.kt",
+            "package com.example\ndata class User(val address: Address)",
+        )
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertNotNull(field.nestedMessage)
+        assertEquals("street", field.nestedMessage!!.fields[0].name)
+    }
+
+    fun `test resolves enum from explicit import`() {
+        myFixture.addFileToProject(
+            "com/example/dto/Score.kt",
+            "package com.example.dto\nenum class Score { HIGH, LOW }",
+        )
+        myFixture.addFileToProject(
+            "com/example/model/Score.kt",
+            "package com.example.model\nenum class Score { A, B, C }",
+        )
+        myFixture.configureByText(
+            "User.kt",
+            """
+            package com.example
+            import com.example.dto.Score
+            data class User(val score: Score)
+            """.trimIndent(),
+        )
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertNotNull(field.nestedEnum)
+        assertEquals(setOf("HIGH", "LOW"), field.nestedEnum!!.entries)
+    }
+
+    fun `test resolves enum from same package when no explicit import`() {
+        myFixture.addFileToProject(
+            "Score.kt",
+            "package com.example\nenum class Score { HIGH, LOW, MEDIUM }",
+        )
+        myFixture.configureByText(
+            "User.kt",
+            "package com.example\ndata class User(val score: Score)",
+        )
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertNotNull(field.nestedEnum)
+        assertEquals(setOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum!!.entries)
+    }
+
+    fun `test resolves List element type from explicit import`() {
+        myFixture.addFileToProject(
+            "com/example/dto/Item.kt",
+            "package com.example.dto\ndata class Item(val label: String)",
+        )
+        myFixture.addFileToProject(
+            "com/example/model/Item.kt",
+            "package com.example.model\ndata class Item(val name: String)",
+        )
+        myFixture.configureByText(
+            "Cart.kt",
+            """
+            package com.example
+            import com.example.dto.Item
+            data class Cart(val items: List<Item>)
+            """.trimIndent(),
+        )
+        val model = analyze("Cart")
+        val field = model.fields[0]
+        assertTrue(field.fieldType is ProtoFieldType.Repeated)
+        assertNotNull(field.nestedMessage)
+        assertEquals("label", field.nestedMessage!!.fields[0].name)
+    }
+
+    fun `test resolves Map value type from explicit import`() {
+        myFixture.addFileToProject(
+            "com/example/dto/Address.kt",
+            "package com.example.dto\ndata class Address(val street: String)",
+        )
+        myFixture.addFileToProject(
+            "com/example/model/Address.kt",
+            "package com.example.model\ndata class Address(val city: String)",
+        )
+        myFixture.configureByText(
+            "User.kt",
+            """
+            package com.example
+            import com.example.dto.Address
+            data class User(val addresses: Map<String, Address>)
+            """.trimIndent(),
+        )
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertTrue(field.fieldType is ProtoFieldType.Map)
+        assertNotNull(field.nestedMessage)
+        assertEquals("street", field.nestedMessage!!.fields[0].name)
+    }
+
+    fun `test unresolvable type with no import and no same-package match produces unresolved field`() {
+        myFixture.configureByText(
+            "User.kt",
+            "package com.example\ndata class User(val unknown: GhostType)",
+        )
+        val model = analyze("User")
+        val field = model.fields[0]
+        assertTrue(field.unresolved)
+    }
+
     private fun analyze(className: String): ProtoMessage {
         val cls =
             myFixture.file.children

@@ -7,22 +7,24 @@ import com.intellij.psi.search.PsiShortNamesCache
 import org.jetbrains.kotlin.asJava.classes.KtLightClass
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtEnumEntry
+import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtTypeReference
 
 /**
  * Analyzes a Kotlin data-class hierarchy via PSI and produces a [ProtoMessage]
  * tree that [ProtoRenderer] can later serialize to `.proto` text.
  *
- * **Deduplication**: [processed] caches fully analyzed classes by FQN — prevents duplicate message blocks.
+ * **Deduplication**: [processed] stores fully analyzed classes by FQN — prevents duplicate message blocks.
  * Uses FQN as the key to avoid false collisions between same-named classes in different packages.
  *
- * Further enhancement: migrate to K2 Analysis API for robust type resolution https://github.com/Kotlin/analysis-api
+ * Further enhancement: migrate to K2 Analysis API for even more robust type resolution.
+ * The current approach handles explicit imports and same-package resolution correctly.
+ * Remaining limitation: wildcard imports (import com.example.*) are not resolved.
  */
 internal class ProtoAnalyzer(
     private val project: Project,
     private val scope: GlobalSearchScope,
 ) {
-    // Guards against circular references in nullable data class fields (e.g. A(val b: B?) and B(val a: A?)).
-    // Extremely rare in practice but would cause a StackOverflowError without this guard.
     private val processed = mutableMapOf<String, ProtoMessage>()
 
     fun analyze(rootClass: KtClass): ProtoMessage {
@@ -32,20 +34,16 @@ internal class ProtoAnalyzer(
 
     private fun processClass(ktClass: KtClass): ProtoMessage {
         val className = ktClass.name!!
-
         val qualifiedName = ktClass.fqName?.asString() ?: className
         processed[qualifiedName]?.let { return it }
 
         val fields =
             ktClass.primaryConstructorParameters
-                .mapNotNull { param ->
-                    val paramName = param.name ?: return@mapNotNull null
-                    val typeText = param.typeReference?.text ?: return@mapNotNull null
-                    paramName to typeText
-                }.mapIndexed { index, (paramName, typeText) ->
+                .filter { it.name != null && it.typeReference != null }
+                .mapIndexed { index, param ->
                     resolveField(
-                        name = paramName,
-                        typeText = typeText,
+                        name = param.name!!,
+                        typeReference = param.typeReference!!,
                         number = index + 1,
                     )
                 }
@@ -60,10 +58,12 @@ internal class ProtoAnalyzer(
 
     private fun resolveField(
         name: String,
-        typeText: String,
+        typeReference: KtTypeReference,
         number: Int,
     ): ProtoField {
+        val typeText = typeReference.text
         val isNullable = typeText.endsWith('?')
+
         return when (val resolved = ProtoTypeMapper.resolve(typeText)) {
             is MappedProtoType.ScalarType ->
                 ProtoField(
@@ -80,7 +80,7 @@ internal class ProtoAnalyzer(
                 val nested =
                     resolved.elementProto
                         .takeIf { resolved.isCustomType }
-                        ?.let(::findDataClass)
+                        ?.let { findDataClass(it, typeReference) }
                         ?.let(::processClass)
 
                 ProtoField(
@@ -95,8 +95,8 @@ internal class ProtoAnalyzer(
                 val nested =
                     resolved.valueProto
                         .takeIf { resolved.isCustomValue }
-                        ?.let(::findDataClass)
-                        ?.let(this::processClass)
+                        ?.let { findDataClass(it, typeReference) }
+                        ?.let(::processClass)
 
                 ProtoField(
                     name = name,
@@ -106,40 +106,40 @@ internal class ProtoAnalyzer(
                 )
             }
 
-            null -> {
+            null ->
                 handleUnmappedType(
                     name = name,
                     number = number,
                     baseType = typeText.trimEnd('?').trim(),
                     isNullable = isNullable,
+                    typeReference = typeReference,
                 )
-            }
         }
     }
 
-    /**
-     * Handles custom types that were not possible to map to a Protobuf type
-     */
     private fun handleUnmappedType(
         name: String,
         number: Int,
         baseType: String,
         isNullable: Boolean,
+        typeReference: KtTypeReference,
     ): ProtoField {
-        findDataClass(baseType)?.let {
+        val modifier = if (isNullable) ProtoModifier.OPTIONAL else ProtoModifier.NONE
+
+        findDataClass(baseType, typeReference)?.let {
             return ProtoField(
                 name = name,
                 number = number,
-                fieldType = ProtoFieldType.MessageRef(baseType, if (isNullable) ProtoModifier.OPTIONAL else ProtoModifier.NONE),
+                fieldType = ProtoFieldType.MessageRef(baseType, modifier),
                 nestedMessage = processClass(it),
             )
         }
 
-        findEnumClass(baseType)?.let {
+        findEnumClass(baseType, typeReference)?.let {
             return ProtoField(
                 name = name,
                 number = number,
-                fieldType = ProtoFieldType.EnumRef(baseType, if (isNullable) ProtoModifier.OPTIONAL else ProtoModifier.NONE),
+                fieldType = ProtoFieldType.EnumRef(baseType, modifier),
                 nestedEnum = analyzeEnum(it),
             )
         }
@@ -158,21 +158,61 @@ internal class ProtoAnalyzer(
                 .filterIsInstance<KtEnumEntry>()
                 .mapNotNull { it.name }
                 .toSet()
-
-        return ProtoEnumModel(
-            name = ktClass.name!!,
-            entries = entries,
-        )
+        return ProtoEnumModel(name = ktClass.name!!, entries = entries)
     }
 
-    private fun findDataClass(name: String): KtClass? = findKtClass(name)?.takeIf { it.isDataClass() }
+    private fun findDataClass(
+        name: String,
+        context: KtTypeReference,
+    ): KtClass? = findKtClass(name, context)?.takeIf { it.isDataClass() }
 
-    private fun findEnumClass(name: String): KtClass? = findKtClass(name)?.takeIf { it.isEnum() }
+    private fun findEnumClass(
+        name: String,
+        context: KtTypeReference,
+    ): KtClass? = findKtClass(name, context)?.takeIf { it.isEnum() }
 
-    private fun findKtClass(name: String): KtClass? =
+    /**
+     * Resolves [simpleName] to a [KtClass] using the import context of [context]:
+     *
+     * 1. Explicit import in the containing file
+     * 2. Same package as the containing file
+     * 3. Project-wide short name lookup
+     */
+    private fun findKtClass(
+        simpleName: String,
+        context: KtTypeReference,
+    ): KtClass? {
+        val file = context.containingFile as? KtFile
+
+        if (file != null) {
+            // 1. Explicit import
+            file.importDirectives
+                .mapNotNull { it.importedFqName?.asString() }
+                .firstOrNull { it.endsWith(".$simpleName") }
+                ?.let {
+                    val resolved = findKtClassByExactFqn(it)
+                    if (resolved != null) return resolved
+                }
+
+            // 2. Same package
+            val samePackageFqn = "${file.packageFqName.asString()}.$simpleName"
+            findKtClassByExactFqn(samePackageFqn)?.let { return it }
+        }
+
+        return findKotlinLightClassesByName(simpleName)
+            .firstNotNullOfOrNull { it.kotlinOrigin as? KtClass }
+    }
+
+    private fun findKtClassByExactFqn(fqn: String): KtClass? {
+        val shortName = fqn.substringAfterLast(".")
+        return findKotlinLightClassesByName(shortName)
+            .mapNotNull { it.kotlinOrigin as? KtClass }
+            .firstOrNull { it.fqName?.asString() == fqn }
+    }
+
+    private fun findKotlinLightClassesByName(name: String) =
         PsiShortNamesCache
             .getInstance(project)
             .getClassesByName(name, scope)
             .filterIsInstance<KtLightClass>()
-            .firstNotNullOfOrNull { it.kotlinOrigin as? KtClass }
 }

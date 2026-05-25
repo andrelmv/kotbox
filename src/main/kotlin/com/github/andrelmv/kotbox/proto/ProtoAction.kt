@@ -7,13 +7,6 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbService
 
-/**
- * Right-click → "Generate Proto Message" action.
- *
- * Visible and enabled only when the caret is inside a Kotlin data class.
- * Delegates immediately to [ProtoGenerator], which owns the orchestration
- * (background analysis, dialog, file placement).
- */
 internal class ProtoAction : AnAction() {
     override fun getActionUpdateThread() = ActionUpdateThread.BGT
 

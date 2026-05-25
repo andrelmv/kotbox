@@ -8,7 +8,6 @@ import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import java.awt.Dimension
 import javax.swing.JComponent
-import kotlin.apply
 
 object ProtoEditorProvider {
     fun create(
@@ -35,9 +34,7 @@ object ProtoEditorProvider {
                 object : LanguageTextField.SimpleDocumentCreator() {},
                 false,
             )
-        return JBScrollPane(textField).apply {
-            preferredSize = Dimension(650, 450)
-        }
+        return JBScrollPane(textField).apply { preferredSize = buildPreferredSize() }
     }
 
     private fun createFallbackViewer(
@@ -56,14 +53,12 @@ object ProtoEditorProvider {
                     isUseSoftWraps = false
                     additionalLinesCount = 0
                 }
-            }
+            } as EditorEx
 
-        return editor.scrollingModel.let {
-            (editor as EditorEx).scrollPane.apply {
-                preferredSize = Dimension(650, 450)
-            }
-        }
+        return editor.scrollPane.apply { preferredSize = buildPreferredSize() }
     }
+
+    private fun buildPreferredSize() = Dimension(650, 450)
 }
 
 internal const val PROTOBUF = "protobuf"

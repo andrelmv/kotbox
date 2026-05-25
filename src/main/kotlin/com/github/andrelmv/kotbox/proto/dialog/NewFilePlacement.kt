@@ -25,5 +25,7 @@ internal object NewFilePlacement {
         })
     }
 
-    private fun String.ensureProtoExtension(): String = if (endsWith(".proto")) this else "$this.proto"
+    private fun String.ensureProtoExtension(): String = if (endsWith(PROTO_EXTENSION)) this else "$this$PROTO_EXTENSION"
 }
+
+private const val PROTO_EXTENSION = ".proto"

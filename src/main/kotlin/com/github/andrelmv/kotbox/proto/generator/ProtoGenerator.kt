@@ -49,7 +49,7 @@ internal object ProtoGenerator {
                                     val model = analyzer.analyze(targetClass)
                                     AnalysisResult(
                                         protoText =
-                                            ProtoRenderer().render(
+                                            ProtoRenderer.render(
                                                 model = model,
                                                 javaPackage = sourceFile.packageFqName.asString(),
                                             ),

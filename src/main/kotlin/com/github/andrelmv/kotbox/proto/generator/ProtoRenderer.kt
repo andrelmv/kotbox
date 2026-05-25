@@ -1,6 +1,6 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-internal class ProtoRenderer {
+internal object ProtoRenderer {
     /**
      * Renders the full `.proto` file content for [model].
      *
@@ -12,7 +12,6 @@ internal class ProtoRenderer {
         model: ProtoMessage,
         javaPackage: String = "",
     ): String {
-        // First pass: collect all nested messages and build the top-level message
         val messageBlock = renderMessage(model, indent = 0)
 
         return buildString {
@@ -29,17 +28,12 @@ internal class ProtoRenderer {
         }.trimEnd() + "\n"
     }
 
-    /**
-     * Renders one `message` block.  Nested messages are emitted *inside* the
-     * enclosing message (proto3 allows nested type definitions), keeping the
-     * output self-contained in a single file.
-     */
     private fun renderMessage(
         model: ProtoMessage,
         indent: Int,
     ): String {
-        val pad = PROTO_STANDARD_TAB.repeat(indent)
-        val innerPad = PROTO_STANDARD_TAB.repeat(indent + 1)
+        val pad = TAB.repeat(indent)
+        val innerPad = TAB.repeat(indent + 1)
 
         return buildString {
             // Sibling enums first
@@ -105,8 +99,8 @@ internal class ProtoRenderer {
         model: ProtoEnumModel,
         indent: Int,
     ): String {
-        val pad = PROTO_STANDARD_TAB.repeat(indent)
-        val innerPad = PROTO_STANDARD_TAB.repeat(indent + 1)
+        val pad = TAB.repeat(indent)
+        val innerPad = TAB.repeat(indent + 1)
 
         return buildString {
             appendLine("${pad}enum ${model.name} {")
@@ -124,5 +118,5 @@ internal class ProtoRenderer {
 }
 
 // 2 spaces, proto style guide
-private const val PROTO_STANDARD_TAB = "  "
+private const val TAB = "  "
 private val CAMEL_CASE_REGEX = Regex("([a-z])([A-Z])")
