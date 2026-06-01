@@ -1,6 +1,6 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-internal object ProtoRenderer {
+internal object CodeRenderer {
     /**
      * Renders the full `.proto` file content for [model].
      *
@@ -68,27 +68,7 @@ internal object ProtoRenderer {
                         append(innerPad)
                     }
 
-                    val declaration =
-                        when (val type = field.fieldType) {
-                            is ProtoFieldType.Scalar -> {
-                                val prefix = type.modifier.toPrefix()
-                                "$prefix${type.protoType} ${field.name.toSnakeCase()} = ${field.number};"
-                            }
-                            is ProtoFieldType.MessageRef -> {
-                                val prefix = type.modifier.toPrefix()
-                                "${prefix}${type.typeName} ${field.name.toSnakeCase()} = ${field.number};"
-                            }
-                            is ProtoFieldType.Repeated -> "repeated ${type.elementProto} ${field.name.toSnakeCase()} = ${field.number};"
-                            is ProtoFieldType.Map -> {
-                                "map<${type.keyProto}, ${type.valueProto}> ${field.name.toSnakeCase()} = ${field.number};"
-                            }
-                            is ProtoFieldType.EnumRef -> {
-                                val prefix = type.modifier.toPrefix()
-                                "$prefix${type.typeName} ${field.name.toSnakeCase()} = ${field.number};"
-                            }
-                        }
-
-                    appendLine(declaration)
+                    appendLine(field)
                 }
 
             append("$pad}")
@@ -110,13 +90,10 @@ internal object ProtoRenderer {
             append("$pad}")
         }
     }
-
-    // Converts camelCase identifiers to snake_case per proto style guide
-    private fun String.toSnakeCase(): String = this.replace(CAMEL_CASE_REGEX) { "${it.groupValues[1]}_${it.groupValues[2]}" }.lowercase()
-
-    private fun ProtoModifier.toPrefix() = if (this != ProtoModifier.NONE) "${this.keyword} " else ""
 }
 
 // 2 spaces, proto style guide
 private const val TAB = "  "
 private val CAMEL_CASE_REGEX = Regex("([a-z])([A-Z])")
+
+internal fun String.toSnakeCase(): String = this.replace(CAMEL_CASE_REGEX) { "${it.groupValues[1]}_${it.groupValues[2]}" }.lowercase()

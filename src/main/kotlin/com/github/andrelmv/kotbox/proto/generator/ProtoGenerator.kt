@@ -31,11 +31,8 @@ internal object ProtoGenerator {
         ProgressManager.getInstance().run(
             object : Task.Backgroundable(project, "Analyzing class for proto generation") {
                 override fun run(indicator: ProgressIndicator) {
-                    val analyzer =
-                        ProtoAnalyzer(
-                            project = project,
-                            scope = scope,
-                        )
+                    val resolver = KotlinClassFinder(project, scope)
+                    val analyzer = ClassAnalyzer(resolver)
 
                     data class AnalysisResult(
                         val protoText: String,
@@ -49,7 +46,7 @@ internal object ProtoGenerator {
                                     val model = analyzer.analyze(targetClass)
                                     AnalysisResult(
                                         protoText =
-                                            ProtoRenderer.render(
+                                            CodeRenderer.render(
                                                 model = model,
                                                 javaPackage = sourceFile.packageFqName.asString(),
                                             ),

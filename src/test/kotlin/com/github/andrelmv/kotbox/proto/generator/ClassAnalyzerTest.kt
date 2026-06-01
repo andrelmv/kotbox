@@ -4,7 +4,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtClass
 
-internal class ProtoAnalyzerTest : BasePlatformTestCase() {
+internal class ClassAnalyzerTest : BasePlatformTestCase() {
     fun `test analyzes single data class with scalar fields`() {
         myFixture.configureByText("User.kt", "data class User(val name: String, val age: Int)")
         val model = analyze("User")
@@ -131,7 +131,7 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         assertEquals("Score", (field.fieldType as ProtoFieldType.EnumRef).typeName)
         assertNotNull(field.nestedEnum)
         assertEquals("Score", field.nestedEnum!!.name)
-        assertEquals(setOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum.entries)
+        assertEquals(linkedSetOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum.entries)
     }
 
     fun `test nullable enum field produces optional modifier`() {
@@ -289,7 +289,7 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         val model = analyze("User")
         val field = model.fields[0]
         assertNotNull(field.nestedEnum)
-        assertEquals(setOf("HIGH", "LOW"), field.nestedEnum!!.entries)
+        assertEquals(linkedSetOf("HIGH", "LOW"), field.nestedEnum!!.entries)
     }
 
     fun `test resolves enum from same package when no explicit import`() {
@@ -304,7 +304,7 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
         val model = analyze("User")
         val field = model.fields[0]
         assertNotNull(field.nestedEnum)
-        assertEquals(setOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum!!.entries)
+        assertEquals(linkedSetOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum!!.entries)
     }
 
     fun `test resolves List element type from explicit import`() {
@@ -371,6 +371,7 @@ internal class ProtoAnalyzerTest : BasePlatformTestCase() {
                 .filterIsInstance<KtClass>()
                 .firstOrNull { it.name == className }
                 ?: error("Class '$className' not found")
-        return ProtoAnalyzer(project, GlobalSearchScope.projectScope(project)).analyze(cls)
+        val finder = KotlinClassFinder(project, GlobalSearchScope.projectScope(project))
+        return ClassAnalyzer(finder).analyze(cls)
     }
 }

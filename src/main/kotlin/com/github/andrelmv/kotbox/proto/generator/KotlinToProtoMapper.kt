@@ -1,30 +1,30 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-internal sealed interface MappedProtoType {
+internal sealed interface MappedType {
     data class ScalarType(
-        val protoType: String,
+        val type: String,
         val isNullable: Boolean,
-    ) : MappedProtoType
+    ) : MappedType
 
     data class MapType(
-        val keyProto: String,
-        val valueProto: String, // scalar Proto type OR custom type name
-        val isCustomValue: Boolean,
-    ) : MappedProtoType
+        val key: String,
+        val value: String,
+        val customValue: Boolean,
+    ) : MappedType
 
     data class CollectionType(
-        val elementProto: String, // scalar Proto type OR custom type name
-        val isCustomType: Boolean,
-    ) : MappedProtoType
+        val element: String,
+        val customElement: Boolean,
+    ) : MappedType
 }
 
-internal object ProtoTypeMapper {
+internal object KotlinToProtoMapper {
     /**
-     * Maps a Kotlin type name [type] into a [MappedProtoType].
+     * Maps a Kotlin type name [type] into a [MappedType].
      *
      * Returns null when the type is a user-defined message
      */
-    fun resolve(type: String): MappedProtoType? {
+    fun resolve(type: String): MappedType? {
         val kotlinTypeTrimmed = type.trim()
 
         val isNullable = kotlinTypeTrimmed.endsWith('?')
@@ -35,25 +35,25 @@ internal object ProtoTypeMapper {
             kotlinType.isMap() -> resolveMapType(kotlinType)
             else ->
                 scalarMap[kotlinType]?.let {
-                    MappedProtoType.ScalarType(
-                        protoType = it,
+                    MappedType.ScalarType(
+                        type = it,
                         isNullable = isNullable,
                     )
                 }
         }
     }
 
-    private fun resolveCollectionType(kotlinType: String): MappedProtoType.CollectionType {
+    private fun resolveCollectionType(kotlinType: String): MappedType.CollectionType {
         val elementKotlin = kotlinType.substringAfter('<').removeSuffix(">").trim()
         val elementProto = scalarMap[elementKotlin]
 
-        return MappedProtoType.CollectionType(
-            elementProto = elementProto ?: elementKotlin,
-            isCustomType = elementProto == null,
+        return MappedType.CollectionType(
+            element = elementProto ?: elementKotlin,
+            customElement = elementProto == null,
         )
     }
 
-    private fun resolveMapType(kotlinType: String): MappedProtoType.MapType? {
+    private fun resolveMapType(kotlinType: String): MappedType.MapType? {
         val inner = kotlinType.removePrefix("Map<").removeSuffix(">")
         val commaIdx = findTopLevelComma(inner).takeIf { it != -1 } ?: return null
 
@@ -63,10 +63,10 @@ internal object ProtoTypeMapper {
         val valueKotlin = inner.substring(commaIdx + 1).trim()
         val valueProto = scalarMap[valueKotlin]
 
-        return MappedProtoType.MapType(
-            keyProto = keyProto,
-            valueProto = valueProto ?: valueKotlin,
-            isCustomValue = valueProto == null,
+        return MappedType.MapType(
+            key = keyProto,
+            value = valueProto ?: valueKotlin,
+            customValue = valueProto == null,
         )
     }
 

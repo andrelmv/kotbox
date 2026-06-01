@@ -2,7 +2,7 @@ package com.github.andrelmv.kotbox.proto.generator
 
 /**
  * A representation of a single proto `message` block, possibly containing nested messages.
- * Intentionally decoupled from PSI so that [ProtoRenderer] has no IntelliJ dependencies.
+ * Intentionally decoupled from PSI so that [CodeRenderer] has no IntelliJ dependencies.
  */
 internal data class ProtoMessage(
     val name: String,
@@ -16,14 +16,16 @@ internal data class ProtoField(
     val nestedMessage: ProtoMessage? = null,
     val nestedEnum: ProtoEnumModel? = null,
     val unresolved: Boolean = false,
-)
+) {
+    override fun toString(): String = "$fieldType ${name.toSnakeCase()} = $number;"
+}
 
 internal sealed interface ProtoFieldType {
     data class Scalar(
         val protoType: String,
         val modifier: ProtoModifier,
     ) : ProtoFieldType {
-        override fun toString(): String = this.protoType
+        override fun toString(): String = "${modifier.keyword}$protoType"
     }
 
     data class Repeated(
@@ -43,14 +45,14 @@ internal sealed interface ProtoFieldType {
         val typeName: String,
         val modifier: ProtoModifier,
     ) : ProtoFieldType {
-        override fun toString(): String = this.typeName
+        override fun toString(): String = "${modifier.keyword}$typeName"
     }
 
     data class EnumRef(
         val typeName: String,
         val modifier: ProtoModifier,
     ) : ProtoFieldType {
-        override fun toString(): String = this.typeName
+        override fun toString(): String = "${modifier.keyword}$typeName"
     }
 }
 
@@ -58,10 +60,12 @@ internal enum class ProtoModifier(
     val keyword: String,
 ) {
     NONE(""),
-    OPTIONAL("optional"),
+    OPTIONAL("optional$SPACE"),
 }
 
 internal data class ProtoEnumModel(
     val name: String,
-    val entries: Set<String>,
+    val entries: LinkedHashSet<String>,
 )
+
+private const val SPACE = " "
