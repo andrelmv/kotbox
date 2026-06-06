@@ -145,6 +145,10 @@ kover {
                         "com.github.andrelmv.kotbox.dslbuilder.DslBuilderPlacementDialog",
                         "com.github.andrelmv.kotbox.dslbuilder.DslBuilderAction",
                         "com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderGenerator",
+                        "com.github.andrelmv.kotbox.proto.generator.PlacementDialog",
+                        "com.github.andrelmv.kotbox.proto.generator.ProtoAction",
+                        "com.github.andrelmv.kotbox.proto.generator.ProtoGenerator",
+                        "com.github.andrelmv.kotbox.proto.generator.ProtoEditorProvider",
                     )
                 }
             }
@@ -160,7 +164,7 @@ sonar {
         property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/kover/report.xml")
         property(
             "sonar.coverage.exclusions",
-            "**/toolwindow/ui/**,**/inlay/config/**,**/dslbuilder/DslBuilderPlacementDialog.kt,**/dslbuilder/DslBuilderAction.kt,**/dslbuilder/generator/DslBuilderGenerator.kt",
+            "**/toolwindow/ui/**,**/inlay/config/**,**/dslbuilder/DslBuilderPlacementDialog.kt,**/dslbuilder/DslBuilderAction.kt,**/dslbuilder/generator/DslBuilderGenerator.kt,**/proto/generator/PlacementDialog.kt,**/proto/generator/ProtoAction.kt,**/proto/generator/ProtoGenerator.kt,**/proto/generator/ProtoEditorProvider.kt",
         )
     }
 }

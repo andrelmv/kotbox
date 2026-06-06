@@ -4,12 +4,12 @@ package com.github.andrelmv.kotbox.proto.generator
  * A representation of a single proto `message` block, possibly containing nested messages.
  * Intentionally decoupled from PSI so that [CodeRenderer] has no IntelliJ dependencies.
  */
-internal data class ProtoMessage(
+data class ProtoMessage(
     val name: String,
     val fields: List<ProtoField>,
 )
 
-internal data class ProtoField(
+data class ProtoField(
     val fieldType: ProtoFieldType,
     val name: String,
     val number: Int,
@@ -20,7 +20,7 @@ internal data class ProtoField(
     override fun toString(): String = "$fieldType ${name.toSnakeCase()} = $number;"
 }
 
-internal sealed interface ProtoFieldType {
+sealed interface ProtoFieldType {
     data class Scalar(
         val protoType: String,
         val modifier: ProtoModifier,
@@ -56,14 +56,14 @@ internal sealed interface ProtoFieldType {
     }
 }
 
-internal enum class ProtoModifier(
+enum class ProtoModifier(
     val keyword: String,
 ) {
     NONE(""),
     OPTIONAL("optional$SPACE"),
 }
 
-internal data class ProtoEnumModel(
+data class ProtoEnumModel(
     val name: String,
     val entries: LinkedHashSet<String>,
 )

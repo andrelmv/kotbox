@@ -10,7 +10,6 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 
@@ -25,14 +24,12 @@ internal object ProtoGenerator {
         }
 
         val sourceFile = targetClass.containingFile as? KtFile ?: return
-        val scope = GlobalSearchScope.projectScope(project)
 
         // Analyze in background — avoids freezing the EDT for large hierarchies
         ProgressManager.getInstance().run(
             object : Task.Backgroundable(project, "Analyzing class for proto generation") {
                 override fun run(indicator: ProgressIndicator) {
-                    val resolver = KotlinClassFinder(project, scope)
-                    val analyzer = ClassAnalyzer(resolver)
+                    val analyzer = K2ClassAnalyzer()
 
                     data class AnalysisResult(
                         val protoText: String,
