@@ -1,6 +1,5 @@
 package com.github.andrelmv.kotbox.proto.dialog
 
-import com.intellij.lang.Language
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
@@ -14,14 +13,14 @@ class PreviewDialog(
     project: Project,
     private val protoContent: String,
 ) : DialogWrapper(project, true) {
-    private val editorComponent by lazy { ProtoEditorProvider.create(project, protoContent) }
+    private val editorView by lazy { ProtoEditorProvider.create(project, protoContent) }
 
     init {
         title = "Proto Preview"
         init()
     }
 
-    override fun createCenterPanel(): JComponent = editorComponent
+    override fun createCenterPanel(): JComponent = editorView.component
 
     override fun createActions(): Array<Action> =
         arrayOf(
@@ -34,14 +33,7 @@ class PreviewDialog(
         )
 
     override fun dispose() {
-        if (!isProtoPluginAvailable()) {
-            EditorFactory
-                .getInstance()
-                .getEditors(EditorFactory.getInstance().createDocument(protoContent))
-                .forEach { EditorFactory.getInstance().releaseEditor(it) }
-        }
+        editorView.editor?.let { EditorFactory.getInstance().releaseEditor(it) }
         super.dispose()
     }
-
-    private fun isProtoPluginAvailable(): Boolean = Language.findLanguageByID(PROTOBUF) != null
 }

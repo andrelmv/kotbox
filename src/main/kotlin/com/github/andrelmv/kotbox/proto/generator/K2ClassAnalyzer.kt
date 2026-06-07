@@ -46,9 +46,10 @@ internal class K2ClassAnalyzer(
         val fields =
             ktClass
                 .primaryConstructorParameters
-                .filter { it.name != null && it.typeReference != null }
-                .mapIndexed { index, param ->
-                    val resolution = resolvedClass.fieldResolutions.getValue(param.name!!)
+                .mapIndexedNotNull { index, param ->
+                    val name = param.name ?: return@mapIndexedNotNull null
+                    val typeReference = param.typeReference ?: return@mapIndexedNotNull null
+                    val resolution = resolvedClass.fieldResolutions.getValue(name)
                     val nestedMessage =
                         resolution.resolved
                             ?.takeIf { it.isDataClass() }
@@ -57,8 +58,8 @@ internal class K2ClassAnalyzer(
 
                     rules.firstNotNullOf {
                         it.tryExecute(
-                            name = param.name!!,
-                            typeText = param.typeReference!!.text,
+                            name = name,
+                            typeText = typeReference.text,
                             number = index + 1,
                             mappedType = resolution.mapped,
                             nestedMessage = nestedMessage,
@@ -76,10 +77,10 @@ internal class K2ClassAnalyzer(
     companion object {
         fun defaultRules() =
             listOf(
-                CollectionResolutionRule(),
-                MapResolutionRule(),
-                ScalarResolutionRule(),
-                FallbackResolutionRule(),
+                CollectionResolutionRule,
+                MapResolutionRule,
+                ScalarResolutionRule,
+                FallbackResolutionRule,
             )
     }
 }
@@ -88,7 +89,6 @@ internal fun KtClass.toProtoEnumModel(): ProtoEnumModel {
     val entries =
         declarations
             .filterIsInstance<KtEnumEntry>()
-            .mapNotNull { it.name }
-            .let { LinkedHashSet(it) }
+            .mapNotNullTo(LinkedHashSet()) { it.name }
     return ProtoEnumModel(name = name!!, entries = entries)
 }

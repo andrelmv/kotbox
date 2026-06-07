@@ -8,13 +8,11 @@ import org.jetbrains.kotlin.analysis.api.types.KaClassType
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtTypeReference
 
-object KtClassResolver {
+internal object KtClassResolver {
     /**
      * Finds the [KtClass] this field references, for use by the graph walker.
      * Returns non-null only when [mapped] indicates a user-defined class is involved.
      *
-     * For type aliases like `typealias AddressList = List<Address>`, the type arguments
-     * aren't visible in the PSI, so falls back to K2 type expansion to find them.
      */
     @OptIn(KaExperimentalApi::class)
     fun findReferencedClass(

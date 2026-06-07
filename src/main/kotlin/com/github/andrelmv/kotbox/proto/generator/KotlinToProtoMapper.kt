@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.analysis.api.types.KaClassType
 import org.jetbrains.kotlin.analysis.api.types.KaType
 import org.jetbrains.kotlin.psi.KtTypeReference
 
-sealed interface MappedType {
+internal sealed interface MappedType {
     data class ScalarType(
         val type: String,
         val isNullable: Boolean,
@@ -128,18 +128,18 @@ internal object KotlinToProtoMapper {
      * @return the index of the top-level comma, or -1 if none exists.
      */
     private fun findTopLevelComma(s: String): Int {
-        s.foldIndexed(0) { i, depth, c ->
+        var depth = 0
+        for ((i, c) in s.withIndex()) {
             when (c) {
-                '<' -> depth + 1
-                '>' -> depth - 1
-                ',' -> if (depth == 0) return i else depth
-                else -> depth
+                '<' -> depth++
+                '>' -> depth--
+                ',' -> if (depth == 0) return i
             }
         }
         return -1
     }
 
-    private val scalarMap: Map<String, String> by lazy {
+    private val scalarMap: Map<String, String> =
         mapOf(
             "String" to "string",
             "Int" to "int32",
@@ -152,9 +152,8 @@ internal object KotlinToProtoMapper {
             "ByteArray" to "bytes",
             "Any" to "google.protobuf.Any",
         )
-    }
 
-    private val validProtoMapKeyTypes by lazy {
+    private val validProtoMapKeyTypes =
         setOf(
             "string",
             "int32",
@@ -169,7 +168,6 @@ internal object KotlinToProtoMapper {
             "sfixed64",
             "bool",
         )
-    }
 }
 
 /**

@@ -1,15 +1,9 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-import com.intellij.openapi.application.ReadAction
-import com.intellij.testFramework.IndexingTestUtil
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
-import java.util.concurrent.Callable
 
-internal class KtClassResolverTest : BasePlatformTestCase() {
-    override fun runInDispatchThread(): Boolean = false
-
+internal class KtClassResolverTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
     // Direct type resolution (mapped = null)
     // -------------------------------------------------------------------------
@@ -112,7 +106,7 @@ internal class KtClassResolverTest : BasePlatformTestCase() {
     }
 
     // -------------------------------------------------------------------------
-    // Type alias resolution (mapped = null, K2 expands through the alias)
+    // Type alias
     // -------------------------------------------------------------------------
 
     fun `test resolves typealias for data class to its underlying class`() {
@@ -145,7 +139,7 @@ internal class KtClassResolverTest : BasePlatformTestCase() {
     }
 
     // -------------------------------------------------------------------------
-    // Collection element resolution (mapped = CollectionType)
+    // Collection element resolution
     // -------------------------------------------------------------------------
 
     fun `test returns element class for custom collection`() {
@@ -156,7 +150,12 @@ internal class KtClassResolverTest : BasePlatformTestCase() {
                 "package com.example\ndata class User(val addresses: List<Address>)",
             ) as KtFile
 
-        val result = findClassForType(file, "List<Address>", MappedType.CollectionType(element = "Address", customElement = true))
+        val result =
+            findClassForType(
+                file = file,
+                typeName = "List<Address>",
+                mapped = MappedType.CollectionType(element = "Address", customElement = true),
+            )
 
         assertNotNull(result)
         assertEquals("com.example.Address", result!!.fqName?.asString())
@@ -170,14 +169,61 @@ internal class KtClassResolverTest : BasePlatformTestCase() {
                 "package com.example\ntypealias AddressList = List<Address>\ndata class User(val addresses: AddressList)",
             ) as KtFile
 
-        val result = findClassForType(file, "AddressList", MappedType.CollectionType(element = "Address", customElement = true))
+        val result =
+            findClassForType(
+                file = file,
+                typeName = "AddressList",
+                mapped = MappedType.CollectionType(element = "Address", customElement = true),
+            )
 
         assertNotNull(result)
         assertEquals("com.example.Address", result!!.fqName?.asString())
     }
 
     // -------------------------------------------------------------------------
-    // Known scalar / fully-mapped type (no class to resolve)
+    // Map value resolution
+    // -------------------------------------------------------------------------
+
+    fun `test returns value class for custom map value`() {
+        myFixture.addFileToProject("com/example/Address.kt", "package com.example\ndata class Address(val street: String)")
+        val file =
+            myFixture.addFileToProject(
+                "com/example/User.kt",
+                "package com.example\ndata class User(val addresses: Map<String, Address>)",
+            ) as KtFile
+
+        val result =
+            findClassForType(
+                file = file,
+                typeName = "Map<String, Address>",
+                mapped = MappedType.MapType(key = "string", value = "Address", customValue = true),
+            )
+
+        assertNotNull(result)
+        assertEquals("com.example.Address", result!!.fqName?.asString())
+    }
+
+    fun `test returns value class for map value typealias`() {
+        myFixture.addFileToProject("com/example/Address.kt", "package com.example\ndata class Address(val street: String)")
+        val file =
+            myFixture.addFileToProject(
+                "com/example/User.kt",
+                "package com.example\ntypealias AddressMap = Map<String, Address>\ndata class User(val addresses: AddressMap)",
+            ) as KtFile
+
+        val result =
+            findClassForType(
+                file = file,
+                typeName = "AddressMap",
+                mapped = MappedType.MapType(key = "string", value = "Address", customValue = true),
+            )
+
+        assertNotNull(result)
+        assertEquals("com.example.Address", result!!.fqName?.asString())
+    }
+
+    // -------------------------------------------------------------------------
+    // Known scalar
     // -------------------------------------------------------------------------
 
     fun `test returns null for scalar type`() {
@@ -194,20 +240,14 @@ internal class KtClassResolverTest : BasePlatformTestCase() {
         file: KtFile,
         typeName: String,
         mapped: MappedType? = null,
-    ): KtClass? {
-        IndexingTestUtil.waitUntilIndexesAreReady(project)
-        return ReadAction
-            .nonBlocking(
-                Callable {
-                    val typeRef =
-                        file.children
-                            .filterIsInstance<KtClass>()
-                            .flatMap { it.primaryConstructorParameters }
-                            .mapNotNull { it.typeReference }
-                            .first { it.text.trimEnd('?') == typeName }
-                    KtClassResolver.findReferencedClass(typeRef, mapped)
-                },
-            ).inSmartMode(project)
-            .executeSynchronously()
-    }
+    ): KtClass? =
+        inSmartReadAction {
+            val typeRef =
+                file.children
+                    .filterIsInstance<KtClass>()
+                    .flatMap { it.primaryConstructorParameters }
+                    .mapNotNull { it.typeReference }
+                    .first { it.text.trimEnd('?') == typeName }
+            KtClassResolver.findReferencedClass(typeRef, mapped)
+        }
 }

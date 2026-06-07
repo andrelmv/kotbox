@@ -1,15 +1,9 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-import com.intellij.openapi.application.ReadAction
-import com.intellij.testFramework.IndexingTestUtil
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
-import java.util.concurrent.Callable
 
-internal class ClassGraphBuilderTest : BasePlatformTestCase() {
-    override fun runInDispatchThread(): Boolean = false
-
+internal class ClassGraphBuilderTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
     // Discovery
     // -------------------------------------------------------------------------
@@ -22,41 +16,41 @@ internal class ClassGraphBuilderTest : BasePlatformTestCase() {
     }
 
     fun `test discovers a transitively referenced data class`() {
-        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
-        val file = myFixture.addFileToProject("User.kt", "package com.ex\ndata class User(val address: Address)") as KtFile
+        myFixture.addFileToProject("Address.kt", "package com.example\ndata class Address(val street: String)")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val address: Address)") as KtFile
         val graph = build(file, "User")
 
         assertEquals(setOf("User", "Address"), graph.simpleNames())
     }
 
     fun `test discovers the full three-level hierarchy`() {
-        myFixture.addFileToProject("Coords.kt", "package com.ex\ndata class Coordinates(val lat: Double)")
-        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val coordinates: Coordinates)")
-        val file = myFixture.addFileToProject("User.kt", "package com.ex\ndata class User(val address: Address)") as KtFile
+        myFixture.addFileToProject("Coordinates.kt", "package com.example\ndata class Coordinates(val lat: Double)")
+        myFixture.addFileToProject("Address.kt", "package com.example\ndata class Address(val coordinates: Coordinates)")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val address: Address)") as KtFile
         val graph = build(file, "User")
 
         assertEquals(setOf("User", "Address", "Coordinates"), graph.simpleNames())
     }
 
     fun `test discovers a referenced enum class`() {
-        myFixture.addFileToProject("Score.kt", "package com.ex\nenum class Score { HIGH, LOW }")
-        val file = myFixture.addFileToProject("User.kt", "package com.ex\ndata class User(val score: Score)") as KtFile
+        myFixture.addFileToProject("Score.kt", "package com.example\nenum class Score { HIGH, LOW }")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val score: Score)") as KtFile
         val graph = build(file, "User")
 
         assertEquals(setOf("User", "Score"), graph.simpleNames())
     }
 
     fun `test discovers element class of a custom collection`() {
-        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
-        val file = myFixture.addFileToProject("User.kt", "package com.ex\ndata class User(val addresses: List<Address>)") as KtFile
+        myFixture.addFileToProject("Address.kt", "package com.example\ndata class Address(val street: String)")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val addresses: List<Address>)") as KtFile
         val graph = build(file, "User")
 
         assertEquals(setOf("User", "Address"), graph.simpleNames())
     }
 
     fun `test discovers value class of a custom map`() {
-        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
-        val file = myFixture.addFileToProject("User.kt", "package com.ex\ndata class User(val byId: Map<String, Address>)") as KtFile
+        myFixture.addFileToProject("Address.kt", "package com.example\ndata class Address(val street: String)")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val byId: Map<String, Address>)") as KtFile
         val graph = build(file, "User")
 
         assertEquals(setOf("User", "Address"), graph.simpleNames())
@@ -78,11 +72,11 @@ internal class ClassGraphBuilderTest : BasePlatformTestCase() {
     // -------------------------------------------------------------------------
 
     fun `test a class referenced by two fields is discovered once`() {
-        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
+        myFixture.addFileToProject("Address.kt", "package com.example\ndata class Address(val street: String)")
         val file =
             myFixture.addFileToProject(
                 "User.kt",
-                "package com.ex\ndata class User(val home: Address, val work: Address)",
+                "package com.example\ndata class User(val home: Address, val work: Address)",
             ) as KtFile
         val graph = build(file, "User")
 
@@ -91,15 +85,15 @@ internal class ClassGraphBuilderTest : BasePlatformTestCase() {
     }
 
     fun `test terminates and de-duplicates on a cyclic reference`() {
-        myFixture.addFileToProject("B.kt", "package com.ex\ndata class B(val a: A)")
-        val file = myFixture.addFileToProject("A.kt", "package com.ex\ndata class A(val b: B)") as KtFile
+        myFixture.addFileToProject("B.kt", "package com.example\ndata class B(val a: A)")
+        val file = myFixture.addFileToProject("A.kt", "package com.example\ndata class A(val b: B)") as KtFile
         val graph = build(file, "A")
 
         assertEquals(setOf("A", "B"), graph.simpleNames())
     }
 
     fun `test terminates on a self-referential class`() {
-        val file = myFixture.addFileToProject("Node.kt", "package com.ex\ndata class Node(val next: Node)") as KtFile
+        val file = myFixture.addFileToProject("Node.kt", "package com.example\ndata class Node(val next: Node)") as KtFile
         val graph = build(file, "Node")
 
         assertEquals(setOf("Node"), graph.simpleNames())
@@ -126,23 +120,23 @@ internal class ClassGraphBuilderTest : BasePlatformTestCase() {
     }
 
     fun `test nested data class field wires the resolved class into the resolution`() {
-        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
-        val file = myFixture.addFileToProject("User.kt", "package com.ex\ndata class User(val address: Address)") as KtFile
+        myFixture.addFileToProject("Address.kt", "package com.example\ndata class Address(val street: String)")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val address: Address)") as KtFile
         val resolution = build(file, "User").rootFieldResolutions("User").getValue("address")
 
         assertNull(resolution.mapped) // user-defined message types map to null
         assertNotNull(resolution.resolved)
-        assertEquals("Address", nameOf(resolution.resolved))
+        assertEquals("Address", resolution.resolved.nameOf())
     }
 
     fun `test custom collection field carries CollectionType mapping and resolved element`() {
-        myFixture.addFileToProject("Address.kt", "package com.ex\ndata class Address(val street: String)")
-        val file = myFixture.addFileToProject("User.kt", "package com.ex\ndata class User(val addresses: List<Address>)") as KtFile
+        myFixture.addFileToProject("Address.kt", "package com.example\ndata class Address(val street: String)")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val addresses: List<Address>)") as KtFile
         val resolution = build(file, "User").rootFieldResolutions("User").getValue("addresses")
 
         assertTrue(resolution.mapped is MappedType.CollectionType)
         assertTrue((resolution.mapped as MappedType.CollectionType).customElement)
-        assertEquals("Address", nameOf(resolution.resolved))
+        assertEquals("Address", resolution.resolved.nameOf())
     }
 
     fun `test unresolvable type produces a resolution with no mapping and no class`() {
@@ -164,36 +158,15 @@ internal class ClassGraphBuilderTest : BasePlatformTestCase() {
     // Helpers
     // -------------------------------------------------------------------------
 
-    private fun ClassGraph.simpleNames(): Set<String> =
-        ReadAction
-            .nonBlocking(Callable { classes.values.map { it.ktClass.name!! }.toSet() })
-            .inSmartMode(project)
-            .executeSynchronously()
+    private fun ClassGraph.simpleNames(): Set<String> = inSmartReadAction { classes.values.map { it.ktClass.name!! }.toSet() }
 
     private fun ClassGraph.rootFieldResolutions(simpleName: String): Map<String, ClassGraph.FieldResolution> =
-        ReadAction
-            .nonBlocking(Callable { classes.values.first { it.ktClass.name == simpleName }.fieldResolutions })
-            .inSmartMode(project)
-            .executeSynchronously()
+        inSmartReadAction { classes.values.first { it.ktClass.name == simpleName }.fieldResolutions }
 
-    private fun nameOf(ktClass: KtClass?): String? =
-        ReadAction.nonBlocking(Callable { ktClass?.name }).inSmartMode(project).executeSynchronously()
+    private fun KtClass?.nameOf(): String? = inSmartReadAction { this?.name }
 
     private fun build(
         file: KtFile,
         rootClassName: String,
-    ): ClassGraph {
-        IndexingTestUtil.waitUntilIndexesAreReady(project)
-        return ReadAction
-            .nonBlocking(
-                Callable {
-                    val root =
-                        file.children
-                            .filterIsInstance<KtClass>()
-                            .first { it.name == rootClassName }
-                    ClassGraphBuilder.build(root)
-                },
-            ).inSmartMode(project)
-            .executeSynchronously()
-    }
+    ): ClassGraph = inSmartReadAction { ClassGraphBuilder.build(file.findClass(rootClassName)) }
 }

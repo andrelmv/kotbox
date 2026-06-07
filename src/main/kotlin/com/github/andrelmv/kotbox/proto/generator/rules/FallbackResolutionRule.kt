@@ -7,7 +7,7 @@ import com.github.andrelmv.kotbox.proto.generator.ProtoFieldType
 import com.github.andrelmv.kotbox.proto.generator.ProtoMessage
 import com.github.andrelmv.kotbox.proto.generator.ProtoModifier
 
-class FallbackResolutionRule : FieldResolutionRule {
+internal object FallbackResolutionRule : FieldResolutionRule {
     override fun tryExecute(
         name: String,
         typeText: String,
@@ -16,25 +16,26 @@ class FallbackResolutionRule : FieldResolutionRule {
         nestedMessage: ProtoMessage?,
         nestedEnum: ProtoEnumModel?,
     ): ProtoField {
-        val isNullable = typeText.endsWith('?')
-        val baseType = typeText.trimEnd('?').trim()
+        val trimmed = typeText.trim()
+        val isNullable = trimmed.endsWith('?')
+        val baseType = trimmed.removeSuffix("?").trim()
         val modifier = if (isNullable) ProtoModifier.OPTIONAL else ProtoModifier.NONE
 
-        nestedMessage?.let {
+        if (nestedMessage != null) {
             return ProtoField(
                 name = name,
                 number = number,
-                fieldType = ProtoFieldType.MessageRef(it.name, modifier),
-                nestedMessage = it,
+                fieldType = ProtoFieldType.MessageRef(nestedMessage.name, modifier),
+                nestedMessage = nestedMessage,
             )
         }
 
-        nestedEnum?.let {
+        if (nestedEnum != null) {
             return ProtoField(
                 name = name,
                 number = number,
-                fieldType = ProtoFieldType.EnumRef(it.name, modifier),
-                nestedEnum = it,
+                fieldType = ProtoFieldType.EnumRef(nestedEnum.name, modifier),
+                nestedEnum = nestedEnum,
             )
         }
 

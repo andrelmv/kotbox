@@ -7,7 +7,7 @@ import com.github.andrelmv.kotbox.proto.generator.ProtoFieldType
 import com.github.andrelmv.kotbox.proto.generator.ProtoMessage
 import com.github.andrelmv.kotbox.proto.generator.ProtoModifier
 
-class ScalarResolutionRule : FieldResolutionRule {
+internal object ScalarResolutionRule : FieldResolutionRule {
     override fun tryExecute(
         name: String,
         typeText: String,

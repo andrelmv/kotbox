@@ -1,16 +1,9 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-import com.intellij.openapi.application.ReadAction
-import com.intellij.testFramework.IndexingTestUtil
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
-import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicInteger
 
-internal class KotlinToProtoMapperTest : BasePlatformTestCase() {
-    override fun runInDispatchThread(): Boolean = false
-
+internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
     // Scalars
     // -------------------------------------------------------------------------
@@ -274,25 +267,15 @@ internal class KotlinToProtoMapperTest : BasePlatformTestCase() {
     private val fileCounter = AtomicInteger()
 
     private fun resolveFirstParamOf(fileBody: String): MappedType? {
-        val file =
-            myFixture.addFileToProject(
-                "Test${fileCounter.incrementAndGet()}.kt",
-                fileBody,
-            ) as KtFile
-        IndexingTestUtil.waitUntilIndexesAreReady(project)
-        return ReadAction
-            .nonBlocking(
-                Callable {
-                    val typeRef =
-                        file.children
-                            .filterIsInstance<KtClass>()
-                            .first { it.name == "T" }
-                            .primaryConstructorParameters
-                            .first()
-                            .typeReference!!
-                    KotlinToProtoMapper.resolve(typeRef)
-                },
-            ).inSmartMode(project)
-            .executeSynchronously()
+        val file = myFixture.addFileToProject("Test${fileCounter.incrementAndGet()}.kt", fileBody) as KtFile
+        return inSmartReadAction {
+            val typeRef =
+                file
+                    .findClass("T")
+                    .primaryConstructorParameters
+                    .first()
+                    .typeReference!!
+            KotlinToProtoMapper.resolve(typeRef)
+        }
     }
 }

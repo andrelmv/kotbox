@@ -140,7 +140,7 @@ val nickname: String?   →   optional string nickname = 6;
 val address: Address?   →   optional Address address = 3;
 ```
 
-> List<T>?` and `Map<K, V>?` — the nullable wrapper is ignored and the field is emitted as `repeated` or `map` respectively, since Proto3 has no concept of a nullable repeated field nor map.
+> `List<T>?` and `Map<K, V>?` — the nullable wrapper is ignored and the field is emitted as `repeated` or `map` respectively, since Proto3 has no concept of a nullable repeated field nor map.
 
 ---
 
@@ -184,7 +184,7 @@ The **Preview & copy** dialog renders the generated proto with syntax highlighti
 ## Compatibility
 
 !!! success "Fully Compatible"
-Built on the IntelliJ PSI API with no K1/K2 compiler dependency.
+Built on the Kotlin K2 Analysis API.
 
 - ✅ IntelliJ IDEA 2026.1 or later
 - ✅ Kotlin plugin enabled

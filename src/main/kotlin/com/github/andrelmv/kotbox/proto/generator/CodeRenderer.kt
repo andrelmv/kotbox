@@ -64,16 +64,29 @@ internal object CodeRenderer {
                     append(innerPad)
 
                     if (field.unresolved) {
-                        appendLine("// TODO: unresolved type '${field.fieldType}' — update manually")
+                        appendLine("// TODO: unresolved type '${renderType(field.fieldType)}' — update manually")
                         append(innerPad)
                     }
 
-                    appendLine(field)
+                    appendLine(renderField(field))
                 }
 
             append("$pad}")
         }
     }
+
+    private fun renderField(field: ProtoField): String = "${renderType(field.fieldType)} ${field.name.toSnakeCase()} = ${field.number};"
+
+    private fun renderType(type: ProtoFieldType): String =
+        when (type) {
+            is ProtoFieldType.Scalar -> "${prefix(type.modifier)}${type.protoType}"
+            is ProtoFieldType.Repeated -> "repeated ${type.elementProto}"
+            is ProtoFieldType.Map -> "map<${type.keyProto}, ${type.valueProto}>"
+            is ProtoFieldType.MessageRef -> "${prefix(type.modifier)}${type.typeName}"
+            is ProtoFieldType.EnumRef -> "${prefix(type.modifier)}${type.typeName}"
+        }
+
+    private fun prefix(modifier: ProtoModifier): String = if (modifier == ProtoModifier.OPTIONAL) "optional " else ""
 
     private fun renderEnum(
         model: ProtoEnumModel,

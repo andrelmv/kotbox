@@ -6,7 +6,7 @@ import com.github.andrelmv.kotbox.proto.generator.ProtoField
 import com.github.andrelmv.kotbox.proto.generator.ProtoFieldType
 import com.github.andrelmv.kotbox.proto.generator.ProtoMessage
 
-class MapResolutionRule : FieldResolutionRule {
+internal object MapResolutionRule : FieldResolutionRule {
     override fun tryExecute(
         name: String,
         typeText: String,

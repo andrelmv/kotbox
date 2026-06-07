@@ -9,13 +9,22 @@ import com.intellij.ui.components.JBScrollPane
 import java.awt.Dimension
 import javax.swing.JComponent
 
+/**
+ * @param editor non-null only for the fallback [EditorEx] viewer; release it via
+ *               [EditorFactory.releaseEditor] on disposal.
+ */
+data class ProtoEditorView(
+    val component: JComponent,
+    val editor: EditorEx?,
+)
+
 object ProtoEditorProvider {
     fun create(
         project: Project,
         protoContent: String,
-    ): JComponent =
+    ): ProtoEditorView =
         if (isProtoPluginAvailable()) {
-            createLanguageTextField(project, protoContent)
+            ProtoEditorView(createLanguageTextField(project, protoContent), editor = null)
         } else {
             createFallbackViewer(project, protoContent)
         }
@@ -40,7 +49,7 @@ object ProtoEditorProvider {
     private fun createFallbackViewer(
         project: Project,
         protoContent: String,
-    ): JComponent {
+    ): ProtoEditorView {
         val editorFactory = EditorFactory.getInstance()
         val document = editorFactory.createDocument(protoContent)
         val editor =
@@ -55,7 +64,8 @@ object ProtoEditorProvider {
                 }
             } as EditorEx
 
-        return editor.scrollPane.apply { preferredSize = buildPreferredSize() }
+        val component = editor.scrollPane.apply { preferredSize = buildPreferredSize() }
+        return ProtoEditorView(component, editor)
     }
 
     private fun buildPreferredSize() = Dimension(650, 450)

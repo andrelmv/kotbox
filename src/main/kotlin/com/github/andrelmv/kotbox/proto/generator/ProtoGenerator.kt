@@ -10,6 +10,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 
@@ -82,7 +83,6 @@ internal object ProtoGenerator {
         project: Project,
         message: String,
     ) {
-        com.intellij.openapi.ui.Messages
-            .showErrorDialog(project, message, "Proto Generator")
+        Messages.showErrorDialog(project, message, "Proto Generator")
     }
 }

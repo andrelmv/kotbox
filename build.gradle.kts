@@ -35,6 +35,7 @@ repositories {
 dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
+    testImplementation(kotlin("test"))
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
@@ -145,10 +146,14 @@ kover {
                         "com.github.andrelmv.kotbox.dslbuilder.DslBuilderPlacementDialog",
                         "com.github.andrelmv.kotbox.dslbuilder.DslBuilderAction",
                         "com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderGenerator",
-                        "com.github.andrelmv.kotbox.proto.generator.PlacementDialog",
-                        "com.github.andrelmv.kotbox.proto.generator.ProtoAction",
-                        "com.github.andrelmv.kotbox.proto.generator.ProtoGenerator",
-                        "com.github.andrelmv.kotbox.proto.generator.ProtoEditorProvider",
+                        "com.github.andrelmv.kotbox.proto.ProtoAction",
+                        "com.github.andrelmv.kotbox.proto.ProtoIntention",
+                        "com.github.andrelmv.kotbox.proto.dialog.PlacementDialog",
+                        "com.github.andrelmv.kotbox.proto.dialog.PlacementStrategy*",
+                        "com.github.andrelmv.kotbox.proto.dialog.PreviewDialog*",
+                        "com.github.andrelmv.kotbox.proto.dialog.ProtoEditorProvider*",
+                        "com.github.andrelmv.kotbox.proto.dialog.ProtoEditorView",
+                        "com.github.andrelmv.kotbox.proto.generator.ProtoGenerator*",
                     )
                 }
             }
@@ -164,7 +169,7 @@ sonar {
         property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/kover/report.xml")
         property(
             "sonar.coverage.exclusions",
-            "**/toolwindow/ui/**,**/inlay/config/**,**/dslbuilder/DslBuilderPlacementDialog.kt,**/dslbuilder/DslBuilderAction.kt,**/dslbuilder/generator/DslBuilderGenerator.kt,**/proto/generator/PlacementDialog.kt,**/proto/generator/ProtoAction.kt,**/proto/generator/ProtoGenerator.kt,**/proto/generator/ProtoEditorProvider.kt",
+            "**/toolwindow/ui/**,**/inlay/config/**,**/dslbuilder/DslBuilderPlacementDialog.kt,**/dslbuilder/DslBuilderAction.kt,**/dslbuilder/generator/DslBuilderGenerator.kt,**/proto/ProtoAction.kt,**/proto/ProtoIntention.kt,**/proto/dialog/PlacementDialog.kt,**/proto/dialog/PlacementStrategy.kt,**/proto/dialog/PreviewDialog.kt,**/proto/dialog/ProtoEditorProvider.kt,**/proto/generator/ProtoGenerator.kt",
         )
     }
 }
