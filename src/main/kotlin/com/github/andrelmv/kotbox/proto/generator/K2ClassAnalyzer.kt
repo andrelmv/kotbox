@@ -1,10 +1,15 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-import com.github.andrelmv.kotbox.proto.generator.rules.CollectionResolutionRule
-import com.github.andrelmv.kotbox.proto.generator.rules.FallbackResolutionRule
-import com.github.andrelmv.kotbox.proto.generator.rules.FieldResolutionRule
-import com.github.andrelmv.kotbox.proto.generator.rules.MapResolutionRule
-import com.github.andrelmv.kotbox.proto.generator.rules.ScalarResolutionRule
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoEnumModel
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
+import com.github.andrelmv.kotbox.proto.generator.resolution.ClassGraph
+import com.github.andrelmv.kotbox.proto.generator.resolution.ClassGraphBuilder
+import com.github.andrelmv.kotbox.proto.generator.resolution.fullyQualifiedName
+import com.github.andrelmv.kotbox.proto.generator.resolution.rules.CollectionResolutionRule
+import com.github.andrelmv.kotbox.proto.generator.resolution.rules.FallbackResolutionRule
+import com.github.andrelmv.kotbox.proto.generator.resolution.rules.FieldResolutionRule
+import com.github.andrelmv.kotbox.proto.generator.resolution.rules.MapResolutionRule
+import com.github.andrelmv.kotbox.proto.generator.resolution.rules.ScalarResolutionRule
 import com.github.andrelmv.kotbox.utils.isDataClass
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtEnumEntry
@@ -61,7 +66,7 @@ internal class K2ClassAnalyzer(
                             name = name,
                             typeText = typeReference.text,
                             number = index + 1,
-                            mappedType = resolution.mapped,
+                            protoTypeMapping = resolution.protoTypeMapping,
                             nestedMessage = nestedMessage,
                             nestedEnum = nestedEnum?.toProtoEnumModel(),
                         )

@@ -1,5 +1,10 @@
-package com.github.andrelmv.kotbox.proto.generator
+package com.github.andrelmv.kotbox.proto.generator.resolution
 
+import com.github.andrelmv.kotbox.proto.generator.ProtoGeneratorTestCase
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoTypeMapping
+import com.github.andrelmv.kotbox.proto.generator.resolution.KotlinToProtoMapper.resolveExpanded
+import org.jetbrains.kotlin.analysis.api.KaExperimentalApi
+import org.jetbrains.kotlin.analysis.api.analyze
 import org.jetbrains.kotlin.psi.KtFile
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -9,45 +14,51 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
 
     fun `test maps String to string`() {
-        val result = resolve<MappedType.ScalarType>("String")
+        val result = resolve<ProtoTypeMapping.ScalarTypeMapping>("String")
         assertEquals("string", result.type)
         assertFalse(result.isNullable)
     }
 
     fun `test maps Int to int32`() {
-        assertEquals("int32", resolve<MappedType.ScalarType>("Int").type)
+        assertEquals("int32", resolve<ProtoTypeMapping.ScalarTypeMapping>("Int").type)
     }
 
     fun `test maps Long to int64`() {
-        assertEquals("int64", resolve<MappedType.ScalarType>("Long").type)
+        assertEquals("int64", resolve<ProtoTypeMapping.ScalarTypeMapping>("Long").type)
     }
 
     fun `test maps Short to int32`() {
-        assertEquals("int32", resolve<MappedType.ScalarType>("Short").type)
+        assertEquals("int32", resolve<ProtoTypeMapping.ScalarTypeMapping>("Short").type)
     }
 
     fun `test maps Byte to int32`() {
-        assertEquals("int32", resolve<MappedType.ScalarType>("Byte").type)
+        assertEquals("int32", resolve<ProtoTypeMapping.ScalarTypeMapping>("Byte").type)
     }
 
     fun `test maps Float to float`() {
-        assertEquals("float", resolve<MappedType.ScalarType>("Float").type)
+        assertEquals("float", resolve<ProtoTypeMapping.ScalarTypeMapping>("Float").type)
     }
 
     fun `test maps Double to double`() {
-        assertEquals("double", resolve<MappedType.ScalarType>("Double").type)
+        assertEquals("double", resolve<ProtoTypeMapping.ScalarTypeMapping>("Double").type)
     }
 
     fun `test maps Boolean to bool`() {
-        assertEquals("bool", resolve<MappedType.ScalarType>("Boolean").type)
+        assertEquals("bool", resolve<ProtoTypeMapping.ScalarTypeMapping>("Boolean").type)
     }
 
     fun `test maps ByteArray to bytes`() {
-        assertEquals("bytes", resolve<MappedType.ScalarType>("ByteArray").type)
+        assertEquals(
+            "bytes",
+            resolve<ProtoTypeMapping.ScalarTypeMapping>("ByteArray").type,
+        )
     }
 
     fun `test maps Any to google protobuf Any`() {
-        assertEquals("google.protobuf.Any", resolve<MappedType.ScalarType>("Any").type)
+        assertEquals(
+            "google.protobuf.Any",
+            resolve<ProtoTypeMapping.ScalarTypeMapping>("Any").type,
+        )
     }
 
     fun `test returns null for unknown scalar type`() {
@@ -59,13 +70,13 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
 
     fun `test maps nullable String to optional scalar`() {
-        val result = resolve<MappedType.ScalarType>("String?")
+        val result = resolve<ProtoTypeMapping.ScalarTypeMapping>("String?")
         assertEquals("string", result.type)
         assertTrue(result.isNullable)
     }
 
     fun `test maps nullable Int to optional scalar`() {
-        val result = resolve<MappedType.ScalarType>("Int?")
+        val result = resolve<ProtoTypeMapping.ScalarTypeMapping>("Int?")
         assertEquals("int32", result.type)
         assertTrue(result.isNullable)
     }
@@ -75,32 +86,32 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     }
 
     fun `test nullable List of scalar is resolved as CollectionType`() {
-        val result = resolve<MappedType.CollectionType>("List<String>?")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("List<String>?")
         assertEquals("string", result.element)
         assertFalse(result.customElement)
     }
 
     fun `test nullable Set of scalar is resolved as CollectionType`() {
-        val result = resolve<MappedType.CollectionType>("Set<Int>?")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("Set<Int>?")
         assertEquals("int32", result.element)
         assertFalse(result.customElement)
     }
 
     fun `test nullable List of custom type is resolved as CollectionType with isCustomType true`() {
-        val result = resolve<MappedType.CollectionType>("List<Address>?")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("List<Address>?")
         assertEquals("Address", result.element)
         assertTrue(result.customElement)
     }
 
     fun `test nullable Map of scalar key and scalar value is resolved as MapType`() {
-        val result = resolve<MappedType.MapType>("Map<String, Int>?")
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<String, Int>?")
         assertEquals("string", result.key)
         assertEquals("int32", result.value)
         assertFalse(result.customValue)
     }
 
     fun `test nullable Map of scalar key and custom value is resolved as MapType`() {
-        val result = resolve<MappedType.MapType>("Map<String, Address>?")
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<String, Address>?")
         assertEquals("string", result.key)
         assertEquals("Address", result.value)
         assertTrue(result.customValue)
@@ -111,31 +122,31 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
 
     fun `test maps List of String to CollectionType with scalar element`() {
-        val result = resolve<MappedType.CollectionType>("List<String>")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("List<String>")
         assertEquals("string", result.element)
         assertFalse(result.customElement)
     }
 
     fun `test maps Set of Int to CollectionType with scalar element`() {
-        val result = resolve<MappedType.CollectionType>("Set<Int>")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("Set<Int>")
         assertEquals("int32", result.element)
         assertFalse(result.customElement)
     }
 
     fun `test maps List of custom type to CollectionType with isCustomType true`() {
-        val result = resolve<MappedType.CollectionType>("List<Address>")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("List<Address>")
         assertEquals("Address", result.element)
         assertTrue(result.customElement)
     }
 
     fun `test maps Set of custom type to CollectionType with isCustomType true`() {
-        val result = resolve<MappedType.CollectionType>("Set<Address>")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("Set<Address>")
         assertEquals("Address", result.element)
         assertTrue(result.customElement)
     }
 
     fun `test elementProto is the class name when custom type`() {
-        val result = resolve<MappedType.CollectionType>("List<MyMessage>")
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("List<MyMessage>")
         assertEquals("MyMessage", result.element)
     }
 
@@ -144,21 +155,21 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
 
     fun `test maps Map of String to Int`() {
-        val result = resolve<MappedType.MapType>("Map<String, Int>")
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<String, Int>")
         assertEquals("string", result.key)
         assertEquals("int32", result.value)
         assertFalse(result.customValue)
     }
 
     fun `test maps Map of String to custom type`() {
-        val result = resolve<MappedType.MapType>("Map<String, Address>")
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<String, Address>")
         assertEquals("string", result.key)
         assertEquals("Address", result.value)
         assertTrue(result.customValue)
     }
 
     fun `test maps Map of Bool key to String value`() {
-        val result = resolve<MappedType.MapType>("Map<Boolean, String>")
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<Boolean, String>")
         assertEquals("bool", result.key)
         assertEquals("string", result.value)
     }
@@ -180,14 +191,14 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     }
 
     fun `test handles nested generic in map value`() {
-        val result = resolve<MappedType.MapType>("Map<String, List<Int>>")
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<String, List<Int>>")
         assertEquals("string", result.key)
         assertEquals("List<Int>", result.value)
         assertTrue(result.customValue)
     }
 
     fun `test findTopLevelComma correctly splits nested generic value`() {
-        val result = resolve<MappedType.MapType>("Map<String, List<Int>>")
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<String, List<Int>>")
         assertEquals("string", result.key)
         assertEquals("List<Int>", result.value)
     }
@@ -197,26 +208,38 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
 
     fun `test alias for scalar resolves to ScalarType`() {
-        val result = aliased<MappedType.ScalarType>("typealias UserId = String", "UserId")
+        val result =
+            aliased<ProtoTypeMapping.ScalarTypeMapping>(
+                "typealias UserId = String",
+                "UserId",
+            )
         assertEquals("string", result.type)
         assertFalse(result.isNullable)
     }
 
     fun `test alias for nullable scalar resolves to nullable ScalarType`() {
-        val result = aliased<MappedType.ScalarType>("typealias Nickname = String?", "Nickname")
+        val result =
+            aliased<ProtoTypeMapping.ScalarTypeMapping>(
+                "typealias Nickname = String?",
+                "Nickname",
+            )
         assertEquals("string", result.type)
         assertTrue(result.isNullable)
     }
 
     fun `test alias for List of scalar resolves to CollectionType with scalar element`() {
-        val result = aliased<MappedType.CollectionType>("typealias Tags = List<String>", "Tags")
+        val result =
+            aliased<ProtoTypeMapping.CollectionTypeMapping>(
+                "typealias Tags = List<String>",
+                "Tags",
+            )
         assertEquals("string", result.element)
         assertFalse(result.customElement)
     }
 
     fun `test alias for List of custom type resolves to CollectionType with custom element`() {
         val result =
-            aliased<MappedType.CollectionType>(
+            aliased<ProtoTypeMapping.CollectionTypeMapping>(
                 "data class Address(val s: String)\ntypealias Addresses = List<Address>",
                 "Addresses",
             )
@@ -225,7 +248,11 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     }
 
     fun `test alias for Map of scalars resolves to MapType`() {
-        val result = aliased<MappedType.MapType>("typealias Scores = Map<String, Int>", "Scores")
+        val result =
+            aliased<ProtoTypeMapping.MapTypeMapping>(
+                "typealias Scores = Map<String, Int>",
+                "Scores",
+            )
         assertEquals("string", result.key)
         assertEquals("int32", result.value)
         assertFalse(result.customValue)
@@ -233,7 +260,7 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
 
     fun `test alias for Map with custom value resolves to MapType with custom value`() {
         val result =
-            aliased<MappedType.MapType>(
+            aliased<ProtoTypeMapping.MapTypeMapping>(
                 "data class Address(val s: String)\ntypealias ById = Map<String, Address>",
                 "ById",
             )
@@ -246,9 +273,10 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
     // Helpers
     // -------------------------------------------------------------------------
 
-    private inline fun <reified T : MappedType> resolve(kotlinType: String): T = resolveRaw(kotlinType).assertIs("input '$kotlinType'")
+    private inline fun <reified T : ProtoTypeMapping> resolve(kotlinType: String): T =
+        resolveRaw(kotlinType).assertIs("input '$kotlinType'")
 
-    private inline fun <reified T : MappedType> MappedType?.assertIs(context: String): T {
+    private inline fun <reified T : ProtoTypeMapping> ProtoTypeMapping?.assertIs(context: String): T {
         assertNotNull("Expected ${T::class.simpleName} but got null for $context", this)
         assertTrue(
             "Expected ${T::class.simpleName} but got ${this!!::class.simpleName} for $context",
@@ -257,16 +285,17 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
         return this as T
     }
 
-    private fun resolveRaw(kotlinType: String): MappedType? = resolveFirstParamOf("data class T(val x: $kotlinType)")
+    private fun resolveRaw(kotlinType: String): ProtoTypeMapping? = resolveFirstParamOf("data class T(val x: $kotlinType)")
 
-    private inline fun <reified T : MappedType> aliased(
+    private inline fun <reified T : ProtoTypeMapping> aliased(
         declarations: String,
         fieldType: String,
     ): T = resolveFirstParamOf("$declarations\ndata class T(val x: $fieldType)").assertIs("field type '$fieldType'")
 
     private val fileCounter = AtomicInteger()
 
-    private fun resolveFirstParamOf(fileBody: String): MappedType? {
+    @OptIn(KaExperimentalApi::class)
+    private fun resolveFirstParamOf(fileBody: String): ProtoTypeMapping? {
         val file = myFixture.addFileToProject("Test${fileCounter.incrementAndGet()}.kt", fileBody) as KtFile
         return inSmartReadAction {
             val typeRef =
@@ -275,7 +304,9 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
                     .primaryConstructorParameters
                     .first()
                     .typeReference!!
-            KotlinToProtoMapper.resolve(typeRef)
+            KotlinToProtoMapper
+                .resolveFromText(typeRef.text)
+                ?: analyze(typeRef) { resolveExpanded(typeRef) }
         }
     }
 }

@@ -1,11 +1,15 @@
-package com.github.andrelmv.kotbox.proto.generator
+package com.github.andrelmv.kotbox.proto.generator.resolution
 
+import com.github.andrelmv.kotbox.proto.generator.ProtoGeneratorTestCase
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoTypeMapping
+import org.jetbrains.kotlin.analysis.api.KaExperimentalApi
+import org.jetbrains.kotlin.analysis.api.analyze
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 
-internal class KtClassResolverTest : ProtoGeneratorTestCase() {
+internal class KtClassExtractorTest : ProtoGeneratorTestCase() {
     // -------------------------------------------------------------------------
-    // Direct type resolution (mapped = null)
+    // Direct type resolution
     // -------------------------------------------------------------------------
 
     fun `test resolves data class from explicit import over same-named class in different package`() {
@@ -154,7 +158,7 @@ internal class KtClassResolverTest : ProtoGeneratorTestCase() {
             findClassForType(
                 file = file,
                 typeName = "List<Address>",
-                mapped = MappedType.CollectionType(element = "Address", customElement = true),
+                typeMapping = ProtoTypeMapping.CollectionTypeMapping(element = "Address", customElement = true),
             )
 
         assertNotNull(result)
@@ -173,7 +177,7 @@ internal class KtClassResolverTest : ProtoGeneratorTestCase() {
             findClassForType(
                 file = file,
                 typeName = "AddressList",
-                mapped = MappedType.CollectionType(element = "Address", customElement = true),
+                typeMapping = ProtoTypeMapping.CollectionTypeMapping(element = "Address", customElement = true),
             )
 
         assertNotNull(result)
@@ -196,7 +200,7 @@ internal class KtClassResolverTest : ProtoGeneratorTestCase() {
             findClassForType(
                 file = file,
                 typeName = "Map<String, Address>",
-                mapped = MappedType.MapType(key = "string", value = "Address", customValue = true),
+                typeMapping = ProtoTypeMapping.MapTypeMapping(key = "string", value = "Address", customValue = true),
             )
 
         assertNotNull(result)
@@ -215,7 +219,7 @@ internal class KtClassResolverTest : ProtoGeneratorTestCase() {
             findClassForType(
                 file = file,
                 typeName = "AddressMap",
-                mapped = MappedType.MapType(key = "string", value = "Address", customValue = true),
+                typeMapping = ProtoTypeMapping.MapTypeMapping(key = "string", value = "Address", customValue = true),
             )
 
         assertNotNull(result)
@@ -229,17 +233,18 @@ internal class KtClassResolverTest : ProtoGeneratorTestCase() {
     fun `test returns null for scalar type`() {
         val file = myFixture.addFileToProject("User.kt", "data class User(val name: String)") as KtFile
 
-        assertNull(findClassForType(file, "String", MappedType.ScalarType(type = "string", isNullable = false)))
+        assertNull(findClassForType(file, "String", ProtoTypeMapping.ScalarTypeMapping(type = "string", isNullable = false)))
     }
 
     // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
 
+    @OptIn(KaExperimentalApi::class)
     private fun findClassForType(
         file: KtFile,
         typeName: String,
-        mapped: MappedType? = null,
+        typeMapping: ProtoTypeMapping? = null,
     ): KtClass? =
         inSmartReadAction {
             val typeRef =
@@ -248,6 +253,6 @@ internal class KtClassResolverTest : ProtoGeneratorTestCase() {
                     .flatMap { it.primaryConstructorParameters }
                     .mapNotNull { it.typeReference }
                     .first { it.text.trimEnd('?') == typeName }
-            KtClassResolver.findReferencedClass(typeRef, mapped)
+            analyze(typeRef) { with(KtClassExtractor) { resolveClass(typeRef, typeMapping) } }
         }
 }

@@ -1,5 +1,11 @@
 package com.github.andrelmv.kotbox.proto.generator
 
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoEnumModel
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoField
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoFieldType
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoModifier
+
 internal object CodeRenderer {
     /**
      * Renders the full `.proto` file content for [model].

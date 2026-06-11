@@ -1,18 +1,18 @@
-package com.github.andrelmv.kotbox.proto.generator.rules
+package com.github.andrelmv.kotbox.proto.generator.resolution.rules
 
-import com.github.andrelmv.kotbox.proto.generator.MappedType
-import com.github.andrelmv.kotbox.proto.generator.ProtoEnumModel
-import com.github.andrelmv.kotbox.proto.generator.ProtoField
-import com.github.andrelmv.kotbox.proto.generator.ProtoFieldType
-import com.github.andrelmv.kotbox.proto.generator.ProtoMessage
-import com.github.andrelmv.kotbox.proto.generator.ProtoModifier
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoEnumModel
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoField
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoFieldType
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoModifier
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoTypeMapping
 
 internal object FallbackResolutionRule : FieldResolutionRule {
     override fun tryExecute(
         name: String,
         typeText: String,
         number: Int,
-        mappedType: MappedType?,
+        protoTypeMapping: ProtoTypeMapping?,
         nestedMessage: ProtoMessage?,
         nestedEnum: ProtoEnumModel?,
     ): ProtoField {

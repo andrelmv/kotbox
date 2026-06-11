@@ -1,5 +1,10 @@
 package com.github.andrelmv.kotbox.proto.generator
 
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoEnumModel
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoField
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoFieldType
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoModifier
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue

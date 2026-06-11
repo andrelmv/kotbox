@@ -1,5 +1,7 @@
-package com.github.andrelmv.kotbox.proto.generator
+package com.github.andrelmv.kotbox.proto.generator.resolution
 
+import com.github.andrelmv.kotbox.proto.generator.ProtoGeneratorTestCase
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoTypeMapping
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 
@@ -114,8 +116,8 @@ internal class ClassGraphBuilderTest : ProtoGeneratorTestCase() {
         val file = myFixture.addFileToProject("User.kt", "data class User(val name: String)") as KtFile
         val resolution = build(file, "User").rootFieldResolutions("User").getValue("name")
 
-        assertTrue(resolution.mapped is MappedType.ScalarType)
-        assertEquals("string", (resolution.mapped as MappedType.ScalarType).type)
+        assertTrue(resolution.protoTypeMapping is ProtoTypeMapping.ScalarTypeMapping)
+        assertEquals("string", (resolution.protoTypeMapping as ProtoTypeMapping.ScalarTypeMapping).type)
         assertNull(resolution.resolved)
     }
 
@@ -124,7 +126,7 @@ internal class ClassGraphBuilderTest : ProtoGeneratorTestCase() {
         val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val address: Address)") as KtFile
         val resolution = build(file, "User").rootFieldResolutions("User").getValue("address")
 
-        assertNull(resolution.mapped) // user-defined message types map to null
+        assertNull(resolution.protoTypeMapping) // user-defined message types map to null
         assertNotNull(resolution.resolved)
         assertEquals("Address", resolution.resolved.nameOf())
     }
@@ -134,8 +136,8 @@ internal class ClassGraphBuilderTest : ProtoGeneratorTestCase() {
         val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val addresses: List<Address>)") as KtFile
         val resolution = build(file, "User").rootFieldResolutions("User").getValue("addresses")
 
-        assertTrue(resolution.mapped is MappedType.CollectionType)
-        assertTrue((resolution.mapped as MappedType.CollectionType).customElement)
+        assertTrue(resolution.protoTypeMapping is ProtoTypeMapping.CollectionTypeMapping)
+        assertTrue((resolution.protoTypeMapping as ProtoTypeMapping.CollectionTypeMapping).customElement)
         assertEquals("Address", resolution.resolved.nameOf())
     }
 
@@ -143,7 +145,7 @@ internal class ClassGraphBuilderTest : ProtoGeneratorTestCase() {
         val file = myFixture.addFileToProject("User.kt", "data class User(val mystery: GhostType)") as KtFile
         val resolution = build(file, "User").rootFieldResolutions("User").getValue("mystery")
 
-        assertNull(resolution.mapped)
+        assertNull(resolution.protoTypeMapping)
         assertNull(resolution.resolved)
     }
 

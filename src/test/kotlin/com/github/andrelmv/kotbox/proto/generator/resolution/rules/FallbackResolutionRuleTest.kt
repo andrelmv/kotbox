@@ -1,10 +1,10 @@
-package com.github.andrelmv.kotbox.proto.generator.rules
+package com.github.andrelmv.kotbox.proto.generator.resolution.rules
 
-import com.github.andrelmv.kotbox.proto.generator.ProtoEnumModel
-import com.github.andrelmv.kotbox.proto.generator.ProtoField
-import com.github.andrelmv.kotbox.proto.generator.ProtoFieldType
-import com.github.andrelmv.kotbox.proto.generator.ProtoMessage
-import com.github.andrelmv.kotbox.proto.generator.ProtoModifier
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoEnumModel
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoField
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoFieldType
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoModifier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -93,7 +93,7 @@ class FallbackResolutionRuleTest {
             name = "field",
             typeText = typeText,
             number = 1,
-            mappedType = null,
+            protoTypeMapping = null,
             nestedMessage = nestedMessage,
             nestedEnum = nestedEnum,
         )

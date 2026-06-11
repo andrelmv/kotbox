@@ -1,5 +1,7 @@
 package com.github.andrelmv.kotbox.proto.generator
 
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoFieldType
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
 import org.jetbrains.kotlin.psi.KtFile
 import kotlin.test.assertFailsWith
 

@@ -1,10 +1,10 @@
-package com.github.andrelmv.kotbox.proto.generator.rules
+package com.github.andrelmv.kotbox.proto.generator.resolution.rules
 
-import com.github.andrelmv.kotbox.proto.generator.MappedType
-import com.github.andrelmv.kotbox.proto.generator.ProtoEnumModel
-import com.github.andrelmv.kotbox.proto.generator.ProtoField
-import com.github.andrelmv.kotbox.proto.generator.ProtoFieldType
-import com.github.andrelmv.kotbox.proto.generator.ProtoMessage
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoEnumModel
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoField
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoFieldType
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoTypeMapping
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
@@ -13,7 +13,7 @@ import org.junit.Test
 class MapResolutionRuleTest {
     @Test
     fun `produces a map field carrying the key and value types`() {
-        val field = execute(MappedType.MapType(key = "string", value = "int32", customValue = false))
+        val field = execute(ProtoTypeMapping.MapTypeMapping(key = "string", value = "int32", customValue = false))
 
         assertEquals("scores", field!!.name)
         assertEquals(1, field.number)
@@ -25,28 +25,28 @@ class MapResolutionRuleTest {
     @Test
     fun `passes through the nested message of a custom value`() {
         val address = ProtoMessage(name = "Address", fields = emptyList())
-        val field = execute(MappedType.MapType(key = "string", value = "Address", customValue = true), nestedMessage = address)
+        val field = execute(ProtoTypeMapping.MapTypeMapping(key = "string", value = "Address", customValue = true), nestedMessage = address)
 
         assertSame(address, field!!.nestedMessage)
     }
 
     @Test
     fun `ignores scalar types`() {
-        assertNull(execute(MappedType.ScalarType(type = "string", isNullable = false)))
+        assertNull(execute(ProtoTypeMapping.ScalarTypeMapping(type = "string", isNullable = false)))
     }
 
     @Test
     fun `ignores collection types`() {
-        assertNull(execute(MappedType.CollectionType(element = "string", customElement = false)))
+        assertNull(execute(ProtoTypeMapping.CollectionTypeMapping(element = "string", customElement = false)))
     }
 
     @Test
     fun `ignores a null mapping`() {
-        assertNull(execute(mappedType = null))
+        assertNull(execute(protoTypeMapping = null))
     }
 
     private fun execute(
-        mappedType: MappedType?,
+        protoTypeMapping: ProtoTypeMapping?,
         nestedMessage: ProtoMessage? = null,
         nestedEnum: ProtoEnumModel? = null,
     ): ProtoField? =
@@ -54,7 +54,7 @@ class MapResolutionRuleTest {
             name = "scores",
             typeText = "Map<String, Int>",
             number = 1,
-            mappedType = mappedType,
+            protoTypeMapping = protoTypeMapping,
             nestedMessage = nestedMessage,
             nestedEnum = nestedEnum,
         )

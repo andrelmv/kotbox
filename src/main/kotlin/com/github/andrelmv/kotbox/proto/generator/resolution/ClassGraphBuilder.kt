@@ -1,5 +1,6 @@
-package com.github.andrelmv.kotbox.proto.generator
+package com.github.andrelmv.kotbox.proto.generator.resolution
 
+import com.github.andrelmv.kotbox.proto.generator.model.ProtoTypeMapping
 import org.jetbrains.kotlin.psi.KtClass
 
 /**
@@ -22,13 +23,10 @@ internal object ClassGraphBuilder {
                     .mapNotNull { param ->
                         val name = param.name ?: return@mapNotNull null
                         val typeReference = param.typeReference ?: return@mapNotNull null
-                        val mapped: MappedType? = KotlinToProtoMapper.resolve(typeReference)
-                        val resolvedKtClass: KtClass? =
-                            KtClassResolver
-                                .findReferencedClass(typeReference, mapped)
-                                ?.also { stack.addLast(it) }
+                        val resolution = FieldResolutionFacade.resolve(typeReference)
+                        resolution.resolved?.let { stack.addLast(it) }
 
-                        name to ClassGraph.FieldResolution(mapped, resolvedKtClass)
+                        name to resolution
                     }.toMap()
 
             classes[fqn] = ClassGraph.ResolvedClass(current, fieldResolutions)
@@ -47,7 +45,7 @@ internal data class ClassGraph(
     )
 
     data class FieldResolution(
-        val mapped: MappedType?,
+        val protoTypeMapping: ProtoTypeMapping?,
         val resolved: KtClass?,
     )
 }

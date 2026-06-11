@@ -1,7 +1,7 @@
-package com.github.andrelmv.kotbox.proto.generator
+package com.github.andrelmv.kotbox.proto.generator.model
 
 /**
- * Data model for a proto `message` block — no IntelliJ dependencies, keeping [CodeRenderer] framework-free
+ * Data model for a proto `message` block — no IntelliJ dependencies
  */
 data class ProtoMessage(
     val name: String,
