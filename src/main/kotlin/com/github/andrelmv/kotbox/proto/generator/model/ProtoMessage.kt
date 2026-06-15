@@ -3,12 +3,12 @@ package com.github.andrelmv.kotbox.proto.generator.model
 /**
  * Data model for a proto `message` block — no IntelliJ dependencies
  */
-data class ProtoMessage(
+internal data class ProtoMessage(
     val name: String,
     val fields: List<ProtoField>,
 )
 
-data class ProtoField(
+internal data class ProtoField(
     val fieldType: ProtoFieldType,
     val name: String,
     val number: Int,
@@ -17,7 +17,7 @@ data class ProtoField(
     val unresolved: Boolean = false,
 )
 
-sealed interface ProtoFieldType {
+internal sealed interface ProtoFieldType {
     data class Scalar(
         val protoType: String,
         val modifier: ProtoModifier,
@@ -43,12 +43,12 @@ sealed interface ProtoFieldType {
     ) : ProtoFieldType
 }
 
-enum class ProtoModifier {
+internal enum class ProtoModifier {
     NONE,
     OPTIONAL,
 }
 
-data class ProtoEnumModel(
+internal data class ProtoEnumModel(
     val name: String,
     val entries: LinkedHashSet<String>,
 )

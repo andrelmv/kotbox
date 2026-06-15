@@ -117,6 +117,19 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
         assertTrue(result.customValue)
     }
 
+    fun `test List with nullable scalar element strips nullability`() {
+        val result = resolve<ProtoTypeMapping.CollectionTypeMapping>("List<String?>")
+        assertEquals("string", result.element)
+        assertFalse(result.customElement)
+    }
+
+    fun `test Map with nullable scalar value strips nullability`() {
+        val result = resolve<ProtoTypeMapping.MapTypeMapping>("Map<String, Int?>")
+        assertEquals("string", result.key)
+        assertEquals("int32", result.value)
+        assertFalse(result.customValue)
+    }
+
     // -------------------------------------------------------------------------
     // Collections
     // -------------------------------------------------------------------------

@@ -13,12 +13,12 @@ import javax.swing.JComponent
  * @param editor non-null only for the fallback [EditorEx] viewer; release it via
  *               [EditorFactory.releaseEditor] on disposal.
  */
-data class ProtoEditorView(
+internal data class ProtoEditorView(
     val component: JComponent,
     val editor: EditorEx?,
 )
 
-object ProtoEditorProvider {
+internal object ProtoEditorProvider {
     fun create(
         project: Project,
         protoContent: String,

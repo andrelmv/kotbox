@@ -9,23 +9,23 @@ import org.jetbrains.kotlin.psi.KtFile
 
 /**
  * Analyzes the data class hierarchy starting from a root class and produces
- * a [BuilderHierarchy] in topological order (dependencies before dependents).
- * Uses [FieldClassifier] (backed by the K2 Analysis API) to classify each field.
+ * a [DslBuilderHierarchy] in topological order (dependencies before dependents).
+ * Uses [DslBuilderFieldClassifier] (backed by the K2 Analysis API) to classify each field.
  * Cycle detection is handled via a visited set — never remove that guard.
  */
-class HierarchyAnalyzer(
+class DslBuilderHierarchyAnalyzer(
     private val project: Project,
     private val scope: GlobalSearchScope,
 ) {
-    fun analyze(rootClass: KtClass): BuilderHierarchy {
+    fun analyze(rootClass: KtClass): DslBuilderHierarchy {
         require(rootClass.isDataClass()) { "'${rootClass.name}' is not a data class" }
 
         val rootName = rootClass.name ?: error("Root class has no name")
         val dslMarkerName = "${rootName}Dsl"
-        val classifier = FieldClassifier(project, scope, rootClass)
+        val classifier = DslBuilderFieldClassifier(project, scope, rootClass)
 
         val visited = mutableSetOf<String>()
-        val orderedBuilders = mutableListOf<BuilderClassModel>()
+        val orderedBuilders = mutableListOf<DslBuilderClassModel>()
         val requiredImports = mutableSetOf<String>()
 
         fun processClass(
@@ -41,17 +41,17 @@ class HierarchyAnalyzer(
 
             // Process dependencies first (DFS — guarantees topological order)
             fields
-                .filterIsInstance<BuilderField.NestedBuilder>()
+                .filterIsInstance<DslBuilderField.NestedBuilder>()
                 .forEach { findDataClass(it.typeName)?.let { cls -> processClass(cls, false) } }
             fields
-                .filterIsInstance<BuilderField.NestedBuilderList>()
+                .filterIsInstance<DslBuilderField.NestedBuilderList>()
                 .forEach { findDataClass(it.elementTypeName)?.let { cls -> processClass(cls, false) } }
 
             // Collect imports for nested types
             fields.forEach { field ->
                 when (field) {
-                    is BuilderField.NestedBuilder -> collectImport(field.typeName, requiredImports)
-                    is BuilderField.NestedBuilderList -> collectImport(field.elementTypeName, requiredImports)
+                    is DslBuilderField.NestedBuilder -> collectImport(field.typeName, requiredImports)
+                    is DslBuilderField.NestedBuilderList -> collectImport(field.elementTypeName, requiredImports)
                     else -> {}
                 }
             }
@@ -62,7 +62,7 @@ class HierarchyAnalyzer(
                     ?.asString() ?: ""
 
             orderedBuilders.add(
-                BuilderClassModel(
+                DslBuilderClassModel(
                     dataClassName = className,
                     builderClassName = "${className}Builder",
                     packageName = packageName,
@@ -75,7 +75,7 @@ class HierarchyAnalyzer(
 
         processClass(rootClass, isRoot = true)
 
-        return BuilderHierarchy(
+        return DslBuilderHierarchy(
             builders = orderedBuilders,
             dslMarkerName = dslMarkerName,
             requiredImports = requiredImports,

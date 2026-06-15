@@ -2,6 +2,7 @@ package com.github.andrelmv.kotbox.proto
 
 import com.github.andrelmv.kotbox.proto.generator.ProtoGenerator
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.codeInsight.intention.LowPriorityAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
@@ -10,7 +11,9 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 
-internal class ProtoIntention : IntentionAction {
+internal class ProtoIntention :
+    IntentionAction,
+    LowPriorityAction {
     override fun getText(): String = "Generate proto"
 
     override fun getFamilyName(): String = "Kotlin Toolbox"

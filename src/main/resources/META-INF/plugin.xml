@@ -8,7 +8,6 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>org.jetbrains.kotlin</depends>
-    <depends optional="true" config-file="withProto.xml">com.intellij.plugins.protobuf</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 

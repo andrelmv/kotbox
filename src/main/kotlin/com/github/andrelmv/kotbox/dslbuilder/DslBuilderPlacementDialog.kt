@@ -1,8 +1,9 @@
 package com.github.andrelmv.kotbox.dslbuilder
 
-import com.github.andrelmv.kotbox.dslbuilder.placement.PlacementStrategy
+import com.github.andrelmv.kotbox.dslbuilder.placement.DslBuilderPlacementStrategy
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBRadioButton
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
@@ -24,7 +25,6 @@ class DslBuilderPlacementDialog(
 
     init {
         title = "Generate DSL Builder"
-        init()
 
         val group = ButtonGroup()
         group.add(sameFileButton)
@@ -32,6 +32,15 @@ class DslBuilderPlacementDialog(
 
         newFileNameField.isEnabled = false
         newFileButton.addChangeListener { newFileNameField.isEnabled = newFileButton.isSelected }
+
+        init()
+    }
+
+    override fun doValidate(): ValidationInfo? {
+        if (newFileButton.isSelected && newFileNameField.text.trim().isEmpty()) {
+            return ValidationInfo("File name cannot be empty", newFileNameField)
+        }
+        return null
     }
 
     override fun createCenterPanel(): JComponent {
@@ -61,9 +70,9 @@ class DslBuilderPlacementDialog(
         return panel
     }
 
-    fun getPlacementStrategy(): PlacementStrategy =
+    fun getPlacementStrategy(): DslBuilderPlacementStrategy =
         when {
-            newFileButton.isSelected -> PlacementStrategy.NewFile(newFileNameField.text.trim())
-            else -> PlacementStrategy.SameFile
+            newFileButton.isSelected -> DslBuilderPlacementStrategy.NewFile(newFileNameField.text.trim())
+            else -> DslBuilderPlacementStrategy.SameFile
         }
 }

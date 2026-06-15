@@ -10,7 +10,7 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 
-class CodeRendererTest {
+class ProtoCodeRendererTest {
     // -------------------------------------------------------------------------
     // Header
     // -------------------------------------------------------------------------
@@ -18,14 +18,14 @@ class CodeRendererTest {
     @Test
     fun `test renders syntax header`() {
         val model = message("Empty")
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.startsWith("""syntax = "proto3";"""))
     }
 
     @Test
     fun `test renders java package options when provided`() {
         val model = message("Empty")
-        val output = CodeRenderer.render(model, javaPackage = "com.example")
+        val output = ProtoCodeRenderer.render(model, javaPackage = "com.example")
         assertTrue(output.contains("""option java_package = "com.example";"""))
         assertTrue(output.contains("option java_multiple_files = true;"))
     }
@@ -33,7 +33,7 @@ class CodeRendererTest {
     @Test
     fun `test does not render java package options when blank`() {
         val model = message("Empty")
-        val output = CodeRenderer.render(model, javaPackage = "")
+        val output = ProtoCodeRenderer.render(model, javaPackage = "")
         assertFalse(output.contains("option java_package"))
     }
 
@@ -48,7 +48,7 @@ class CodeRendererTest {
                 "User",
                 scalarField("name", "string", number = 1),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("string name = 1;"))
     }
 
@@ -59,7 +59,7 @@ class CodeRendererTest {
                 "User",
                 scalarField("age", "int32", number = 1),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("int32 age = 1;"))
     }
 
@@ -70,7 +70,7 @@ class CodeRendererTest {
                 "User",
                 scalarField("nickname", "string", number = 1, modifier = ProtoModifier.OPTIONAL),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("optional string nickname = 1;"))
     }
 
@@ -83,7 +83,7 @@ class CodeRendererTest {
                 scalarField("age", "int32", number = 2),
                 scalarField("active", "bool", number = 3),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("string name = 1;"))
         assertTrue(output.contains("int32 age = 2;"))
         assertTrue(output.contains("bool active = 3;"))
@@ -100,7 +100,7 @@ class CodeRendererTest {
                 "User",
                 scalarField("firstName", "string", number = 1),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("string first_name = 1;"))
     }
 
@@ -115,7 +115,7 @@ class CodeRendererTest {
                 "User",
                 repeatedField("tags", "string", number = 1),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("repeated string tags = 1;"))
     }
 
@@ -131,7 +131,7 @@ class CodeRendererTest {
                 "Cart",
                 repeatedField("items", "Item", number = 1, nested = nested),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("message Item {"))
         assertTrue(output.contains("repeated Item items = 1;"))
     }
@@ -147,7 +147,7 @@ class CodeRendererTest {
                 "User",
                 mapField("scores", "string", "int32", number = 1),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("map<string, int32> scores = 1;"))
     }
 
@@ -163,7 +163,7 @@ class CodeRendererTest {
                 "User",
                 mapField("addresses", "string", "Address", number = 1, nestedValue = nested),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("message Address {"))
         assertTrue(output.contains("map<string, Address> addresses = 1;"))
     }
@@ -184,7 +184,7 @@ class CodeRendererTest {
                 "User",
                 scalarField("address", "Address", number = 1, nested = nested),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         val addressIdx = output.indexOf("message Address")
         val userIdx = output.indexOf("message User")
         assertTrue(addressIdx < userIdx)
@@ -207,7 +207,7 @@ class CodeRendererTest {
                 "User",
                 messageRefField("address", "Address", number = 1, nested = address),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("message Coordinates {"))
         assertTrue(output.contains("message Address {"))
         assertTrue(output.contains("message User {"))
@@ -227,7 +227,7 @@ class CodeRendererTest {
                 scalarField("primaryTag", "Tag", number = 1, nested = nested),
                 scalarField("secondaryTag", "Tag", number = 2, nested = nested),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertEquals(1, output.split("message Tag {").size - 1)
     }
 
@@ -243,7 +243,7 @@ class CodeRendererTest {
                 "User",
                 enumField("score", "Score", number = 1, enum = enum),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("enum Score {"))
         assertTrue(output.contains("HIGH = 0;"))
         assertTrue(output.contains("LOW = 1;"))
@@ -261,7 +261,7 @@ class CodeRendererTest {
                 "User",
                 enumField("status", "Status", number = 1, enum = enum),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("ACTIVE = 0;"))
         assertTrue(output.contains("INACTIVE = 1;"))
     }
@@ -275,7 +275,7 @@ class CodeRendererTest {
                 enumField("score1", "Score", number = 1, enum = enum),
                 enumField("score2", "Score", number = 2, enum = enum),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertEquals(1, output.split("enum Score {").size - 1)
     }
 
@@ -297,7 +297,7 @@ class CodeRendererTest {
                     nestedEnum = null,
                 ),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("// TODO: unresolved type"))
     }
 
@@ -308,13 +308,13 @@ class CodeRendererTest {
     @Test
     fun `test output ends with newline`() {
         val model = message("User", scalarField("name", "string", number = 1))
-        assertTrue(CodeRenderer.render(model).endsWith("\n"))
+        assertTrue(ProtoCodeRenderer.render(model).endsWith("\n"))
     }
 
     @Test
     fun `test message block is correctly wrapped`() {
         val model = message("User", scalarField("name", "string", number = 1))
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("message User {"))
         assertTrue(output.contains("}"))
     }
@@ -327,7 +327,7 @@ class CodeRendererTest {
                 "User",
                 messageRefField("address", "Address", number = 1, modifier = ProtoModifier.OPTIONAL, nested = nested),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("optional Address address = 1;"))
     }
 
@@ -345,7 +345,7 @@ class CodeRendererTest {
                     nestedMessage = null,
                 ),
             )
-        val output = CodeRenderer.render(model)
+        val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("optional Score score = 1;"))
     }
 

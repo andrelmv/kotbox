@@ -1,15 +1,15 @@
 package com.github.andrelmv.kotbox.dslbuilder
 
-import com.github.andrelmv.kotbox.dslbuilder.placement.SameFilePlacement
+import com.github.andrelmv.kotbox.dslbuilder.placement.DslBuilderSameFilePlacement
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtFile
 
-class SameFilePlacementTest : BasePlatformTestCase() {
+class DslBuilderSameFilePlacementTest : BasePlatformTestCase() {
     fun `test insert appends annotation class to file`() {
         myFixture.configureByText("Test.kt", "data class User(val name: String)\n")
         val file = myFixture.file as KtFile
 
-        SameFilePlacement.insert(file, "@DslMarker\nannotation class UserDsl", project)
+        DslBuilderSameFilePlacement.insert(file, "@DslMarker\nannotation class UserDsl", project)
 
         assertTrue(file.text.contains("annotation class UserDsl"))
     }
@@ -18,7 +18,7 @@ class SameFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("Test.kt", "data class User(val name: String)\n")
         val file = myFixture.file as KtFile
 
-        SameFilePlacement.insert(
+        DslBuilderSameFilePlacement.insert(
             file,
             "@UserDsl\nclass UserBuilder {\n    var name: String? = null\n    fun build(): User = User(name = name ?: error(\"\"))\n}",
             project,
@@ -32,7 +32,7 @@ class SameFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("Test.kt", "data class User(val name: String)\n")
         val file = myFixture.file as KtFile
 
-        SameFilePlacement.insert(file, "class UserBuilder {}", project)
+        DslBuilderSameFilePlacement.insert(file, "class UserBuilder {}", project)
 
         assertTrue(file.text.contains("data class User"))
         assertTrue(file.text.contains("class UserBuilder"))
@@ -42,7 +42,7 @@ class SameFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("Test.kt", "data class User(val name: String)\n")
         val file = myFixture.file as KtFile
 
-        SameFilePlacement.insert(
+        DslBuilderSameFilePlacement.insert(
             file,
             "@DslMarker\nannotation class UserDsl\n\nclass UserBuilder {}",
             project,

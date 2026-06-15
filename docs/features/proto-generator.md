@@ -184,11 +184,11 @@ The **Preview & copy** dialog renders the generated proto with syntax highlighti
 ## Compatibility
 
 !!! success "Fully Compatible"
-Built on the Kotlin K2 Analysis API.
+    Built on the Kotlin K2 Analysis API.
 
-- ✅ IntelliJ IDEA 2026.1 or later
-- ✅ Kotlin plugin enabled
-- ✅ Protocol Buffers plugin (optional — enhances preview highlighting)
+    - ✅ IntelliJ IDEA 2026.1 or later
+    - ✅ Kotlin plugin enabled
+    - ✅ Protocol Buffers plugin (optional — enhances preview highlighting)
 
 ---
 
