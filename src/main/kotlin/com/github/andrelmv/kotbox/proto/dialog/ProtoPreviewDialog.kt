@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent
 import javax.swing.Action
 import javax.swing.JComponent
 
-class PreviewDialog(
+internal class ProtoPreviewDialog(
     project: Project,
     private val protoContent: String,
 ) : DialogWrapper(project, true) {

@@ -1,15 +1,15 @@
 package com.github.andrelmv.kotbox.dslbuilder
 
-import com.github.andrelmv.kotbox.dslbuilder.placement.NewFilePlacement
+import com.github.andrelmv.kotbox.dslbuilder.placement.DslBuilderNewFilePlacement
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtFile
 
-class NewFilePlacementTest : BasePlatformTestCase() {
+class DslBuilderNewFilePlacementTest : BasePlatformTestCase() {
     fun `test insert creates new kt file in the same directory`() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
+        DslBuilderNewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
 
         assertNotNull(sourceFile.containingDirectory?.findFile("UserBuilder.kt"))
     }
@@ -18,7 +18,7 @@ class NewFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
+        DslBuilderNewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
 
         assertNotNull(sourceFile.containingDirectory?.findFile("UserBuilder.kt"))
     }
@@ -27,7 +27,7 @@ class NewFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "UserBuilder.kt", "class UserBuilder {}", project)
+        DslBuilderNewFilePlacement.insert(sourceFile, "UserBuilder.kt", "class UserBuilder {}", project)
 
         assertNotNull(sourceFile.containingDirectory?.findFile("UserBuilder.kt"))
         // Ensure "UserBuilder.kt.kt" was not created
@@ -38,7 +38,7 @@ class NewFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
+        DslBuilderNewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
 
         val newFile = sourceFile.containingDirectory?.findFile("UserBuilder.kt") as? KtFile
         assertEquals("com.example", newFile?.packageFqName?.asString())
@@ -48,7 +48,7 @@ class NewFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "data class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
+        DslBuilderNewFilePlacement.insert(sourceFile, "UserBuilder", "class UserBuilder {}", project)
 
         assertNotNull(sourceFile.containingDirectory?.findFile("UserBuilder.kt"))
     }

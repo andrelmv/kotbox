@@ -3,12 +3,12 @@ package com.github.andrelmv.kotbox.proto.dialog
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtFile
 
-internal class NewFilePlacementTest : BasePlatformTestCase() {
+internal class ProtoNewFilePlacementTest : BasePlatformTestCase() {
     fun `test insert creates new file in the same directory`() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "User", "message User {}", project)
+        ProtoNewFilePlacement.insert(sourceFile, "User", "message User {}", project)
 
         assertNotNull(sourceFile.containingDirectory?.findFile("User.proto"))
     }
@@ -17,7 +17,7 @@ internal class NewFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "User", "message User {}", project)
+        ProtoNewFilePlacement.insert(sourceFile, "User", "message User {}", project)
 
         assertNotNull(sourceFile.containingDirectory?.findFile("User.proto"))
     }
@@ -26,7 +26,7 @@ internal class NewFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "User.proto", "message User {}", project)
+        ProtoNewFilePlacement.insert(sourceFile, "User.proto", "message User {}", project)
 
         assertNotNull(sourceFile.containingDirectory?.findFile("User.proto"))
         assertNull(sourceFile.containingDirectory?.findFile("User.proto.proto"))
@@ -36,7 +36,7 @@ internal class NewFilePlacementTest : BasePlatformTestCase() {
         myFixture.configureByText("User.kt", "package com.example\ndata class User(val name: String)")
         val sourceFile = myFixture.file as KtFile
 
-        NewFilePlacement.insert(sourceFile, "User", "message User {}", project)
+        ProtoNewFilePlacement.insert(sourceFile, "User", "message User {}", project)
 
         val newFile = sourceFile.containingDirectory?.findFile("User.proto")
         assertEquals("message User {}", newFile?.text)

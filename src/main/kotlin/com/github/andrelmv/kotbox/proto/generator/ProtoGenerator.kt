@@ -1,9 +1,9 @@
 package com.github.andrelmv.kotbox.proto.generator
 
-import com.github.andrelmv.kotbox.proto.dialog.NewFilePlacement
-import com.github.andrelmv.kotbox.proto.dialog.PlacementDialog
-import com.github.andrelmv.kotbox.proto.dialog.PlacementStrategy
-import com.github.andrelmv.kotbox.proto.dialog.PreviewDialog
+import com.github.andrelmv.kotbox.proto.dialog.ProtoNewFilePlacement
+import com.github.andrelmv.kotbox.proto.dialog.ProtoPlacementDialog
+import com.github.andrelmv.kotbox.proto.dialog.ProtoPlacementStrategy
+import com.github.andrelmv.kotbox.proto.dialog.ProtoPreviewDialog
 import com.github.andrelmv.kotbox.utils.isDataClass
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
@@ -20,7 +20,9 @@ internal object ProtoGenerator {
         targetClass: KtClass,
     ) {
         if (!targetClass.isDataClass()) {
-            showError(project, "'${targetClass.name}' is not a data class.")
+            ApplicationManager.getApplication().invokeLater {
+                showError(project, "'${targetClass.name}' is not a data class.")
+            }
             return
         }
 
@@ -44,7 +46,7 @@ internal object ProtoGenerator {
                                     val model = analyzer.analyze(targetClass)
                                     AnalysisResult(
                                         protoText =
-                                            CodeRenderer.render(
+                                            ProtoCodeRenderer.render(
                                                 model = model,
                                                 javaPackage = sourceFile.packageFqName.asString(),
                                             ),
@@ -59,14 +61,14 @@ internal object ProtoGenerator {
 
                     // Placement dialog must run on the EDT
                     ApplicationManager.getApplication().invokeLater {
-                        val dialog = PlacementDialog("Proto", project, targetClass.name!!)
+                        val dialog = ProtoPlacementDialog("Proto", project, targetClass.name!!)
                         if (!dialog.showAndGet()) return@invokeLater
 
                         when (val strategy = dialog.getPlacementStrategy()) {
-                            is PlacementStrategy.PreviewAndCopy ->
-                                PreviewDialog(project, result.protoText).show()
-                            is PlacementStrategy.NewFile ->
-                                NewFilePlacement.insert(
+                            is ProtoPlacementStrategy.PreviewAndCopy ->
+                                ProtoPreviewDialog(project, result.protoText).show()
+                            is ProtoPlacementStrategy.NewFile ->
+                                ProtoNewFilePlacement.insert(
                                     sourceFile,
                                     strategy.fileName,
                                     result.protoText,

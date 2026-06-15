@@ -93,7 +93,12 @@ internal object KotlinToProtoMapper {
     }
 
     private fun resolveCollectionTypeMapping(kotlinType: String): ProtoTypeMapping.CollectionTypeMapping {
-        val elementKotlin = kotlinType.substringAfter('<').removeSuffix(">").trim()
+        val elementKotlin =
+            kotlinType
+                .substringAfter('<')
+                .removeSuffix(">")
+                .trim()
+                .trimEnd('?')
         return collectionMapping(elementKotlin)
     }
 
@@ -101,8 +106,8 @@ internal object KotlinToProtoMapper {
         val inner = kotlinType.removePrefix("Map<").removeSuffix(">")
         val commaIdx = findTopLevelComma(inner).takeIf { it != -1 } ?: return null
 
-        val keyKotlin = inner.substring(0, commaIdx).trim()
-        val valueKotlin = inner.substring(commaIdx + 1).trim()
+        val keyKotlin = inner.substring(0, commaIdx).trim().trimEnd('?')
+        val valueKotlin = inner.substring(commaIdx + 1).trim().trimEnd('?')
         return mapMapping(keyKotlin, valueKotlin)
     }
 

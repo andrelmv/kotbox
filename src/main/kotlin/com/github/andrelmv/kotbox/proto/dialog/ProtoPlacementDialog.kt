@@ -2,6 +2,7 @@ package com.github.andrelmv.kotbox.proto.dialog
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBRadioButton
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
@@ -12,7 +13,7 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-internal class PlacementDialog(
+internal class ProtoPlacementDialog(
     title: String,
     project: Project,
     targetClassName: String,
@@ -23,7 +24,6 @@ internal class PlacementDialog(
 
     init {
         this.title = "Generate $title"
-        init()
 
         val group = ButtonGroup()
         group.add(newFileButton)
@@ -33,6 +33,15 @@ internal class PlacementDialog(
         previewAndCopyButton.addChangeListener {
             newFileNameField.isEnabled = newFileButton.isSelected
         }
+
+        init()
+    }
+
+    override fun doValidate(): ValidationInfo? {
+        if (newFileButton.isSelected && newFileNameField.text.trim().isEmpty()) {
+            return ValidationInfo("File name cannot be empty", newFileNameField)
+        }
+        return null
     }
 
     override fun createCenterPanel(): JComponent {
@@ -62,9 +71,9 @@ internal class PlacementDialog(
         return panel
     }
 
-    fun getPlacementStrategy(): PlacementStrategy =
+    fun getPlacementStrategy(): ProtoPlacementStrategy =
         when {
-            newFileButton.isSelected -> PlacementStrategy.NewFile(newFileNameField.text.trim())
-            else -> PlacementStrategy.PreviewAndCopy
+            newFileButton.isSelected -> ProtoPlacementStrategy.NewFile(newFileNameField.text.trim())
+            else -> ProtoPlacementStrategy.PreviewAndCopy
         }
 }

@@ -6,7 +6,7 @@ import com.github.andrelmv.kotbox.proto.generator.model.ProtoFieldType
 import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
 import com.github.andrelmv.kotbox.proto.generator.model.ProtoModifier
 
-internal object CodeRenderer {
+internal object ProtoCodeRenderer {
     /**
      * Renders the full `.proto` file content for [model].
      *
@@ -44,8 +44,8 @@ internal object CodeRenderer {
         return buildString {
             // Sibling enums first
             model.fields
-                .filter { it.fieldType is ProtoFieldType.EnumRef }
-                .distinctBy { it.nestedEnum!! }
+                .filter { it.fieldType is ProtoFieldType.EnumRef && it.nestedEnum != null }
+                .distinctBy { it.nestedEnum }
                 .forEach {
                     append(renderEnum(it.nestedEnum!!, indent))
                     appendLine()

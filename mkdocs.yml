@@ -100,5 +100,5 @@ nav:
     - Wrap with Coroutine Builder: features/wrap-with-coroutine.md
     - DSL Builder Generator: features/dsl-builder-generator.md
     - Copy Interpolated Value: features/copy-interpolated-value.md
-    - Proto generator: features/proto-generator.md
+    - Proto Message Generator: features/proto-generator.md
   - Changelog: changelog.md

@@ -8,12 +8,12 @@ import org.jetbrains.kotlin.psi.KtParameter
  * Result of K2 analysis for a constructor parameter: nullability and default-value
  * presence resolved in a single analyze {} session for efficiency.
  */
-data class ParamAnalysis(
+data class DslBuilderParamAnalysis(
     val isNullable: Boolean,
     val hasDefault: Boolean,
 )
 
-internal fun KtParameter.analyzeK2(): ParamAnalysis {
+internal fun KtParameter.analyzeK2(): DslBuilderParamAnalysis {
     // PSI-syntactic fallbacks — no resolve required, work in all contexts including tests.
     // Covers the common cases: explicit "?" marker and "= expr" default.
     val isNullablePsi = typeReference?.text?.trim()?.endsWith("?") ?: false
@@ -22,13 +22,13 @@ internal fun KtParameter.analyzeK2(): ParamAnalysis {
     return try {
         analyze(this) {
             val sym = symbol as? KaValueParameterSymbol
-            ParamAnalysis(
+            DslBuilderParamAnalysis(
                 isNullable = sym?.returnType?.isMarkedNullable ?: isNullablePsi,
                 hasDefault = sym?.hasDefaultValue ?: hasDefaultPsi,
             )
         }
     } catch (_: Exception) {
-        ParamAnalysis(isNullable = isNullablePsi, hasDefault = hasDefaultPsi)
+        DslBuilderParamAnalysis(isNullable = isNullablePsi, hasDefault = hasDefaultPsi)
     }
 }
 

@@ -8,18 +8,18 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtParameter
 
 /**
- * Classifies a [KtParameter] into a [BuilderField] using the K2 Analysis API.
+ * Classifies a [KtParameter] into a [DslBuilderField] using the K2 Analysis API.
  *
  * IMPORTANT: uses the raw typeReference.text (without stripping generics) to detect
  * collection types — isListType/isSetType/isMapType rely on the "<" character.
  * simpleTypeName() is used only for stub-index lookups (short name without generics).
  */
-class FieldClassifier(
+class DslBuilderFieldClassifier(
     private val project: Project,
     private val scope: GlobalSearchScope,
     private val rootClass: KtClass,
 ) {
-    fun classify(param: KtParameter): BuilderField? {
+    fun classify(param: KtParameter): DslBuilderField? {
         // rawTypeText: full type text without nullable marker — e.g. "List<String>", "Address"
         val rawTypeText =
             param.typeReference
@@ -46,17 +46,17 @@ class FieldClassifier(
         scalarName: String,
         isNullable: Boolean,
         isRequired: Boolean,
-    ): BuilderField {
+    ): DslBuilderField {
         val dataClass = findDataClassInModule(scalarName)
         return if (dataClass != null && isSameModule(dataClass)) {
-            BuilderField.NestedBuilder(
+            DslBuilderField.NestedBuilder(
                 name = param.name ?: "",
                 typeName = scalarName,
                 builderTypeName = "${scalarName}Builder",
                 isRequired = isRequired,
             )
         } else {
-            BuilderField.Simple(
+            DslBuilderField.Simple(
                 name = param.name ?: "",
                 typeName = rawTypeName,
                 isNullableInOriginal = isNullable,
@@ -69,9 +69,9 @@ class FieldClassifier(
         param: KtParameter,
         rawType: String,
         isRequired: Boolean,
-    ): BuilderField {
+    ): DslBuilderField {
         val elementType =
-            extractGenericArgument(rawType, 0) ?: return BuilderField.Simple(
+            extractGenericArgument(rawType, 0) ?: return DslBuilderField.Simple(
                 name = param.name ?: "",
                 typeName = rawType,
                 isNullableInOriginal = false,
@@ -79,14 +79,14 @@ class FieldClassifier(
             )
         val dataClass = findDataClassInModule(elementType.substringBefore("<").trim())
         return if (dataClass != null && isSameModule(dataClass)) {
-            BuilderField.NestedBuilderList(
+            DslBuilderField.NestedBuilderList(
                 name = param.name ?: "",
                 elementTypeName = elementType,
                 elementBuilderTypeName = "${elementType.substringBefore("<").trim()}Builder",
                 isRequired = isRequired,
             )
         } else {
-            BuilderField.SimpleList(name = param.name ?: "", elementTypeName = elementType, isRequired = isRequired)
+            DslBuilderField.SimpleList(name = param.name ?: "", elementTypeName = elementType, isRequired = isRequired)
         }
     }
 
@@ -94,19 +94,19 @@ class FieldClassifier(
         param: KtParameter,
         rawType: String,
         isRequired: Boolean,
-    ): BuilderField {
+    ): DslBuilderField {
         val elementType = extractGenericArgument(rawType, 0) ?: "Any"
-        return BuilderField.SimpleSet(name = param.name ?: "", elementTypeName = elementType, isRequired = isRequired)
+        return DslBuilderField.SimpleSet(name = param.name ?: "", elementTypeName = elementType, isRequired = isRequired)
     }
 
     private fun classifyMap(
         param: KtParameter,
         rawType: String,
         isRequired: Boolean,
-    ): BuilderField {
+    ): DslBuilderField {
         val keyType = extractGenericArgument(rawType, 0) ?: "Any"
         val valueType = extractGenericArgument(rawType, 1) ?: "Any"
-        return BuilderField.SimpleMap(name = param.name ?: "", keyTypeName = keyType, valueTypeName = valueType, isRequired = isRequired)
+        return DslBuilderField.SimpleMap(name = param.name ?: "", keyTypeName = keyType, valueTypeName = valueType, isRequired = isRequired)
     }
 
     /**

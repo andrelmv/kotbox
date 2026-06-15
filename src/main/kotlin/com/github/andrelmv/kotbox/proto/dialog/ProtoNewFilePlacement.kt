@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFileFactory
 import org.jetbrains.kotlin.psi.KtFile
 
-internal object NewFilePlacement {
+internal object ProtoNewFilePlacement {
     fun insert(
         sourceFile: KtFile,
         fileName: String,
