@@ -1,0 +1,31 @@
+package com.github.andrelmv.kotbox.proto.dialog
+
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.fileTypes.PlainTextFileType
+import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiFileFactory
+import org.jetbrains.kotlin.psi.KtFile
+
+internal object ProtoNewFilePlacement {
+    fun insert(
+        sourceFile: KtFile,
+        fileName: String,
+        generatedCode: String,
+        project: Project,
+    ) {
+        val protoFileName = fileName.ensureProtoExtension()
+
+        val dir = sourceFile.containingDirectory ?: return
+        WriteCommandAction.runWriteCommandAction(project, "Generate Proto", null, {
+            val newFile =
+                PsiFileFactory
+                    .getInstance(project)
+                    .createFileFromText(protoFileName, PlainTextFileType.INSTANCE, generatedCode)
+            dir.add(newFile)
+        })
+    }
+
+    private fun String.ensureProtoExtension(): String = if (endsWith(PROTO_EXTENSION)) this else "$this$PROTO_EXTENSION"
+}
+
+private const val PROTO_EXTENSION = ".proto"

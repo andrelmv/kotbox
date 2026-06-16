@@ -1,9 +1,10 @@
 package com.github.andrelmv.kotbox.dslbuilder.generator
 
 import com.github.andrelmv.kotbox.dslbuilder.DslBuilderPlacementDialog
-import com.github.andrelmv.kotbox.dslbuilder.placement.NewFilePlacement
-import com.github.andrelmv.kotbox.dslbuilder.placement.PlacementStrategy
-import com.github.andrelmv.kotbox.dslbuilder.placement.SameFilePlacement
+import com.github.andrelmv.kotbox.dslbuilder.placement.DslBuilderNewFilePlacement
+import com.github.andrelmv.kotbox.dslbuilder.placement.DslBuilderPlacementStrategy
+import com.github.andrelmv.kotbox.dslbuilder.placement.DslBuilderSameFilePlacement
+import com.github.andrelmv.kotbox.utils.isDataClass
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -50,10 +51,10 @@ internal object DslBuilderGenerator {
         ProgressManager.getInstance().run(
             object : Task.Backgroundable(project, "Analyzing DSL hierarchy") {
                 override fun run(indicator: ProgressIndicator) {
-                    val analyzer = HierarchyAnalyzer(project, scope)
+                    val analyzer = DslBuilderHierarchyAnalyzer(project, scope)
 
                     data class AnalysisResult(
-                        val hierarchy: BuilderHierarchy,
+                        val hierarchy: DslBuilderHierarchy,
                         val packageName: String,
                     )
                     val result =
@@ -71,7 +72,7 @@ internal object DslBuilderGenerator {
                             return
                         }
 
-                    val generatedCode = CodeRenderer().render(result.hierarchy, result.packageName)
+                    val generatedCode = DslBuilderCodeRenderer().render(result.hierarchy, result.packageName)
 
                     // Placement dialog must run on the EDT
                     ApplicationManager.getApplication().invokeLater {
@@ -79,10 +80,10 @@ internal object DslBuilderGenerator {
                         if (!dialog.showAndGet()) return@invokeLater
 
                         when (val strategy = dialog.getPlacementStrategy()) {
-                            is PlacementStrategy.SameFile ->
-                                SameFilePlacement.insert(sourceFile, generatedCode, project)
-                            is PlacementStrategy.NewFile ->
-                                NewFilePlacement.insert(sourceFile, strategy.fileName, generatedCode, project)
+                            is DslBuilderPlacementStrategy.SameFile ->
+                                DslBuilderSameFilePlacement.insert(sourceFile, generatedCode, project)
+                            is DslBuilderPlacementStrategy.NewFile ->
+                                DslBuilderNewFilePlacement.insert(sourceFile, strategy.fileName, generatedCode, project)
                         }
                     }
                 }

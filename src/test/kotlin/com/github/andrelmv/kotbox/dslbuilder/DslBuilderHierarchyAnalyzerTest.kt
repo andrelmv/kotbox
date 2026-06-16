@@ -1,13 +1,13 @@
 package com.github.andrelmv.kotbox.dslbuilder
 
-import com.github.andrelmv.kotbox.dslbuilder.generator.BuilderField
-import com.github.andrelmv.kotbox.dslbuilder.generator.BuilderHierarchy
-import com.github.andrelmv.kotbox.dslbuilder.generator.HierarchyAnalyzer
+import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderField
+import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderHierarchy
+import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderHierarchyAnalyzer
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtClass
 
-class HierarchyAnalyzerTest : BasePlatformTestCase() {
+class DslBuilderHierarchyAnalyzerTest : BasePlatformTestCase() {
     fun `test analyzes single data class`() {
         myFixture.configureByText("Test.kt", "data class User(val name: String, val age: Int)")
         val h = analyze("User")
@@ -44,7 +44,7 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
             h.builders
                 .first()
                 .fields
-                .find { it.name == "born" } is BuilderField.Simple,
+                .find { it.name == "born" } is DslBuilderField.Simple,
         )
     }
 
@@ -56,8 +56,8 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
                 .first()
                 .fields
                 .first()
-        assertTrue(tagsField is BuilderField.SimpleList)
-        assertEquals("String", (tagsField as BuilderField.SimpleList).elementTypeName)
+        assertTrue(tagsField is DslBuilderField.SimpleList)
+        assertEquals("String", (tagsField as DslBuilderField.SimpleList).elementTypeName)
     }
 
     fun `test dslMarkerName uses root class name`() {
@@ -98,7 +98,7 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
         assertEquals("Item", h.builders[0].dataClassName)
         assertEquals("Cart", h.builders[1].dataClassName)
         val itemsField = h.builders[1].fields.first()
-        assertTrue(itemsField is BuilderField.NestedBuilderList)
+        assertTrue(itemsField is DslBuilderField.NestedBuilderList)
     }
 
     fun `test collects required imports for nested data class types`() {
@@ -109,12 +109,12 @@ class HierarchyAnalyzerTest : BasePlatformTestCase() {
     }
 
     // Helper
-    private fun analyze(className: String): BuilderHierarchy {
+    private fun analyze(className: String): DslBuilderHierarchy {
         val cls =
             myFixture.file.children
                 .filterIsInstance<KtClass>()
                 .firstOrNull { it.name == className }
                 ?: error("Class '$className' not found")
-        return HierarchyAnalyzer(project, GlobalSearchScope.projectScope(project)).analyze(cls)
+        return DslBuilderHierarchyAnalyzer(project, GlobalSearchScope.projectScope(project)).analyze(cls)
     }
 }

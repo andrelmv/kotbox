@@ -1,13 +1,11 @@
-package com.github.andrelmv.kotbox.dslbuilder
+package com.github.andrelmv.kotbox.proto.dialog
 
-import com.github.andrelmv.kotbox.dslbuilder.placement.DslBuilderPlacementStrategy
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBRadioButton
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
-import org.jetbrains.kotlin.psi.KtClass
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.ButtonGroup
@@ -15,23 +13,26 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class DslBuilderPlacementDialog(
+internal class ProtoPlacementDialog(
+    title: String,
     project: Project,
-    targetClass: KtClass,
+    targetClassName: String,
 ) : DialogWrapper(project, true) {
-    private val sameFileButton = JBRadioButton("Same file", true)
-    private val newFileButton = JBRadioButton("New file")
-    private val newFileNameField = JBTextField("${targetClass.name}Builder", 20)
+    private val newFileButton = JBRadioButton("New file", true)
+    private val previewAndCopyButton = JBRadioButton("Preview & copy")
+    private val newFileNameField = JBTextField(targetClassName, 20)
 
     init {
-        title = "Generate DSL Builder"
+        this.title = "Generate $title"
 
         val group = ButtonGroup()
-        group.add(sameFileButton)
         group.add(newFileButton)
+        group.add(previewAndCopyButton)
 
-        newFileNameField.isEnabled = false
-        newFileButton.addChangeListener { newFileNameField.isEnabled = newFileButton.isSelected }
+        newFileNameField.isEnabled = true
+        previewAndCopyButton.addChangeListener {
+            newFileNameField.isEnabled = newFileButton.isSelected
+        }
 
         init()
     }
@@ -53,26 +54,26 @@ class DslBuilderPlacementDialog(
 
         gbc.gridx = 0
         gbc.gridy = 0
-        panel.add(sameFileButton, gbc)
-
-        gbc.gridx = 0
-        gbc.gridy = 1
         panel.add(newFileButton, gbc)
 
         gbc.gridx = 1
-        gbc.gridy = 1
+        gbc.gridy = 0
         panel.add(newFileNameField, gbc)
 
         gbc.gridx = 2
+        gbc.gridy = 0
+        panel.add(JLabel(".proto"), gbc)
+
+        gbc.gridx = 0
         gbc.gridy = 1
-        panel.add(JLabel(".kt"), gbc)
+        panel.add(previewAndCopyButton, gbc)
 
         return panel
     }
 
-    fun getPlacementStrategy(): DslBuilderPlacementStrategy =
+    fun getPlacementStrategy(): ProtoPlacementStrategy =
         when {
-            newFileButton.isSelected -> DslBuilderPlacementStrategy.NewFile(newFileNameField.text.trim())
-            else -> DslBuilderPlacementStrategy.SameFile
+            newFileButton.isSelected -> ProtoPlacementStrategy.NewFile(newFileNameField.text.trim())
+            else -> ProtoPlacementStrategy.PreviewAndCopy
         }
 }

@@ -1,15 +1,15 @@
 package com.github.andrelmv.kotbox.dslbuilder
 
-import com.github.andrelmv.kotbox.dslbuilder.generator.BuilderClassModel
-import com.github.andrelmv.kotbox.dslbuilder.generator.BuilderField
-import com.github.andrelmv.kotbox.dslbuilder.generator.BuilderHierarchy
-import com.github.andrelmv.kotbox.dslbuilder.generator.CodeRenderer
+import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderClassModel
+import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderCodeRenderer
+import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderField
+import com.github.andrelmv.kotbox.dslbuilder.generator.DslBuilderHierarchy
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class CodeRendererTest {
-    private val renderer = CodeRenderer()
+class DslBuilderCodeRendererTest {
+    private val renderer = DslBuilderCodeRenderer()
 
     @Test
     fun `renders DslMarker annotation`() {
@@ -24,7 +24,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.Simple("name", "String", false, isRequired = true),
+                        DslBuilderField.Simple("name", "String", false, isRequired = true),
                     ),
                 ),
             )
@@ -39,7 +39,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.Simple("nickname", "String", true, isRequired = false),
+                        DslBuilderField.Simple("nickname", "String", true, isRequired = false),
                     ),
                 ),
             )
@@ -53,7 +53,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.NestedBuilder("address", "Address", "AddressBuilder", isRequired = true),
+                        DslBuilderField.NestedBuilder("address", "Address", "AddressBuilder", isRequired = true),
                     ),
                 ),
             )
@@ -68,7 +68,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.SimpleList("tags", "String", isRequired = false),
+                        DslBuilderField.SimpleList("tags", "String", isRequired = false),
                     ),
                 ),
             )
@@ -84,7 +84,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.SimpleSet("codes", "String", isRequired = false),
+                        DslBuilderField.SimpleSet("codes", "String", isRequired = false),
                     ),
                 ),
             )
@@ -100,7 +100,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.SimpleMap("meta", "String", "Int", isRequired = false),
+                        DslBuilderField.SimpleMap("meta", "String", "Int", isRequired = false),
                     ),
                 ),
             )
@@ -116,7 +116,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.NestedBuilderList("roles", "Role", "RoleBuilder", isRequired = false),
+                        DslBuilderField.NestedBuilderList("roles", "Role", "RoleBuilder", isRequired = false),
                     ),
                 ),
             )
@@ -136,10 +136,10 @@ class CodeRendererTest {
     @Test
     fun `renders import statements when requiredImports is non-empty`() {
         val h =
-            BuilderHierarchy(
+            DslBuilderHierarchy(
                 builders =
                     listOf(
-                        BuilderClassModel(
+                        DslBuilderClassModel(
                             "User",
                             "UserBuilder",
                             "com.example",
@@ -161,10 +161,10 @@ class CodeRendererTest {
     @Test
     fun `skips imports for types in the same package as the generated file`() {
         val h =
-            BuilderHierarchy(
+            DslBuilderHierarchy(
                 builders =
                     listOf(
-                        BuilderClassModel(
+                        DslBuilderClassModel(
                             "User",
                             "UserBuilder",
                             "com.example",
@@ -186,10 +186,10 @@ class CodeRendererTest {
     @Test
     fun `emits all imports when ownPackage is blank`() {
         val h =
-            BuilderHierarchy(
+            DslBuilderHierarchy(
                 builders =
                     listOf(
-                        BuilderClassModel(
+                        DslBuilderClassModel(
                             "User",
                             "UserBuilder",
                             "com.example",
@@ -208,22 +208,22 @@ class CodeRendererTest {
     @Test
     fun `renders full hierarchy in topological order`() {
         val h =
-            BuilderHierarchy(
+            DslBuilderHierarchy(
                 builders =
                     listOf(
-                        BuilderClassModel(
+                        DslBuilderClassModel(
                             "Coordinates",
                             "CoordinatesBuilder",
                             "com.example",
-                            listOf(BuilderField.Simple("lat", "Double", false, true)),
+                            listOf(DslBuilderField.Simple("lat", "Double", isNullableInOriginal = false, isRequired = true)),
                             "UserDsl",
                             false,
                         ),
-                        BuilderClassModel(
+                        DslBuilderClassModel(
                             "User",
                             "UserBuilder",
                             "com.example",
-                            listOf(BuilderField.NestedBuilder("coords", "Coordinates", "CoordinatesBuilder", true)),
+                            listOf(DslBuilderField.NestedBuilder("coords", "Coordinates", "CoordinatesBuilder", true)),
                             "UserDsl",
                             true,
                         ),
@@ -242,7 +242,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.Simple("cenas", "(s: String, i: Int) -> String", false, isRequired = true),
+                        DslBuilderField.Simple("cenas", "(s: String, i: Int) -> String", false, isRequired = true),
                     ),
                 ),
             )
@@ -265,7 +265,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.NestedBuilder("address", "Address", "AddressBuilder", isRequired = false),
+                        DslBuilderField.NestedBuilder("address", "Address", "AddressBuilder", isRequired = false),
                     ),
                 ),
             )
@@ -281,7 +281,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.NestedBuilderList("roles", "Role", "RoleBuilder", isRequired = true),
+                        DslBuilderField.NestedBuilderList("roles", "Role", "RoleBuilder", isRequired = true),
                     ),
                 ),
             )
@@ -296,7 +296,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.SimpleList("tags", "String", isRequired = true),
+                        DslBuilderField.SimpleList("tags", "String", isRequired = true),
                     ),
                 ),
             )
@@ -308,12 +308,12 @@ class CodeRendererTest {
     fun `renders all field types combined in one builder`() {
         val fields =
             listOf(
-                BuilderField.Simple("name", "String", false, isRequired = true),
-                BuilderField.NestedBuilder("address", "Address", "AddressBuilder", isRequired = true),
-                BuilderField.SimpleList("tags", "String", isRequired = false),
-                BuilderField.NestedBuilderList("roles", "Role", "RoleBuilder", isRequired = false),
-                BuilderField.SimpleSet("codes", "Int", isRequired = false),
-                BuilderField.SimpleMap("meta", "String", "Any", isRequired = false),
+                DslBuilderField.Simple("name", "String", false, isRequired = true),
+                DslBuilderField.NestedBuilder("address", "Address", "AddressBuilder", isRequired = true),
+                DslBuilderField.SimpleList("tags", "String", isRequired = false),
+                DslBuilderField.NestedBuilderList("roles", "Role", "RoleBuilder", isRequired = false),
+                DslBuilderField.SimpleSet("codes", "Int", isRequired = false),
+                DslBuilderField.SimpleMap("meta", "String", "Any", isRequired = false),
             )
         val result = renderer.render(hierarchy(fields))
         assertTrue(result.contains("var name: String? = null"))
@@ -343,7 +343,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.Simple("callback", "() -> Unit", false, isRequired = false),
+                        DslBuilderField.Simple("callback", "() -> Unit", false, isRequired = false),
                     ),
                 ),
             )
@@ -357,7 +357,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.SimpleList("matrix", "Map<String, Int>", isRequired = false),
+                        DslBuilderField.SimpleList("matrix", "Map<String, Int>", isRequired = false),
                     ),
                 ),
             )
@@ -369,10 +369,10 @@ class CodeRendererTest {
     @Test
     fun `multiple builders renders entry function only for last root`() {
         val h =
-            BuilderHierarchy(
+            DslBuilderHierarchy(
                 builders =
                     listOf(
-                        BuilderClassModel(
+                        DslBuilderClassModel(
                             "Leaf",
                             "LeafBuilder",
                             "com.example",
@@ -380,11 +380,11 @@ class CodeRendererTest {
                             "RootDsl",
                             false,
                         ),
-                        BuilderClassModel(
+                        DslBuilderClassModel(
                             "Root",
                             "RootBuilder",
                             "com.example",
-                            listOf(BuilderField.NestedBuilder("leaf", "Leaf", "LeafBuilder", true)),
+                            listOf(DslBuilderField.NestedBuilder("leaf", "Leaf", "LeafBuilder", true)),
                             "RootDsl",
                             true,
                         ),
@@ -403,7 +403,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.Simple("class", "String", false, isRequired = true),
+                        DslBuilderField.Simple("class", "String", false, isRequired = true),
                     ),
                 ),
             )
@@ -418,7 +418,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.NestedBuilder("object", "Config", "ConfigBuilder", isRequired = false),
+                        DslBuilderField.NestedBuilder("object", "Config", "ConfigBuilder", isRequired = false),
                     ),
                 ),
             )
@@ -434,7 +434,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.SimpleList("in", "String", isRequired = false),
+                        DslBuilderField.SimpleList("in", "String", isRequired = false),
                     ),
                 ),
             )
@@ -450,7 +450,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.Simple("type", "Class<*>", false, isRequired = true),
+                        DslBuilderField.Simple("type", "Class<*>", false, isRequired = true),
                     ),
                 ),
             )
@@ -464,7 +464,7 @@ class CodeRendererTest {
             renderer.render(
                 hierarchy(
                     listOf(
-                        BuilderField.Simple("value", "Int", false, isRequired = false),
+                        DslBuilderField.Simple("value", "Int", false, isRequired = false),
                     ),
                 ),
             )
@@ -475,14 +475,14 @@ class CodeRendererTest {
 
     // Helper
     private fun hierarchy(
-        fields: List<BuilderField>,
+        fields: List<DslBuilderField>,
         dataClassName: String = "User",
         dslMarkerName: String = "UserDsl",
         isRoot: Boolean = true,
-    ) = BuilderHierarchy(
+    ) = DslBuilderHierarchy(
         builders =
             listOf(
-                BuilderClassModel(
+                DslBuilderClassModel(
                     dataClassName,
                     "${dataClassName}Builder",
                     "com.example",

@@ -1,17 +1,17 @@
 package com.github.andrelmv.kotbox.dslbuilder.generator
 
 /**
- * Renders a [BuilderHierarchy] as Kotlin source text.
+ * Renders a [DslBuilderHierarchy] as Kotlin source text.
  * No IntelliJ dependencies — testable as plain JUnit.
  *
- * Emits import statements when [BuilderHierarchy.requiredImports] is non-empty,
+ * Emits import statements when [DslBuilderHierarchy.requiredImports] is non-empty,
  * skipping any type that already lives in the same-package (same-package imports are redundant).
  */
-class CodeRenderer {
+class DslBuilderCodeRenderer {
     private fun String.escapeIfKeyword(): String = if (this in KOTLIN_HARD_KEYWORDS) "`$this`" else this
 
     fun render(
-        hierarchy: BuilderHierarchy,
+        hierarchy: DslBuilderHierarchy,
         ownPackage: String = "",
     ): String {
         val sb = StringBuilder()
@@ -40,7 +40,7 @@ class CodeRenderer {
 
     private fun renderDslMarker(name: String) = "@DslMarker\nannotation class $name"
 
-    private fun renderBuilder(model: BuilderClassModel): String {
+    private fun renderBuilder(model: DslBuilderClassModel): String {
         val sb = StringBuilder()
         sb.appendLine("@${model.dslMarkerName}")
         sb.appendLine("class ${model.builderClassName} {")
@@ -49,11 +49,11 @@ class CodeRenderer {
 
         val dslMethods =
             model.fields.filter {
-                it is BuilderField.NestedBuilder ||
-                    it is BuilderField.NestedBuilderList ||
-                    it is BuilderField.SimpleList ||
-                    it is BuilderField.SimpleSet ||
-                    it is BuilderField.SimpleMap
+                it is DslBuilderField.NestedBuilder ||
+                    it is DslBuilderField.NestedBuilderList ||
+                    it is DslBuilderField.SimpleList ||
+                    it is DslBuilderField.SimpleSet ||
+                    it is DslBuilderField.SimpleMap
             }
         dslMethods.forEach { sb.appendLine(renderDslMethod(it).prependIndent("    ")) }
         if (dslMethods.isNotEmpty()) sb.appendLine()
@@ -71,51 +71,51 @@ class CodeRenderer {
      */
     private fun nullableType(typeName: String): String = if (typeName.contains("->")) "($typeName)?" else "$typeName?"
 
-    private fun renderField(field: BuilderField): String {
+    private fun renderField(field: DslBuilderField): String {
         val n = field.name.escapeIfKeyword()
         return when (field) {
-            is BuilderField.Simple -> "var $n: ${nullableType(field.typeName)} = null"
-            is BuilderField.NestedBuilder -> "private var $n: ${nullableType(field.typeName)} = null"
-            is BuilderField.SimpleList -> "private val $n: MutableList<${field.elementTypeName}> = mutableListOf()"
-            is BuilderField.NestedBuilderList -> "private val $n: MutableList<${field.elementTypeName}> = mutableListOf()"
-            is BuilderField.SimpleSet -> "private val $n: MutableSet<${field.elementTypeName}> = mutableSetOf()"
-            is BuilderField.SimpleMap ->
+            is DslBuilderField.Simple -> "var $n: ${nullableType(field.typeName)} = null"
+            is DslBuilderField.NestedBuilder -> "private var $n: ${nullableType(field.typeName)} = null"
+            is DslBuilderField.SimpleList -> "private val $n: MutableList<${field.elementTypeName}> = mutableListOf()"
+            is DslBuilderField.NestedBuilderList -> "private val $n: MutableList<${field.elementTypeName}> = mutableListOf()"
+            is DslBuilderField.SimpleSet -> "private val $n: MutableSet<${field.elementTypeName}> = mutableSetOf()"
+            is DslBuilderField.SimpleMap ->
                 "private val $n: MutableMap<${field.keyTypeName}, ${field.valueTypeName}> = mutableMapOf()"
         }
     }
 
-    private fun renderDslMethod(field: BuilderField): String {
+    private fun renderDslMethod(field: DslBuilderField): String {
         val n = field.name.escapeIfKeyword()
         return when (field) {
-            is BuilderField.NestedBuilder ->
+            is DslBuilderField.NestedBuilder ->
                 """
                 fun $n(block: ${field.builderTypeName}.() -> Unit) {
                     $n = ${field.builderTypeName}().apply(block).build()
                 }
                 """.trimIndent()
 
-            is BuilderField.NestedBuilderList ->
+            is DslBuilderField.NestedBuilderList ->
                 """
                 fun $n(block: ${field.elementBuilderTypeName}.() -> Unit) {
                     $n.add(${field.elementBuilderTypeName}().apply(block).build())
                 }
                 """.trimIndent()
 
-            is BuilderField.SimpleList ->
+            is DslBuilderField.SimpleList ->
                 """
                 fun $n(vararg items: ${field.elementTypeName}) {
                     $n.addAll(items.toList())
                 }
                 """.trimIndent()
 
-            is BuilderField.SimpleSet ->
+            is DslBuilderField.SimpleSet ->
                 """
                 fun $n(vararg items: ${field.elementTypeName}) {
                     $n.addAll(items.toList())
                 }
                 """.trimIndent()
 
-            is BuilderField.SimpleMap ->
+            is DslBuilderField.SimpleMap ->
                 """
                 fun $n(key: ${field.keyTypeName}, value: ${field.valueTypeName}) {
                     $n[key] = value
@@ -126,7 +126,7 @@ class CodeRenderer {
         }
     }
 
-    private fun renderBuildMethod(model: BuilderClassModel): String {
+    private fun renderBuildMethod(model: DslBuilderClassModel): String {
         val sb = StringBuilder()
         sb.appendLine("fun build(): ${model.dataClassName} = ${model.dataClassName}(")
         model.fields.forEach { sb.appendLine(renderBuildArgument(it, model.builderClassName).prependIndent("    ")) }
@@ -135,22 +135,24 @@ class CodeRenderer {
     }
 
     private fun renderBuildArgument(
-        field: BuilderField,
+        field: DslBuilderField,
         builderName: String,
     ): String {
         val n = field.name
         val e = n.escapeIfKeyword()
+        val required = "$e = $e ?: error(\"$builderName: '$n' is required\"),"
+        val optional = "$e = $e,"
         return when (field) {
-            is BuilderField.Simple -> if (field.isRequired) "$e = $e ?: error(\"$builderName: '$n' is required\")," else "$e = $e,"
-            is BuilderField.NestedBuilder -> if (field.isRequired) "$e = $e ?: error(\"$builderName: '$n' is required\")," else "$e = $e,"
-            is BuilderField.SimpleList -> "$e = $e.toList(),"
-            is BuilderField.NestedBuilderList -> "$e = $e.toList(),"
-            is BuilderField.SimpleSet -> "$e = $e.toSet(),"
-            is BuilderField.SimpleMap -> "$e = $e.toMap(),"
+            is DslBuilderField.Simple -> if (field.isRequired) required else optional
+            is DslBuilderField.NestedBuilder -> if (field.isRequired) required else optional
+            is DslBuilderField.SimpleList -> "$e = $e.toList(),"
+            is DslBuilderField.NestedBuilderList -> "$e = $e.toList(),"
+            is DslBuilderField.SimpleSet -> "$e = $e.toSet(),"
+            is DslBuilderField.SimpleMap -> "$e = $e.toMap(),"
         }
     }
 
-    private fun renderEntryFunction(model: BuilderClassModel): String {
+    private fun renderEntryFunction(model: DslBuilderClassModel): String {
         val funcName = model.dataClassName.replaceFirstChar { it.lowercaseChar() }
         return "fun $funcName(block: ${model.builderClassName}.() -> Unit): ${model.dataClassName} " +
             "=\n    ${model.builderClassName}().apply(block).build()"

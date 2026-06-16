@@ -1,22 +1,11 @@
 package com.github.andrelmv.kotbox.dslbuilder
 
 import com.github.andrelmv.kotbox.dslbuilder.generator.analyzeK2
-import com.github.andrelmv.kotbox.dslbuilder.generator.isDataClass
 import com.github.andrelmv.kotbox.dslbuilder.generator.simpleTypeName
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.jetbrains.kotlin.psi.KtClass
 
 class DataClassUtilsTest : BasePlatformTestCase() {
-    fun `test isDataClass returns true for data class`() {
-        myFixture.configureByText("Test.kt", "data class User(val name: String)")
-        assertTrue(getClass("User").isDataClass())
-    }
-
-    fun `test isDataClass returns false for regular class`() {
-        myFixture.configureByText("Test.kt", "class User(val name: String)")
-        assertFalse(getClass("User").isDataClass())
-    }
-
     // simpleTypeName
 
     fun `test simpleTypeName returns plain type name`() {

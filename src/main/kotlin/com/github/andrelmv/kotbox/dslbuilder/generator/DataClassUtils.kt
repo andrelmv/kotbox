@@ -2,26 +2,18 @@ package com.github.andrelmv.kotbox.dslbuilder.generator
 
 import org.jetbrains.kotlin.analysis.api.analyze
 import org.jetbrains.kotlin.analysis.api.symbols.KaValueParameterSymbol
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtParameter
-
-/**
- * Returns true if this class is a data class.
- * Uses ktClass.isData() which is a syntactic PSI check — no resolve needed,
- * safe to call on source-declared classes without K2.
- */
-internal fun KtClass.isDataClass(): Boolean = isData()
 
 /**
  * Result of K2 analysis for a constructor parameter: nullability and default-value
  * presence resolved in a single analyze {} session for efficiency.
  */
-data class ParamAnalysis(
+data class DslBuilderParamAnalysis(
     val isNullable: Boolean,
     val hasDefault: Boolean,
 )
 
-internal fun KtParameter.analyzeK2(): ParamAnalysis {
+internal fun KtParameter.analyzeK2(): DslBuilderParamAnalysis {
     // PSI-syntactic fallbacks — no resolve required, work in all contexts including tests.
     // Covers the common cases: explicit "?" marker and "= expr" default.
     val isNullablePsi = typeReference?.text?.trim()?.endsWith("?") ?: false
@@ -30,13 +22,13 @@ internal fun KtParameter.analyzeK2(): ParamAnalysis {
     return try {
         analyze(this) {
             val sym = symbol as? KaValueParameterSymbol
-            ParamAnalysis(
+            DslBuilderParamAnalysis(
                 isNullable = sym?.returnType?.isMarkedNullable ?: isNullablePsi,
                 hasDefault = sym?.hasDefaultValue ?: hasDefaultPsi,
             )
         }
     } catch (_: Exception) {
-        ParamAnalysis(isNullable = isNullablePsi, hasDefault = hasDefaultPsi)
+        DslBuilderParamAnalysis(isNullable = isNullablePsi, hasDefault = hasDefaultPsi)
     }
 }
 
