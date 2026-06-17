@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [2.0.4] - 2026-06-16
+
+- @affelix made their first contribution in https://github.com/andrelmv/kotbox/pull/49
+
 ## [2.0.2] - 2026-04-21
 
 ### Added
@@ -44,7 +48,8 @@
 
 - Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
 
-[Unreleased]: https://github.com/andrelmv/kotbox/compare/2.0.2...HEAD
+[Unreleased]: https://github.com/andrelmv/kotbox/compare/2.0.4...HEAD
+[2.0.4]: https://github.com/andrelmv/kotbox/compare/2.0.2...2.0.4
 [2.0.2]: https://github.com/andrelmv/kotbox/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/andrelmv/kotbox/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/andrelmv/kotbox/compare/1.0.0...2.0.0
