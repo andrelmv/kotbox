@@ -267,6 +267,28 @@ class ProtoCodeRendererTest {
     }
 
     @Test
+    fun `test renders enum definition for repeated enum field`() {
+        val enum = ProtoEnumModel("Status", linkedSetOf("ACTIVE", "INACTIVE"))
+        val model =
+            message(
+                "User",
+                ProtoField(
+                    name = "statuses",
+                    number = 1,
+                    fieldType = ProtoFieldType.Repeated(elementProto = "Status"),
+                    nestedEnum = enum,
+                    nestedMessage = null,
+                ),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("enum Status {"))
+        assertTrue(output.contains("repeated Status statuses = 1;"))
+        val enumIdx = output.indexOf("enum Status")
+        val messageIdx = output.indexOf("message User")
+        assertTrue(enumIdx < messageIdx)
+    }
+
+    @Test
     fun `test deduplicates enums appearing in multiple fields`() {
         val enum = ProtoEnumModel("Score", linkedSetOf("HIGH", "LOW"))
         val model =

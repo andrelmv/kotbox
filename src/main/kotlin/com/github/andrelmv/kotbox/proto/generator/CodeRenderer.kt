@@ -44,7 +44,7 @@ internal object ProtoCodeRenderer {
         return buildString {
             // Sibling enums first
             model.fields
-                .filter { it.fieldType is ProtoFieldType.EnumRef && it.nestedEnum != null }
+                .filter { it.nestedEnum != null }
                 .distinctBy { it.nestedEnum }
                 .forEach {
                     append(renderEnum(it.nestedEnum!!, indent))
@@ -85,14 +85,14 @@ internal object ProtoCodeRenderer {
 
     private fun renderType(type: ProtoFieldType): String =
         when (type) {
-            is ProtoFieldType.Scalar -> "${prefix(type.modifier)}${type.protoType}"
+            is ProtoFieldType.Scalar -> "${type.modifier.prefix()}${type.protoType}"
             is ProtoFieldType.Repeated -> "repeated ${type.elementProto}"
             is ProtoFieldType.Map -> "map<${type.keyProto}, ${type.valueProto}>"
-            is ProtoFieldType.MessageRef -> "${prefix(type.modifier)}${type.typeName}"
-            is ProtoFieldType.EnumRef -> "${prefix(type.modifier)}${type.typeName}"
+            is ProtoFieldType.MessageRef -> "${type.modifier.prefix()}${type.typeName}"
+            is ProtoFieldType.EnumRef -> "${type.modifier.prefix()}${type.typeName}"
         }
 
-    private fun prefix(modifier: ProtoModifier): String = if (modifier == ProtoModifier.OPTIONAL) "optional " else ""
+    private fun ProtoModifier.prefix(): String = if (this == ProtoModifier.OPTIONAL) "optional " else ""
 
     private fun renderEnum(
         model: ProtoEnumModel,

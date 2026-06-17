@@ -22,12 +22,12 @@ internal object KtClassExtractor {
             is ProtoTypeMapping.CollectionTypeMapping if typeMapping.customElement ->
                 typeReference
                     .typeArgument(0)
-                    ?.let { findDataClass(it) }
+                    ?.let { findCustomClass(it) }
                     ?: findExpandedTypeArgument(typeReference, 0)
             is ProtoTypeMapping.MapTypeMapping if typeMapping.customValue ->
                 typeReference
                     .typeArgument(1)
-                    ?.let { findDataClass(it) }
+                    ?.let { findCustomClass(it) }
                     ?: findExpandedTypeArgument(typeReference, 1)
             null -> resolveKtClass(typeReference)?.takeIf { it.isDataClass() || it.isEnum() }
             else -> null
@@ -53,11 +53,11 @@ internal object KtClassExtractor {
         val expandedType = expandedClassType(typeReference) ?: return null
         val argType = expandedTypeArgument(expandedType, index) ?: return null
         val psi = (argType.symbol as? KaClassSymbol)?.psi as? KtClass
-        return psi?.takeIf { it.isDataClass() }
+        return psi?.takeIf { it.isDataClass() || it.isEnum() }
     }
 
-    private fun KaSession.findDataClass(typeReference: KtTypeReference): KtClass? =
-        resolveKtClass(typeReference)?.takeIf { it.isDataClass() }
+    private fun KaSession.findCustomClass(typeReference: KtTypeReference): KtClass? =
+        resolveKtClass(typeReference)?.takeIf { it.isDataClass() || it.isEnum() }
 
     private fun KtTypeReference.typeArgument(index: Int): KtTypeReference? =
         typeElement

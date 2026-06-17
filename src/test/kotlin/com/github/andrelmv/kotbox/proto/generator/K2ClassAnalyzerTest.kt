@@ -93,6 +93,15 @@ internal class K2ClassAnalyzerTest : ProtoGeneratorTestCase() {
         assertEquals(linkedSetOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum!!.entries)
     }
 
+    fun `test wires a collection of enums with its entries`() {
+        myFixture.addFileToProject("Score.kt", "package com.example\nenum class Score { HIGH, LOW, MEDIUM }")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val scores: List<Score>)") as KtFile
+        val field = analyze(file, "User").fields[0]
+
+        assertEquals("Score", (field.fieldType as ProtoFieldType.Repeated).elementProto)
+        assertEquals(linkedSetOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum!!.entries)
+    }
+
     // -------------------------------------------------------------------------
     // Integration
     // -------------------------------------------------------------------------
