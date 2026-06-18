@@ -33,18 +33,15 @@ internal object KtClassExtractor {
             else -> null
         }
 
-    /** Resolves a [KtTypeReference] to its source [KtClass], or null for non-source types. */
     private fun KaSession.resolveKtClass(typeReference: KtTypeReference): KtClass? {
-        // expandedClassType unwraps type aliases before we inspect the type
         val classType = expandedClassType(typeReference) ?: return null
         val classSymbol = classType.symbol as? KaClassSymbol ?: return null
         return classSymbol.psi as? KtClass
     }
 
     /**
-     * Extracts a type argument's [KtClass] directly from the K2 expanded type.
-     * Used when [typeArgument] returns null because the PSI is a type alias with no angle-bracket children
-     * (e.g. `typealias AddressList = List<Address>`).
+     * Fallback for [typeArgument]: when the field type is a type alias (e.g. `typealias AddressList = List<Address>`),
+     * the PSI carries no type arguments to read — expands through K2 and pulls the argument from the resolved type
      */
     private fun KaSession.findExpandedTypeArgument(
         typeReference: KtTypeReference,

@@ -7,22 +7,21 @@ import com.github.andrelmv.kotbox.proto.generator.model.ProtoMessage
 import com.github.andrelmv.kotbox.proto.generator.model.ProtoModifier
 
 internal object ProtoCodeRenderer {
-    /**
-     * Renders the full `.proto` file content for [model].
-     *
-     * @param javaPackage  Optional Java/Kotlin package to embed as the
-     *                     `option java_package` directive (mirrors the source
-     *                     file's package so generated stubs land in the right place).
-     */
     fun render(
         model: ProtoMessage,
         javaPackage: String = "",
     ): String {
         val messageBlock = renderMessage(model, indent = 0)
+        val imports = collectWellKnownImports(model)
 
         return buildString {
             appendLine("""syntax = "proto3";""")
             appendLine()
+
+            if (imports.isNotEmpty()) {
+                imports.sorted().forEach { appendLine("""import "$it";""") }
+                appendLine()
+            }
 
             if (javaPackage.isNotBlank()) {
                 appendLine("""option java_package = "$javaPackage";""")
@@ -34,6 +33,27 @@ internal object ProtoCodeRenderer {
         }.trimEnd() + "\n"
     }
 
+    private fun collectWellKnownImports(model: ProtoMessage): Set<String> =
+        model
+            .importCandidateTypeNames()
+            .mapNotNullTo(sortedSetOf()) { wellKnownImports[it] }
+
+    private fun ProtoMessage.importCandidateTypeNames(): Set<String> {
+        val pending = ArrayDeque(listOf(this))
+        return generateSequence { pending.removeFirstOrNull() }
+            .flatMap { msg -> msg.fields.onEach { it.nestedMessage?.let(pending::add) } }
+            .mapNotNull { it.fieldType.importCandidateTypeName() }
+            .toSet()
+    }
+
+    private fun ProtoFieldType.importCandidateTypeName(): String? =
+        when (this) {
+            is ProtoFieldType.Scalar -> protoType
+            is ProtoFieldType.Repeated -> elementProto
+            is ProtoFieldType.Map -> valueProto
+            is ProtoFieldType.MessageRef, is ProtoFieldType.EnumRef -> null
+        }
+
     private fun renderMessage(
         model: ProtoMessage,
         indent: Int,
@@ -42,7 +62,6 @@ internal object ProtoCodeRenderer {
         val innerPad = TAB.repeat(indent + 1)
 
         return buildString {
-            // Sibling enums first
             model.fields
                 .filter { it.nestedEnum != null }
                 .distinctBy { it.nestedEnum }
@@ -52,7 +71,6 @@ internal object ProtoCodeRenderer {
                     appendLine()
                 }
 
-            // Sibling nested messages
             model.fields
                 .mapNotNull { it.nestedMessage }
                 .distinctBy { it }
@@ -64,7 +82,6 @@ internal object ProtoCodeRenderer {
 
             appendLine("${pad}message ${model.name} {")
 
-            // Field declarations
             model.fields
                 .forEach { field ->
                     append(innerPad)
@@ -114,5 +131,10 @@ internal object ProtoCodeRenderer {
 // 2 spaces, proto style guide
 private const val TAB = "  "
 private val CAMEL_CASE_REGEX = Regex("([a-z])([A-Z])")
+private val wellKnownImports: Map<String, String> =
+    mapOf(
+        "google.protobuf.Timestamp" to "google/protobuf/timestamp.proto",
+        "google.protobuf.Any" to "google/protobuf/any.proto",
+    )
 
-internal fun String.toSnakeCase(): String = this.replace(CAMEL_CASE_REGEX) { "${it.groupValues[1]}_${it.groupValues[2]}" }.lowercase()
+private fun String.toSnakeCase(): String = this.replace(CAMEL_CASE_REGEX) { "${it.groupValues[1]}_${it.groupValues[2]}" }.lowercase()

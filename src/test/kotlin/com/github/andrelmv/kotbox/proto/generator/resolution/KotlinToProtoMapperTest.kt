@@ -61,6 +61,13 @@ internal class KotlinToProtoMapperTest : ProtoGeneratorTestCase() {
         )
     }
 
+    fun `test maps Instant to google protobuf Timestamp`() {
+        assertEquals(
+            "google.protobuf.Timestamp",
+            resolve<ProtoTypeMapping.ScalarTypeMapping>("Instant").type,
+        )
+    }
+
     fun `test returns null for unknown scalar type`() {
         assertNull(resolveRaw("SomeCustomClass"))
     }

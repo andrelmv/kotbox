@@ -90,6 +90,68 @@ class ProtoCodeRendererTest {
     }
 
     // -------------------------------------------------------------------------
+    // Well-known type imports
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `test emits timestamp proto import for google protobuf Timestamp field`() {
+        val model = message("Event", scalarField("occurredAt", "google.protobuf.Timestamp", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("""import "google/protobuf/timestamp.proto";"""))
+    }
+
+    @Test
+    fun `test emits any proto import for google protobuf Any field`() {
+        val model = message("Wrapper", scalarField("payload", "google.protobuf.Any", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("""import "google/protobuf/any.proto";"""))
+    }
+
+    @Test
+    fun `test emits no import for plain scalar fields`() {
+        val model = message("User", scalarField("name", "string", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertFalse(output.contains("import"))
+    }
+
+    @Test
+    fun `test import appears before message block`() {
+        val model = message("Event", scalarField("occurredAt", "google.protobuf.Timestamp", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.indexOf("import") < output.indexOf("message Event"))
+    }
+
+    @Test
+    fun `test import appears before java package options`() {
+        val model = message("Event", scalarField("occurredAt", "google.protobuf.Timestamp", number = 1))
+        val output = ProtoCodeRenderer.render(model, javaPackage = "com.example")
+        assertTrue(output.indexOf("import") < output.indexOf("option java_package"))
+    }
+
+    @Test
+    fun `test deduplicates imports when multiple fields use the same well-known type`() {
+        val model =
+            message(
+                "Event",
+                scalarField("startedAt", "google.protobuf.Timestamp", number = 1),
+                scalarField("endedAt", "google.protobuf.Timestamp", number = 2),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertEquals(1, output.split("""import "google/protobuf/timestamp.proto";""").size - 1)
+    }
+
+    @Test
+    fun `test emits timestamp import for repeated Instant field`() {
+        val model =
+            message(
+                "Event",
+                repeatedField("timestamps", "google.protobuf.Timestamp", number = 1),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("""import "google/protobuf/timestamp.proto";"""))
+    }
+
+    // -------------------------------------------------------------------------
     // camelCase -> snake_case
     // -------------------------------------------------------------------------
 

@@ -24,7 +24,8 @@ internal class K2ClassAnalyzer(
 
         // Process in reverse, so dependencies are protoMessages before dependents
         val protoMessages = mutableMapOf<String, ProtoMessage>()
-        graph.classes.entries
+        graph.classes
+            .entries
             .reversed()
             .forEach { (fqn, resolvedClass) ->
                 protoMessages[fqn] =
@@ -37,12 +38,6 @@ internal class K2ClassAnalyzer(
         return protoMessages.getValue(rootClass.fullyQualifiedName)
     }
 
-    /**
-     * Converts a [ClassGraph.ResolvedClass] into a [ProtoMessage] for each constructor parameter.
-     *
-     * [protoMessages] holds already-built dependency messages so nested fields can reference them by FQN
-     * without rebuilding.
-     */
     private fun buildMessage(
         resolvedClass: ClassGraph.ResolvedClass,
         protoMessages: Map<String, ProtoMessage>,
@@ -55,11 +50,6 @@ internal class K2ClassAnalyzer(
                     val name = param.name ?: return@mapIndexedNotNull null
                     val typeReference = param.typeReference ?: return@mapIndexedNotNull null
                     val resolution = resolvedClass.fieldResolutions.getValue(name)
-                    val nestedMessage =
-                        resolution.resolved
-                            ?.takeIf { it.isDataClass() }
-                            ?.let { protoMessages[it.fullyQualifiedName] }
-                    val nestedEnum = resolution.resolved?.takeIf { it.isEnum() }
 
                     rules.firstNotNullOf {
                         it.tryExecute(
@@ -67,8 +57,14 @@ internal class K2ClassAnalyzer(
                             typeText = typeReference.text,
                             number = index + 1,
                             protoTypeMapping = resolution.protoTypeMapping,
-                            nestedMessage = nestedMessage,
-                            nestedEnum = nestedEnum?.toProtoEnumModel(),
+                            nestedMessage =
+                                resolution.resolved
+                                    ?.takeIf { it.isDataClass() }
+                                    ?.let { protoMessages[it.fullyQualifiedName] },
+                            nestedEnum =
+                                resolution.resolved
+                                    ?.takeIf { it.isEnum() }
+                                    ?.toProtoEnumModel(),
                         )
                     }
                 }
@@ -95,5 +91,8 @@ internal fun KtClass.toProtoEnumModel(): ProtoEnumModel {
         declarations
             .filterIsInstance<KtEnumEntry>()
             .mapNotNullTo(LinkedHashSet()) { it.name }
-    return ProtoEnumModel(name = name!!, entries = entries)
+    return ProtoEnumModel(
+        name = name!!,
+        entries = entries,
+    )
 }
