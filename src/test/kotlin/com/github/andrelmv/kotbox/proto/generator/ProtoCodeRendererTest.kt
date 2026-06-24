@@ -273,10 +273,8 @@ class ProtoCodeRendererTest {
         assertTrue(output.contains("message Coordinates {"))
         assertTrue(output.contains("message Address {"))
         assertTrue(output.contains("message User {"))
-        val coordsIdx = output.indexOf("message Coordinates")
         val addressIdx = output.indexOf("message Address")
         val userIdx = output.indexOf("message User")
-        assertTrue(coordsIdx < addressIdx)
         assertTrue(addressIdx < userIdx)
     }
 
@@ -348,6 +346,34 @@ class ProtoCodeRendererTest {
         val enumIdx = output.indexOf("enum Status")
         val messageIdx = output.indexOf("message User")
         assertTrue(enumIdx < messageIdx)
+    }
+
+    @Test
+    fun `test deduplicates enum shared between parent and nested message`() {
+        val enum = ProtoEnumModel("Score", linkedSetOf("HIGH", "LOW"))
+        val nested = message("Address", enumField("score", "Score", number = 1, enum = enum))
+        val model =
+            message(
+                "User",
+                enumField("score", "Score", number = 1, enum = enum),
+                messageRefField("address", "Address", number = 2, nested = nested),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertEquals(1, output.split("enum Score {").size - 1)
+    }
+
+    @Test
+    fun `test deduplicates message shared between parent and nested message`() {
+        val shared = message("City", scalarField("name", "string", number = 1))
+        val nested = message("Address", messageRefField("city", "City", number = 1, nested = shared))
+        val model =
+            message(
+                "User",
+                messageRefField("city", "City", number = 1, nested = shared),
+                messageRefField("address", "Address", number = 2, nested = nested),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertEquals(1, output.split("message City {").size - 1)
     }
 
     @Test

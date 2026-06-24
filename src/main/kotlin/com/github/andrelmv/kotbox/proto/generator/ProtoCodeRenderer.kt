@@ -10,18 +10,18 @@ internal object ProtoCodeRenderer {
     fun render(
         model: ProtoMessage,
         javaPackage: String = "",
-    ): String {
-        val messageBlock = renderMessage(model, indent = 0)
-        val imports = collectWellKnownImports(model)
-
-        return buildString {
+    ): String =
+        buildString {
             appendLine("""syntax = "proto3";""")
             appendLine()
 
-            if (imports.isNotEmpty()) {
-                imports.sorted().forEach { appendLine("""import "$it";""") }
-                appendLine()
-            }
+            val protoFields = model.flattenedFields()
+
+            protoFields
+                .collectWellKnownImports()
+                .sorted()
+                .forEach { appendLine("""import "$it";""") }
+            appendLine()
 
             if (javaPackage.isNotBlank()) {
                 appendLine("""option java_package = "$javaPackage";""")
@@ -29,24 +29,35 @@ internal object ProtoCodeRenderer {
                 appendLine()
             }
 
-            append(messageBlock)
+            protoFields
+                .collectEnums()
+                .forEach {
+                    appendLine(renderEnum(it))
+                    appendLine()
+                }
+
+            collectMessages(model, protoFields).forEach {
+                appendLine(renderMessage(it))
+                appendLine()
+            }
         }.trimEnd() + "\n"
-    }
 
-    private fun collectWellKnownImports(model: ProtoMessage): Set<String> =
-        model
-            .importCandidateTypeNames()
-            .mapNotNullTo(sortedSetOf()) { wellKnownImports[it] }
-
-    private fun ProtoMessage.importCandidateTypeNames(): Set<String> {
+    private fun ProtoMessage.flattenedFields(): List<ProtoField> {
         val pending = ArrayDeque(listOf(this))
         return generateSequence { pending.removeFirstOrNull() }
-            .flatMap { msg -> msg.fields.onEach { it.nestedMessage?.let(pending::add) } }
-            .mapNotNull { it.fieldType.importCandidateTypeName() }
-            .toSet()
+            .flatMap { it.fields }
+            .onEach { it.nestedMessage?.let(pending::add) }
+            .toList()
     }
 
-    private fun ProtoFieldType.importCandidateTypeName(): String? =
+    private fun List<ProtoField>.collectWellKnownImports(): Set<String> =
+        mapNotNullTo(sortedSetOf()) {
+            it.fieldType
+                .wellKnownTypeName()
+                ?.let(wellKnownImports::get)
+        }
+
+    private fun ProtoFieldType.wellKnownTypeName(): String? =
         when (this) {
             is ProtoFieldType.Scalar -> protoType
             is ProtoFieldType.Repeated -> elementProto
@@ -54,32 +65,34 @@ internal object ProtoCodeRenderer {
             is ProtoFieldType.MessageRef, is ProtoFieldType.EnumRef -> null
         }
 
+    private fun List<ProtoField>.collectEnums(): LinkedHashSet<ProtoEnumModel> = mapNotNull { it.nestedEnum }.toCollection(LinkedHashSet())
+
+    private fun collectMessages(
+        model: ProtoMessage,
+        fields: List<ProtoField>,
+    ): LinkedHashSet<ProtoMessage> =
+        (listOf(model) + fields.mapNotNull { it.nestedMessage })
+            .asReversed()
+            .toCollection(LinkedHashSet())
+
+    private fun renderEnum(model: ProtoEnumModel): String =
+        buildString {
+            appendLine("enum ${model.name} {")
+            model.entries
+                .forEachIndexed { index, entry ->
+                    appendLine("$TAB${entry.toSnakeCase().uppercase()} = $index;")
+                }
+            append("}")
+        }
+
     private fun renderMessage(
         model: ProtoMessage,
-        indent: Int,
+        indent: Int = 0,
     ): String {
         val pad = TAB.repeat(indent)
         val innerPad = TAB.repeat(indent + 1)
 
         return buildString {
-            model.fields
-                .filter { it.nestedEnum != null }
-                .distinctBy { it.nestedEnum }
-                .forEach {
-                    append(renderEnum(it.nestedEnum!!, indent))
-                    appendLine()
-                    appendLine()
-                }
-
-            model.fields
-                .mapNotNull { it.nestedMessage }
-                .distinctBy { it }
-                .forEach {
-                    append(renderMessage(it, indent))
-                    appendLine()
-                    appendLine()
-                }
-
             appendLine("${pad}message ${model.name} {")
 
             model.fields
@@ -110,22 +123,6 @@ internal object ProtoCodeRenderer {
         }
 
     private fun ProtoModifier.prefix(): String = if (this == ProtoModifier.OPTIONAL) "optional " else ""
-
-    private fun renderEnum(
-        model: ProtoEnumModel,
-        indent: Int,
-    ): String {
-        val pad = TAB.repeat(indent)
-        val innerPad = TAB.repeat(indent + 1)
-
-        return buildString {
-            appendLine("${pad}enum ${model.name} {")
-            model.entries.forEachIndexed { index, entry ->
-                appendLine("${innerPad}${entry.toSnakeCase().uppercase()} = $index;")
-            }
-            append("$pad}")
-        }
-    }
 }
 
 // 2 spaces, proto style guide
