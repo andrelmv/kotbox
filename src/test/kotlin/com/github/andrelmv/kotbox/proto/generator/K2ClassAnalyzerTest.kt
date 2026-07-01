@@ -93,6 +93,26 @@ internal class K2ClassAnalyzerTest : ProtoGeneratorTestCase() {
         assertEquals(linkedSetOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum!!.entries)
     }
 
+    fun `test maps Instant to google protobuf Timestamp scalar`() {
+        val file =
+            myFixture.addFileToProject(
+                "Event.kt",
+                "package com.example\nimport java.time.Instant\ndata class Event(val occurredAt: Instant)",
+            ) as KtFile
+        val field = analyze(file, "Event").fields[0]
+
+        assertEquals("google.protobuf.Timestamp", (field.fieldType as ProtoFieldType.Scalar).protoType)
+    }
+
+    fun `test wires a collection of enums with its entries`() {
+        myFixture.addFileToProject("Score.kt", "package com.example\nenum class Score { HIGH, LOW, MEDIUM }")
+        val file = myFixture.addFileToProject("User.kt", "package com.example\ndata class User(val scores: List<Score>)") as KtFile
+        val field = analyze(file, "User").fields[0]
+
+        assertEquals("Score", (field.fieldType as ProtoFieldType.Repeated).elementProto)
+        assertEquals(linkedSetOf("HIGH", "LOW", "MEDIUM"), field.nestedEnum!!.entries)
+    }
+
     // -------------------------------------------------------------------------
     // Integration
     // -------------------------------------------------------------------------

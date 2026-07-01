@@ -36,6 +36,14 @@ class CollectionResolutionRuleTest {
     }
 
     @Test
+    fun `passes through the nested enum of a custom element`() {
+        val enum = ProtoEnumModel(name = "Status", entries = linkedSetOf("ACTIVE", "INACTIVE"))
+        val field = execute(ProtoTypeMapping.CollectionTypeMapping(element = "Status", customElement = true), nestedEnum = enum)
+
+        assertSame(enum, field!!.nestedEnum)
+    }
+
+    @Test
     fun `ignores scalar types`() {
         assertNull(execute(ProtoTypeMapping.ScalarTypeMapping(type = "string", isNullable = false)))
     }
