@@ -31,6 +31,14 @@ class MapResolutionRuleTest {
     }
 
     @Test
+    fun `passes through the nested enum of a custom value`() {
+        val enum = ProtoEnumModel(name = "Status", entries = linkedSetOf("ACTIVE", "INACTIVE"))
+        val field = execute(ProtoTypeMapping.MapTypeMapping(key = "string", value = "Status", customValue = true), nestedEnum = enum)
+
+        assertSame(enum, field!!.nestedEnum)
+    }
+
+    @Test
     fun `ignores scalar types`() {
         assertNull(execute(ProtoTypeMapping.ScalarTypeMapping(type = "string", isNullable = false)))
     }
