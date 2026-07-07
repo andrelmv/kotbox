@@ -52,8 +52,6 @@ internal object KotlinToProtoMapper {
         }
     }
 
-    private fun scalarProto(kotlinShortName: String): String? = scalarMap[kotlinShortName]
-
     /**
      * Builds a [ProtoTypeMapping.ScalarTypeMapping], or null if [kotlinShortName] isn't a known scalar.
      */
@@ -62,8 +60,13 @@ internal object KotlinToProtoMapper {
         isNullable: Boolean,
     ): ProtoTypeMapping.ScalarTypeMapping? =
         scalarProto(kotlinShortName)?.let {
-            ProtoTypeMapping.ScalarTypeMapping(type = it, isNullable = isNullable)
+            ProtoTypeMapping.ScalarTypeMapping(
+                type = it,
+                isNullable = isNullable,
+            )
         }
+
+    private fun scalarProto(kotlinShortName: String): String? = scalarMap[kotlinShortName]
 
     /**
      * Builds a [ProtoTypeMapping.CollectionTypeMapping], falling back to [elementShortName] for custom element types.
@@ -151,6 +154,7 @@ internal object KotlinToProtoMapper {
             "Boolean" to "bool",
             "ByteArray" to "bytes",
             "Any" to "google.protobuf.Any",
+            "Instant" to "google.protobuf.Timestamp",
         )
 
     private val validProtoMapKeyTypes =

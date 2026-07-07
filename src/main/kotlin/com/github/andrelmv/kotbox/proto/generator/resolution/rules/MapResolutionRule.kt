@@ -21,6 +21,7 @@ internal object MapResolutionRule : FieldResolutionRule {
             number = number,
             fieldType = ProtoFieldType.Map(map.key, map.value),
             nestedMessage = nestedMessage,
+            nestedEnum = nestedEnum,
         )
     }
 }

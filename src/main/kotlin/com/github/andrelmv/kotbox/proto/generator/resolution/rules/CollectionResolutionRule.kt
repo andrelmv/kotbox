@@ -21,6 +21,7 @@ internal object CollectionResolutionRule : FieldResolutionRule {
             number = number,
             fieldType = ProtoFieldType.Repeated(collection.element),
             nestedMessage = nestedMessage,
+            nestedEnum = nestedEnum,
         )
     }
 }

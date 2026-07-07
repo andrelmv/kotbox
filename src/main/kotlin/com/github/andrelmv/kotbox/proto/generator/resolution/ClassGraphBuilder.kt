@@ -3,10 +3,6 @@ package com.github.andrelmv.kotbox.proto.generator.resolution
 import com.github.andrelmv.kotbox.proto.generator.model.ProtoTypeMapping
 import org.jetbrains.kotlin.psi.KtClass
 
-/**
- * Builds a [ClassGraph] by performing a depth-first traversal of the class hierarchy
- * starting from a root data class.
- */
 internal object ClassGraphBuilder {
     fun build(rootClass: KtClass): ClassGraph {
         val classes = mutableMapOf<String, ClassGraph.ResolvedClass>()

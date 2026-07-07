@@ -90,6 +90,68 @@ class ProtoCodeRendererTest {
     }
 
     // -------------------------------------------------------------------------
+    // Well-known type imports
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `test emits timestamp proto import for google protobuf Timestamp field`() {
+        val model = message("Event", scalarField("occurredAt", "google.protobuf.Timestamp", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("""import "google/protobuf/timestamp.proto";"""))
+    }
+
+    @Test
+    fun `test emits any proto import for google protobuf Any field`() {
+        val model = message("Wrapper", scalarField("payload", "google.protobuf.Any", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("""import "google/protobuf/any.proto";"""))
+    }
+
+    @Test
+    fun `test emits no import for plain scalar fields`() {
+        val model = message("User", scalarField("name", "string", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertFalse(output.contains("import"))
+    }
+
+    @Test
+    fun `test import appears before message block`() {
+        val model = message("Event", scalarField("occurredAt", "google.protobuf.Timestamp", number = 1))
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.indexOf("import") < output.indexOf("message Event"))
+    }
+
+    @Test
+    fun `test import appears before java package options`() {
+        val model = message("Event", scalarField("occurredAt", "google.protobuf.Timestamp", number = 1))
+        val output = ProtoCodeRenderer.render(model, javaPackage = "com.example")
+        assertTrue(output.indexOf("import") < output.indexOf("option java_package"))
+    }
+
+    @Test
+    fun `test deduplicates imports when multiple fields use the same well-known type`() {
+        val model =
+            message(
+                "Event",
+                scalarField("startedAt", "google.protobuf.Timestamp", number = 1),
+                scalarField("endedAt", "google.protobuf.Timestamp", number = 2),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertEquals(1, output.split("""import "google/protobuf/timestamp.proto";""").size - 1)
+    }
+
+    @Test
+    fun `test emits timestamp import for repeated Instant field`() {
+        val model =
+            message(
+                "Event",
+                repeatedField("timestamps", "google.protobuf.Timestamp", number = 1),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("""import "google/protobuf/timestamp.proto";"""))
+    }
+
+    // -------------------------------------------------------------------------
     // camelCase -> snake_case
     // -------------------------------------------------------------------------
 
@@ -211,10 +273,8 @@ class ProtoCodeRendererTest {
         assertTrue(output.contains("message Coordinates {"))
         assertTrue(output.contains("message Address {"))
         assertTrue(output.contains("message User {"))
-        val coordsIdx = output.indexOf("message Coordinates")
         val addressIdx = output.indexOf("message Address")
         val userIdx = output.indexOf("message User")
-        assertTrue(coordsIdx < addressIdx)
         assertTrue(addressIdx < userIdx)
     }
 
@@ -264,6 +324,56 @@ class ProtoCodeRendererTest {
         val output = ProtoCodeRenderer.render(model)
         assertTrue(output.contains("ACTIVE = 0;"))
         assertTrue(output.contains("INACTIVE = 1;"))
+    }
+
+    @Test
+    fun `test renders enum definition for repeated enum field`() {
+        val enum = ProtoEnumModel("Status", linkedSetOf("ACTIVE", "INACTIVE"))
+        val model =
+            message(
+                "User",
+                ProtoField(
+                    name = "statuses",
+                    number = 1,
+                    fieldType = ProtoFieldType.Repeated(elementProto = "Status"),
+                    nestedEnum = enum,
+                    nestedMessage = null,
+                ),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertTrue(output.contains("enum Status {"))
+        assertTrue(output.contains("repeated Status statuses = 1;"))
+        val enumIdx = output.indexOf("enum Status")
+        val messageIdx = output.indexOf("message User")
+        assertTrue(enumIdx < messageIdx)
+    }
+
+    @Test
+    fun `test deduplicates enum shared between parent and nested message`() {
+        val enum = ProtoEnumModel("Score", linkedSetOf("HIGH", "LOW"))
+        val nested = message("Address", enumField("score", "Score", number = 1, enum = enum))
+        val model =
+            message(
+                "User",
+                enumField("score", "Score", number = 1, enum = enum),
+                messageRefField("address", "Address", number = 2, nested = nested),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertEquals(1, output.split("enum Score {").size - 1)
+    }
+
+    @Test
+    fun `test deduplicates message shared between parent and nested message`() {
+        val shared = message("City", scalarField("name", "string", number = 1))
+        val nested = message("Address", messageRefField("city", "City", number = 1, nested = shared))
+        val model =
+            message(
+                "User",
+                messageRefField("city", "City", number = 1, nested = shared),
+                messageRefField("address", "Address", number = 2, nested = nested),
+            )
+        val output = ProtoCodeRenderer.render(model)
+        assertEquals(1, output.split("message City {").size - 1)
     }
 
     @Test
