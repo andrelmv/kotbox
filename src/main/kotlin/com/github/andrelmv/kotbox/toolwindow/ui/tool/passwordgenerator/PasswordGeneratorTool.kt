@@ -115,9 +115,9 @@ class PasswordGeneratorTool(
             cell(bulkSpinner)
             cell(generateBulkButton)
         }.topGap(TopGap.SMALL)
-        row { cell(bulkEditor.component).align(Align.FILL) }.resizableRow()
-
-        row { }.bottomGap(BottomGap.MEDIUM)
+        row { cell(bulkEditor.component).align(Align.FILL) }
+            .resizableRow()
+            .bottomGap(BottomGap.MEDIUM)
     }
 
     override fun afterBuildUi() {
