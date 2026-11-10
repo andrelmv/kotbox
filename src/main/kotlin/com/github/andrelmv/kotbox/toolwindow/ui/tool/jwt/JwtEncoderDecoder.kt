@@ -73,9 +73,7 @@ class JwtEncoderDecoder(
         row { label("Payload (JSON):").bold() }.topGap(TopGap.SMALL)
         row { cell(payloadEditor.component).align(Align.FILL) }.resizableRow()
 
-        signatureConfigPanel.buildUi(this)
-
-        row { }.bottomGap(BottomGap.MEDIUM)
+        signatureConfigPanel.buildUi(this).bottomGap(BottomGap.MEDIUM)
     }
 
     override fun afterBuildUi() {

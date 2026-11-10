@@ -12,6 +12,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.CollapsibleRow
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
@@ -60,7 +61,7 @@ class SignatureConfigPanel(
     private val keyCardPanel = createKeyCardPanel()
     private val keyLabel = JBLabel("Secret key:")
 
-    fun buildUi(panel: Panel) {
+    fun buildUi(panel: Panel): CollapsibleRow =
         panel.collapsibleGroup("Signature Algorithm Configuration") {
             row {
                 label("Algorithm:")
@@ -77,7 +78,6 @@ class SignatureConfigPanel(
                     "HS512: minimum 512 bits (64 bytes)",
             )
         }
-    }
 
     fun setupListeners() {
         algorithmComboBox.addActionListener {
